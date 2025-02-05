@@ -21,7 +21,7 @@
         </Border.Background>
         
         <Border CornerRadius="50"
-                BorderThickness="5"
+                BorderThickness="1"
                 Opacity="0.6">
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
@@ -38,14 +38,113 @@
                 <GradientStop Color="#309C42" Offset="0.1"/>
             </LinearGradientBrush>
         </Border.Background>
+            
+            <Grid>
+               
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="5"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Autentificare"
+                               Foreground="White"
+                               FontSize="10"
+                               FontFamily="Arial"
+                                 FontWeight="Bold"
+                                 Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Margin="20,0,0,0"/>
+                    
+                    <Button x:Name="btnMinimize"
+                                BorderThickness="0"
+                                Content="-"
+                                Foreground="Black"
+                                FontSize="16"
+                                FontFamily="Arial"
+                                Cursor="Hand"
+                                Margin="0,10,5,0"
+                                Grid.Column="1"
+                                Click="BtnMinimize_OnClick">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Aqua"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="Blue"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border Width="18" Height="18"
+                                        CornerRadius="9"
+                                        Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    
+                    <Button x:Name="btnClose"
+                            BorderThickness="0"
+                            Content="x"
+                            Foreground="White"
+                            FontSize="16"
+                            FontFamily="Arial"
+                            Cursor="Hand"
+                            Margin="0,10,5,0"
+                            Grid.Column="2"
+                            Click="BtnClose_OnClick">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="DarkRed"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="Red"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border Width="18" Height="18"
+                                        CornerRadius="9"
+                                        Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                        
+                    </Button>
+                              
+                </Grid>
+                
+                <StackPanel Width="250"
+                            Grid.Row="2"
+                            Orientation="Vertical"
+                            Margin="0,35,0,0">
+                    <Image Source="/Images/logo.png"
+                           Width="100"
+                           Height="100"/>
+                    
+                </StackPanel>
+                
+            </Grid>  
+            
         </Border>
-        
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition></RowDefinition>
-                <RowDefinition></RowDefinition>
-            </Grid.RowDefinitions>
-        </Grid>        
     </Border>
         
 </Window>
