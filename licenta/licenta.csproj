@@ -18,6 +18,10 @@
       <Resource Include="Images\background.jpg" />
       <None Remove="Images\logo.png" />
       <Resource Include="Images\logo.png" />
+      <None Remove="Images\password.png" />
+      <Resource Include="Images\password.png" />
+      <None Remove="Images\username.png" />
+      <Resource Include="Images\username.png" />
     </ItemGroup>
 
 </Project>

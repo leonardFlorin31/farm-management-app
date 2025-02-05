@@ -22,20 +22,20 @@
         
         <Border CornerRadius="50"
                 BorderThickness="1"
-                Opacity="0.6">
+                Opacity="0.90">
         <Border.BorderBrush>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Color="#6BFF84" Offset="0"/>
                 <GradientStop Color="#4BBD5E" Offset="0.5"/>
-                <GradientStop Color="#309C42" Offset="0.1"/>
+                <GradientStop Color="#309C42" Offset="1"/>
             </LinearGradientBrush>
         </Border.BorderBrush>
         
         <Border.Background>
-            <LinearGradientBrush StartPoint="0,1" EndPoint="1,0">
+            <LinearGradientBrush StartPoint="0,1" EndPoint="1,1">
                 <GradientStop Color="#6BFF84" Offset="0"/>
                 <GradientStop Color="#4BBD5E" Offset="0.5"/>
-                <GradientStop Color="#309C42" Offset="0.1"/>
+                <GradientStop Color="#309C42" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
             
@@ -63,7 +63,7 @@
                                VerticalAlignment="Center"
                                Margin="20,0,0,0"/>
                     
-                    <Button x:Name="btnMinimize"
+                    <Button x:Name="BtnMinimize"
                                 BorderThickness="0"
                                 Content="-"
                                 Foreground="Black"
@@ -78,7 +78,7 @@
                                 <Setter Property="Background" Value="Aqua"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="Blue"/>
+                                        <Setter Property="Background" Value="White"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -96,7 +96,7 @@
                         </Button.Template>
                     </Button>
                     
-                    <Button x:Name="btnClose"
+                    <Button x:Name="BtnClose"
                             BorderThickness="0"
                             Content="x"
                             Foreground="White"
@@ -139,6 +139,68 @@
                     <Image Source="/Images/logo.png"
                            Width="100"
                            Height="100"/>
+                    
+                    <TextBlock Text="Nume"
+                               Foreground="White"
+                               FontSize="25"
+                               FontWeight="Medium"
+                               FontFamily="Arial"
+                               HorizontalAlignment="Center"/>
+                    
+                    <TextBlock Text="Nume de utilizator:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,35,0,0"/>
+                    
+                    <TextBox x:Name="txtUsername"
+                             
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,0"
+                             Padding="20,0,0,0">
+                        
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/username.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left"/>
+                        </TextBox.Background>
+                        
+                    </TextBox>
+                    
+                    <TextBlock Text="Parola:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,35,0,0"/>
+                    
+                    <TextBox x:Name="txtPassword"
+                             
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,0"
+                             Padding="20,0,0,0">
+                        
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/password.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left"/>
+                        </TextBox.Background>
+                        
+                    </TextBox>
+                    
                     
                 </StackPanel>
                 
