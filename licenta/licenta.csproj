@@ -8,4 +8,16 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Model\" />
+      <Folder Include="ViewModel\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\background.jpg" />
+      <Resource Include="Images\background.jpg" />
+      <None Remove="Images\logo.png" />
+      <Resource Include="Images\logo.png" />
+    </ItemGroup>
+
 </Project>
