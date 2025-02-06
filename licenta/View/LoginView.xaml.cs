@@ -27,4 +27,9 @@ public partial class LoginView : Window
     {
         Application.Current.Shutdown();
     }
+
+    private void BtnLogin_OnClickClick(object sender, RoutedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
 }
