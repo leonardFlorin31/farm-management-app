@@ -21,3 +21,6 @@ E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\licenta.genruntimeconfig.cac
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\ref\licenta.dll
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\LoginView.g.cs
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\LoginView.baml
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.g.cs
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.baml
