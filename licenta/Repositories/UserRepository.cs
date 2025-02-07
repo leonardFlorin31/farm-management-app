@@ -7,9 +7,6 @@ namespace licenta.Repositories;
 
 public class UserRepository : RepositoryBase, IUserRepository
 {
-    public UserRepository(string connectionString) : base(connectionString)
-    {
-    }
 
     public bool AutenticateUser(NetworkCredential credential)
     {

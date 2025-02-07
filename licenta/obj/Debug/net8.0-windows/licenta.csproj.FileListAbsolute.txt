@@ -24,3 +24,11 @@ E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\LoginView.baml
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.g.cs
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.baml
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\System.Data.SqlClient.dll
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\win-arm64\native\sni.dll
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\win-x64\native\sni.dll
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\win-x86\native\sni.dll
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\unix\lib\net8.0\System.Data.SqlClient.dll
+E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\System.Data.SqlClient.dll
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\licenta.csproj.AssemblyReference.cache
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\licenta.csproj.Up2Date

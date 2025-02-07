@@ -5,9 +5,9 @@ public abstract class RepositoryBase
 {
     private readonly string _connectionString;
     
-    protected RepositoryBase(string connectionString)
+    protected RepositoryBase()
     {
-        _connectionString = "Server=(local); Database=licenta; Integrated Security=True";
+        _connectionString = "Server=DESKTOP-9HFOFLP\\SQLEXPRESS01; Database=LicentaDB; Integrated Security=True";
     }
     
     protected SqlConnection GetConnection()
