@@ -9,10 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Model\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Remove="Images\background.jpg" />
       <Resource Include="Images\background.jpg" />
       <None Remove="Images\logo.png" />
@@ -21,6 +17,10 @@
       <Resource Include="Images\password.png" />
       <None Remove="Images\username.png" />
       <Resource Include="Images\username.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     </ItemGroup>
 
 </Project>

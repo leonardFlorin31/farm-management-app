@@ -30,6 +30,6 @@ public partial class LoginView : Window
 
     private void BtnLogin_OnClickClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        
     }
 }
