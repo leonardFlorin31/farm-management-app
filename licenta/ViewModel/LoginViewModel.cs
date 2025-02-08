@@ -114,6 +114,6 @@ public class LoginViewModel : ViewModelBase
 
     private void ExecuteRecoverPasswordCommand(string username, string email)
     {
-        // Implement password recovery logic here
+        
     }
 }

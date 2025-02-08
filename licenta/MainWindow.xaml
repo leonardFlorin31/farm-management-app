@@ -4,9 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:licenta"
+        xmlns:viewModel="clr-namespace:licenta.ViewModel"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    
+    <Window.DataContext>
+        <viewModel:MainViewModel/>
+    </Window.DataContext>
     <Grid>
-
+        <TextBlock Text="{Binding CurrentUserAccount.DisplayName}"
+                                                        FontSize="30"
+                                                        HorizontalAlignment="Center"
+                                                        VerticalAlignment="Center"/>
     </Grid>
 </Window>

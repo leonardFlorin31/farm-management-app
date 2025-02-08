@@ -46,7 +46,35 @@ public class UserRepository : RepositoryBase, IUserRepository
 
     public UserModel GetUserByUsername(string username)
     {
-        throw new NotImplementedException();
+        UserModel user = null;
+        using(var connection=GetConnection())
+        using (var command = new SqlCommand())
+        {
+            connection.Open();
+            command.Connection = connection;
+            command.CommandText = "select * from [User] where Username=@Username";
+            command.Parameters.Add("@Username", SqlDbType.VarChar).Value = username;
+            using (var reader = command.ExecuteReader())
+            {
+                if (reader.Read())
+                {
+                    user = new UserModel()
+                    {
+                        Id = reader["Id"].ToString(),
+                        Username = reader["Username"].ToString(),
+                        Password = string.Empty,
+                        FirstName = reader["Name"].ToString(),
+                        LastName = reader["LastName"].ToString(),
+                        Email = reader["Email"].ToString(),
+                    };
+                }
+                else
+                {
+                    user = null;
+                }
+            }
+        }
+        return user;
     }
 
     public IEnumerable<UserModel> GetAllUsers()

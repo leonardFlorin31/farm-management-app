@@ -203,7 +203,7 @@
                     </customControls:BindablePasswordBox>
                     
                     <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="White"
+                               Foreground="Red"
                                FontWeight="Bold"
                                FontFamily="Arial"
                                Margin="0,10,0,0" 
