@@ -1,10 +1,14 @@
 using System;
 using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Principal;
+using System.Text;
+using System.Text.Json;
+using System.Threading;
 using System.Windows.Input;
 using licenta.Model;
-using licenta.Repositories;
 
 namespace licenta.ViewModel;
 
@@ -15,8 +19,6 @@ public class LoginViewModel : ViewModelBase
     private SecureString _password;
     private string _errorMessage;
     private bool _isViewVisible = true;
-
-    private IUserRepository _userRepository;
 
     // Events
     public event Action LoginSuccess;
@@ -65,32 +67,51 @@ public class LoginViewModel : ViewModelBase
     // Commands
     public ICommand LoginCommand { get; }
     public ICommand RecoverPasswordCommand { get; }
-    public ICommand ShowPasswordCommand { get; }
-    public ICommand RememberPasswordCommand { get; }
 
     // Constructors
     public LoginViewModel()
     {
-        _userRepository = new UserRepository();
         LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
         RecoverPasswordCommand = new ViewModelCommand(p => ExecuteRecoverPasswordCommand("", ""));
     }
 
     // Methods
-    private void ExecuteLoginCommand(object obj)
+    private async void ExecuteLoginCommand(object obj)
     {
-        var validUser = _userRepository.AutenticateUser(new NetworkCredential(Username, Password));
-        if (validUser)
+        try
         {
-            Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(Username), null);
-            IsViewVisible = false;
+            // Convertim SecureString în string
+            string password = SecureStringToString(Password);
 
-            // Notify that the login was successful
-            LoginSuccess?.Invoke();
+            // Creăm obiectul pentru cererea de autentificare
+            var loginRequest = new { Username = this.Username, Password = password };
+
+            // Trimitem cererea către server
+            using (var client = new HttpClient())
+            {
+                var content = new StringContent(JsonSerializer.Serialize(loginRequest), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("http://localhost:5035/api/auth/login", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Autentificare reușită
+                    Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(Username), null);
+                    IsViewVisible = false;
+
+                    // Notificăm că autentificarea a avut succes
+                    LoginSuccess?.Invoke();
+                }
+                else
+                {
+                    // Autentificare eșuată
+                    ErrorMessage = "Nume de utilizator sau parolă incorectă!";
+                }
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ErrorMessage = "Username sau parola incorecta!";
+            // Tratăm erorile de rețea sau alte excepții
+            ErrorMessage = "Eroare la conectarea la server: " + ex.Message;
         }
     }
 
@@ -100,13 +121,10 @@ public class LoginViewModel : ViewModelBase
         if (string.IsNullOrEmpty(Username) || Username.Length < 3 || Password == null
             || Password.Length < 3)
         {
-            //errorMessage in campurile acestea reseteaza errorMessage-ul din ExecuteLoginCommand
-            //ErrorMessage = "Va rugam completati campurile!";
             validData = false;
         }
         else
         {
-            //ErrorMessage = "";
             validData = true;
         }
         return validData;
@@ -114,6 +132,20 @@ public class LoginViewModel : ViewModelBase
 
     private void ExecuteRecoverPasswordCommand(string username, string email)
     {
-        
+        // Logica pentru recuperarea parolei
+    }
+
+    private string SecureStringToString(SecureString secureString)
+    {
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = Marshal.SecureStringToGlobalAllocUnicode(secureString);
+            return Marshal.PtrToStringUni(ptr);
+        }
+        finally
+        {
+            Marshal.ZeroFreeGlobalAllocUnicode(ptr);
+        }
     }
 }
