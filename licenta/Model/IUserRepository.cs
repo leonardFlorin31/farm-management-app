@@ -4,6 +4,7 @@ namespace licenta.Model;
 
 public interface IUserRepository
 {
+    Task<UserModel> GetUserByUsernameAsync(string username);
     bool AutenticateUser(NetworkCredential credential);
     
     void AddUser(UserModel user);

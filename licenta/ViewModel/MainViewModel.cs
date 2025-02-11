@@ -1,5 +1,6 @@
 
 
+using System.Net.Http;
 using System.Windows;
 
 namespace licenta.ViewModel;
@@ -28,19 +29,25 @@ public class MainViewModel : ViewModelBase
         LoadCurrentUserData();
     }
     
-    private void LoadCurrentUserData()
+    private async void LoadCurrentUserData()
     {
-        var user = _userRepository.GetUserByUsername(Thread.CurrentPrincipal.Identity.Name);
-        if (user != null)
+        try
         {
-            _currentUserAccount.Username = user.Username;
-            _currentUserAccount.DisplayName = $"Welcome {user.FirstName} {user.LastName}";
-            _currentUserAccount.ProfilePicture = null;
+            var user = await _userRepository.GetUserByUsernameAsync(Thread.CurrentPrincipal.Identity.Name);
+            if (user != null)
+            {
+                CurrentUserAccount.Username = user.Username;
+                CurrentUserAccount.DisplayName = $"Welcome {user.Name} {user.LastName}";
+                CurrentUserAccount.ProfilePicture = null;
+            }
+            else
+            {
+                CurrentUserAccount.DisplayName = "User not found";
+            }
         }
-        else
+        catch (HttpRequestException ex)
         {
-           CurrentUserAccount.DisplayName="User not found";
-            //Application.Current.Shutdown();
+            CurrentUserAccount.DisplayName = "Error connecting to server";
         }
     }
 }
