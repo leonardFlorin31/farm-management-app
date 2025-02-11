@@ -1,5 +1,6 @@
 
 
+using System.ComponentModel;
 using System.Net.Http;
 using System.Windows;
 
@@ -44,10 +45,12 @@ public class MainViewModel : ViewModelBase
             {
                 CurrentUserAccount.DisplayName = "User not found";
             }
+            OnPropertyChanged(nameof(CurrentUserAccount));
         }
         catch (HttpRequestException ex)
         {
             CurrentUserAccount.DisplayName = "Error connecting to server";
+            OnPropertyChanged(nameof(CurrentUserAccount));
         }
     }
 }
