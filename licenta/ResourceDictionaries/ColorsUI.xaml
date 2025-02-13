@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--Background Colors-->
+    <Color x:Key="primaryBackColor1">#E8F5E9</Color> <!-- Light green -->
+    <Color x:Key="primaryBackColor2">#C8E6C9</Color> <!-- Soft green -->
+    <Color x:Key="primaryBackColor3">#FFFFFF</Color> <!-- White -->
+    <Color x:Key="secondaryBackColor1">#A5D6A7</Color> <!-- Medium green -->
+    <Color x:Key="secondaryBackColor2">#81C784</Color> <!-- Darker green -->
+
+    <!--Window Border Colors-->
+    <Color x:Key="winBorderColor1">#4CAF50</Color> <!-- Vibrant green -->
+    <Color x:Key="winBorderColor2">#388E3C</Color> <!-- Dark green -->
+    <Color x:Key="winBorderColor3">#66BB6A</Color> <!-- Light green -->
+
+    <!--Color Palette-->
+    <SolidColorBrush x:Key="color1" Color="#8BC34A"/> <!-- Light green -->
+    <SolidColorBrush x:Key="color2" Color="Black"/> <!-- Green -->
+    <SolidColorBrush x:Key="color3" Color="Yellow"/> <!-- Lime green -->
+    <SolidColorBrush x:Key="color4" Color="#795548"/> <!-- Amber (for accents) -->
+    <SolidColorBrush x:Key="color5" Color="#FF9800"/> <!-- Orange (for accents) -->
+    <SolidColorBrush x:Key="color6" Color="#FFC107"/> <!-- Brown (earthy tone) -->
+    <SolidColorBrush x:Key="color7" Color="#607D8B"/> <!-- Gray-blue (neutral) -->
+    <SolidColorBrush x:Key="color8" Color="#009688"/> <!-- Teal (for contrast) -->
+    <SolidColorBrush x:Key="color9" Color="#4DB6AC"/> <!-- Light teal -->
+    <SolidColorBrush x:Key="color10" Color="#FF5722"/> <!-- Deep orange (for accents) -->
+
+    <!--Font Colors-->
+    <SolidColorBrush x:Key="titleColor1" Color="#2E7D32"/> <!-- Dark green -->
+    <SolidColorBrush x:Key="titleColor2" Color="#1B5E20"/> <!-- Very dark green -->
+    <SolidColorBrush x:Key="titleColor3" Color="#4CAF50"/> <!-- Green -->
+    <SolidColorBrush x:Key="plainTextColor1" Color="#424242"/> <!-- Dark gray -->
+    <SolidColorBrush x:Key="plainTextColor2" Color="#616161"/> <!-- Medium gray -->
+    <SolidColorBrush x:Key="plainTextColor3" Color="#757575"/> <!-- Light gray -->
+
+    <!--Panel Colors-->
+    <SolidColorBrush x:Key="panelColor" Color="#C8E6C9"/> <!-- Soft green -->
+    <SolidColorBrush x:Key="panelOverColor" Color="#A5D6A7"/> <!-- Medium green -->
+    <SolidColorBrush x:Key="panelActiveColor" Color="#81C784"/> <!-- Darker green -->
+
+    <!--Button Colors-->
+    <!--TextBox Colors-->
+    <!--Etc-->
+
+</ResourceDictionary>
