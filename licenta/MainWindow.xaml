@@ -70,7 +70,7 @@
                             <TextBlock Text="Home" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
-                    
+
                     <RadioButton Style="{StaticResource menuButton}"
                                  Tag="{StaticResource color2}">
                         <StackPanel Orientation="Horizontal">
@@ -78,7 +78,7 @@
                             <TextBlock Text="Animals" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
-                    
+
                     <RadioButton Style="{StaticResource menuButton}"
                                  Tag="{StaticResource color3}">
                         <StackPanel Orientation="Horizontal">
@@ -86,7 +86,7 @@
                             <TextBlock Text="Grain" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
-                    
+
                     <RadioButton Style="{StaticResource menuButton}"
                                  Tag="{StaticResource color4}">
                         <StackPanel Orientation="Horizontal">
@@ -97,11 +97,36 @@
 
                 </StackPanel>
             </Border>
+
+            <!--Main Section-->
             <Border CornerRadius="0,10,10,0"
                     Grid.Column="1">
+
                 <Border.Background>
                     <SolidColorBrush Color="{StaticResource primaryBackColor3}" />
                 </Border.Background>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <!--Control bar-->
+                        <RowDefinition Height="25" />
+                        <!--Header / Caption-->
+                        <RowDefinition Height="35" />
+                        <!--Content section / Child views-->
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    
+                    <!--Control bar-->
+                    <StackPanel x:Name="pnlControlBar"
+                                Grid.Row="0"
+                                Orientation="Horizontal"
+                                FlowDirection="RightToLeft"
+                                Background="Transparent"
+                                Margin="0,0,5,0"
+                                MouseLeftButtonDown="PnlControlBar_OnMouseLeftButtonDown">
+                    </StackPanel>
+                    
+                </Grid>
             </Border>
         </Grid>
 
