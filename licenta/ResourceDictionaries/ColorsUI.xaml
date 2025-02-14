@@ -24,7 +24,8 @@
     <SolidColorBrush x:Key="color8" Color="#009688"/> <!-- Teal (for contrast) -->
     <SolidColorBrush x:Key="color9" Color="#4DB6AC"/> <!-- Light teal -->
     <SolidColorBrush x:Key="color10" Color="#FF5722"/> <!-- Deep orange (for accents) -->
-
+    <SolidColorBrush x:Key="color11" Color="Red"/> <!-- Deep orange (for accents) -->
+    
     <!--Font Colors-->
     <SolidColorBrush x:Key="titleColor1" Color="#2E7D32"/> <!-- Dark green -->
     <SolidColorBrush x:Key="titleColor2" Color="#1B5E20"/> <!-- Very dark green -->

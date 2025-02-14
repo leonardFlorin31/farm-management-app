@@ -33,4 +33,21 @@ public partial class MainWindow : Window
         WindowInteropHelper helper = new WindowInteropHelper(this);
         SendMessage(helper.Handle, 161, 2, 0);
     }
+
+    private void BtnClose_OnClick(object sender, RoutedEventArgs e)
+    {
+        Application.Current.Shutdown();
+    }
+
+    private void BtnMinimize_OnClick(object sender, RoutedEventArgs e)
+    {
+        this.WindowState = WindowState.Minimized;
+    }
+
+    private void BtnMaximize_OnClick(object sender, RoutedEventArgs e)
+    {
+        if(this.WindowState==WindowState.Normal)
+           this.WindowState = WindowState.Maximized; 
+        else this.WindowState = WindowState.Normal;
+    }
 }
