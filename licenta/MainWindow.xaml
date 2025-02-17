@@ -75,7 +75,9 @@
 
                     <!--Menu Buttons-->
                     <RadioButton Style="{StaticResource menuButton}"
-                                 Tag="{StaticResource color1}">
+                                 Tag="{StaticResource color1}"
+                                 IsChecked="True"
+                                 Command="{Binding ShowHomeViewCommand}">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Home" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
                             <TextBlock Text="Home" Style="{StaticResource menuButtonText}"></TextBlock>
@@ -83,7 +85,8 @@
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource menuButton}"
-                                 Tag="{StaticResource color2}">
+                                 Tag="{StaticResource color2}"
+                                 Command="{Binding ShowAnimalViewCommand}">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Cow" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
                             <TextBlock Text="Animals" Style="{StaticResource menuButtonText}"></TextBlock>
