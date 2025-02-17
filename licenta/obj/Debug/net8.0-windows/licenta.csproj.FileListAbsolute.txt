@@ -36,3 +36,7 @@ E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\FontAwesome.Sharp.dll
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\ResourceDictionaries\ButtonStyles.baml
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\ResourceDictionaries\ColorsUI.baml
 E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\App.baml
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\AnimalView.g.cs
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\HomeView.g.cs
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\AnimalView.baml
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\HomeView.baml

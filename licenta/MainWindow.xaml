@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:licenta"
         xmlns:viewModel="clr-namespace:licenta.ViewModel"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:view="clr-namespace:licenta.View"
         mc:Ignorable="d"
         Title="MainWindowView" Height="700" Width="1300"
         WindowStartupLocation="CenterScreen"
@@ -16,6 +17,16 @@
     <Window.DataContext>
         <viewModel:MainViewModel />
     </Window.DataContext>
+    
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type viewModel:HomeViewModel}">
+            <view:HomeView />
+        </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:AnimalsViewModel}">
+            <view:AnimalView />
+        </DataTemplate>
+    </Window.Resources>
 
     <Border CornerRadius="10"
             BorderThickness="1">
@@ -161,9 +172,9 @@
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center">
                             
-                            <fa:IconImage Icon="Home" Height="20" Width="20" Foreground="{StaticResource titleColor2}" Margin="35,0,10,0"></fa:IconImage>
+                            <fa:IconImage Icon="{Binding Icon}" Height="20" Width="20" Foreground="{StaticResource titleColor2}" Margin="35,0,10,0"></fa:IconImage>
                             
-                            <TextBlock Text="Home" Foreground="{StaticResource titleColor2}"
+                            <TextBlock Text="{Binding Caption}" Foreground="{StaticResource titleColor2}"
                                        FontSize="16"
                                        FontFamily="Montserrat"
                                        FontWeight="Medium"
@@ -205,6 +216,12 @@
                         </StackPanel>
                         
                     </Grid>
+                    
+                    <!--Content section / Child views-->
+                    <ContentControl Content="{Binding CurrentChildView}"
+                                    Grid.Row="2"
+                                    Margin="25"/>
+                    
                 </Grid>
             </Border>
         </Grid>
