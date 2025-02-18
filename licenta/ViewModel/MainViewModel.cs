@@ -18,6 +18,7 @@ public class MainViewModel : ViewModelBase
     private ViewModelBase _currentChildView;
     private string _caption;
     private IconChar _icon;
+    private readonly Dictionary<Type, ViewModelBase> _viewModelCache = new();
 
     public ViewModelBase CurrentChildView
     {
@@ -45,14 +46,26 @@ public class MainViewModel : ViewModelBase
     
     private void ExecuteShowHomeViewCommand(object obj)
     {
-        CurrentChildView = new HomeViewModel();
+        // Reuse or create HomeViewModel
+        if (!_viewModelCache.TryGetValue(typeof(HomeViewModel), out var viewModel))
+        {
+            viewModel = new HomeViewModel();
+            _viewModelCache[typeof(HomeViewModel)] = viewModel;
+        }
+        CurrentChildView = viewModel; // Use cached instance
         Caption = "Home";
         Icon = IconChar.Home;
     }
 
     private void ExecuteShowAnimalViewCommand(object obj)
     {
-        CurrentChildView = new AnimalsViewModel();
+        // Reuse or create AnimalsViewModel
+        if (!_viewModelCache.TryGetValue(typeof(AnimalsViewModel), out var viewModel))
+        {
+            viewModel = new AnimalsViewModel();
+            _viewModelCache[typeof(AnimalsViewModel)] = viewModel;
+        }
+        CurrentChildView = viewModel; // Use cached instance
         Caption = "Animals";
         Icon = IconChar.UserGroup;
     }
