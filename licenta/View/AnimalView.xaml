@@ -4,12 +4,33 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:licenta.View"
+             xmlns:windowsPresentation="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behavior="clr-namespace:licenta.Behavior"
+             xmlns:viewModel="clr-namespace:licenta.ViewModel">
+    <UserControl.DataContext>
+        <viewModel:AnimalsViewModel />
+    </UserControl.DataContext>
+    
     <Grid>
-        <TextBlock Text="Animals"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   FontSize="30"></TextBlock>
+        <!-- Harta GMap.NET cu behavior pentru evenimente -->
+        <windowsPresentation:GMapControl x:Name="MapControl" 
+                                         MapProvider="{Binding MapProvider}"
+                                         Position="{Binding MapCenter, Mode=TwoWay}"
+                                         MouseWheelZoomEnabled="True"
+                                         MouseWheelZoomType ="MousePositionWithoutCenter"
+                                         Zoom="{Binding ZoomLevel, Mode=TwoWay}">
+            <i:Interaction.Behaviors>
+                <behavior:MapBehavior MapClickedCommand="{Binding MapClickedCommand}" />
+            </i:Interaction.Behaviors>
+        </windowsPresentation:GMapControl>
+        
+        <!-- Butoane pentru zoom -->
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10">
+            <Button Content="Zoom In" Command="{Binding ZoomInCommand}" Width="100" Margin="0,0,0,10"/>
+            <Button Content="Zoom Out" Command="{Binding ZoomOutCommand}" Width="100"/>
+        </StackPanel>
     </Grid>
 </UserControl>
