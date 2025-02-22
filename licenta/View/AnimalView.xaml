@@ -10,27 +10,9 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behavior="clr-namespace:licenta.Behavior"
              xmlns:viewModel="clr-namespace:licenta.ViewModel">
-    <UserControl.DataContext>
-        <viewModel:AnimalsViewModel />
-    </UserControl.DataContext>
+
     
     <Grid>
-        <!-- Harta GMap.NET cu behavior pentru evenimente -->
-        <windowsPresentation:GMapControl x:Name="MapControl" 
-                                         MapProvider="{Binding MapProvider}"
-                                         Position="{Binding MapCenter, Mode=TwoWay}"
-                                         MouseWheelZoomEnabled="True"
-                                         MouseWheelZoomType ="MousePositionWithoutCenter"
-                                         Zoom="{Binding ZoomLevel, Mode=TwoWay}">
-            <i:Interaction.Behaviors>
-                <behavior:MapBehavior MapClickedCommand="{Binding MapClickedCommand}" />
-            </i:Interaction.Behaviors>
-        </windowsPresentation:GMapControl>
-        
-        <!-- Butoane pentru zoom -->
-        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10">
-            <Button Content="Zoom In" Command="{Binding ZoomInCommand}" Width="100" Margin="0,0,0,10"/>
-            <Button Content="Zoom Out" Command="{Binding ZoomOutCommand}" Width="100"/>
-        </StackPanel>
+        <ContentControl Content="{Binding MapControl}" />
     </Grid>
 </UserControl>

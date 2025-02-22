@@ -11,6 +11,7 @@ public class HomeViewModel:ViewModelBase
         set
         {
             _name = value;
+            Console.WriteLine($"Name set to: {_name}");
             OnPropertyChanged(nameof(Name));
         }
     }
@@ -21,7 +22,13 @@ public class HomeViewModel:ViewModelBase
         set
         {
             _email = value;
+            Console.WriteLine($"Email set to: {_email}");
             OnPropertyChanged(nameof(Email));
         }
+    }
+
+    public HomeViewModel()
+    {
+        Console.WriteLine("HomeViewModel initialized");
     }
 }

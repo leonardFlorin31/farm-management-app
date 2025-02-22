@@ -26,6 +26,10 @@
         <DataTemplate DataType="{x:Type viewModel:AnimalsViewModel}">
             <view:AnimalView />
         </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:GrainViewModel}">
+            <view:GrainView />
+        </DataTemplate>
     </Window.Resources>
 
     <Border CornerRadius="10"
@@ -94,7 +98,8 @@
                     </RadioButton>
 
                     <RadioButton Style="{StaticResource menuButton}"
-                                 Tag="{StaticResource color3}">
+                                 Tag="{StaticResource color3}"
+                                 Command="{Binding ShowGrainViewCommand}">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="WheatAwn" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
                             <TextBlock Text="Grain" Style="{StaticResource menuButtonText}"></TextBlock>

@@ -56,3 +56,5 @@ E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\Microsoft.Win32.SystemEvents
 E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\System.Drawing.Common.dll
 E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\System.Private.Windows.Core.dll
 E:\licenta\licenta\licenta\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\Microsoft.Win32.SystemEvents.dll
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\GrainView.g.cs
+E:\licenta\licenta\licenta\obj\Debug\net8.0-windows\View\GrainView.baml

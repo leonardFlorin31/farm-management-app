@@ -1,7 +1,9 @@
 using System;
 using System.Windows.Input;
+using System.Windows.Media;
 using GMap.NET;
 using GMap.NET.MapProviders;
+using GMap.NET.WindowsPresentation;
 
 namespace licenta.ViewModel
 {
@@ -14,6 +16,8 @@ namespace licenta.ViewModel
         // Eveniment pentru notificarea schimbărilor de zoom
         public event Action<int> ZoomChanged;
 
+        public GMapControl MapControl { get; set; }
+        
         // Proprietăți bindable
         public GMapProvider MapProvider
         {
@@ -54,6 +58,43 @@ namespace licenta.ViewModel
             // Inițializare comenzi pentru zoom
             ZoomInCommand = new RelayCommand(ZoomIn);
             ZoomOutCommand = new RelayCommand(ZoomOut);
+            
+            MapControl = new GMapControl
+            {
+                MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance,
+                Position = new PointLatLng(44.4268, 26.1025), // București
+                MinZoom = 2,
+                MaxZoom = 18,
+                Zoom = 13,
+                MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter,
+                CanDragMap = true,
+                DragButton = System.Windows.Input.MouseButton.Left
+            };
+
+            AddPolygonToMap();
+        }
+        
+        private void AddPolygonToMap()
+        {
+            List<PointLatLng> points = new List<PointLatLng>
+            {
+                new PointLatLng(44.4268, 26.1025),
+                new PointLatLng(44.4300, 26.1100),
+                new PointLatLng(44.4200, 26.1100),
+                new PointLatLng(44.4268, 26.1025)
+            };
+
+            GMapPolygon polygon = new GMapPolygon(points)
+            {
+                Shape = new System.Windows.Shapes.Polygon
+                {
+                    Stroke = Brushes.Red,
+                    Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                    StrokeThickness = 2
+                }
+            };
+
+            MapControl.Markers.Add(polygon);
         }
 
         private void OnMapClicked(PointLatLng point)

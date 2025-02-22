@@ -1,33 +1,21 @@
 using System.Windows.Controls;
 using GMap.NET;
+using GMap.NET.WindowsPresentation;
+using licenta.ViewModel;
+using System.Collections.Generic;
+using System.Windows.Media;
 using licenta.ViewModel;
 
-namespace licenta.View;
-
-public partial class AnimalView : UserControl
+namespace licenta.View
 {
-    public AnimalView()
+    public partial class AnimalView : UserControl
     {
-        InitializeComponent();
-        var viewModel = new AnimalsViewModel();
-        DataContext = new AnimalsViewModel();
-        
-        // Inițializează harta
-        MapControl.MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance;
-        MapControl.Position = new PointLatLng(44.4268, 26.1025); // București
-        MapControl.MinZoom = 2;
-        MapControl.MaxZoom = 18;
-        MapControl.Zoom = 13;
-        MapControl.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter;
-        MapControl.CanDragMap = true;
-        MapControl.DragButton = System.Windows.Input.MouseButton.Left;
-        
-        // Ascultă evenimentul de schimbare a zoom-ului
-        viewModel.ZoomChanged += OnZoomChanged;
-    }
-    
-    private void OnZoomChanged(int zoomLevel)
-    {
-        MapControl.Zoom = zoomLevel; // Actualizează zoom-ul hărții
+        public AnimalView()
+        {
+            InitializeComponent();
+            Console.WriteLine("AnimalView initialized");
+            
+        }
+
     }
 }
