@@ -11,13 +11,18 @@
              xmlns:behavior="clr-namespace:licenta.Behavior"
              xmlns:viewModel="clr-namespace:licenta.ViewModel">
 
+    <UserControl.Resources>
+        <local:CentroidToMarginConverter x:Key="CentroidToMarginConverter" />
+        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </UserControl.Resources>
     
     <Grid>
         <ContentControl Content="{Binding MapControl}" />
+        
         <Button Content="Create Polygon" 
                 Command="{Binding CreatePolygonCommand}" 
-                Width="75" 
-                Height="20" 
+                Width="100" 
+                Height="30" 
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
                 Margin="10" 

@@ -1,4 +1,6 @@
 using System;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using GMap.NET;
@@ -15,7 +17,8 @@ namespace licenta.ViewModel
         
         // List to store marker coordinates
         private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
-
+        private PointLatLng _polygonCentroid;
+        
         // Eveniment pentru notificarea schimbărilor de zoom
         public event Action<int> ZoomChanged;
 
@@ -33,6 +36,12 @@ namespace licenta.ViewModel
             get => _mapCenter;
             set => Set(ref _mapCenter, value);
         }
+        
+        public PointLatLng PolygonCentroid
+        {
+            get => _polygonCentroid;
+            set => Set(ref _polygonCentroid, value);
+        }
 
         public int ZoomLevel
         {
@@ -41,7 +50,14 @@ namespace licenta.ViewModel
             {
                 if (Set(ref _zoomLevel, value))
                 {
-                    ZoomChanged?.Invoke(value); // Notifică schimbarea de zoom
+                    // Update the map's zoom if it's out of sync (e.g., when using ZoomIn/ZoomOut commands)
+                    if (MapControl.Zoom != value)
+                    {
+                        MapControl.Zoom = value;
+                    }
+                    Console.WriteLine(ZoomLevel);
+                    ZoomChanged?.Invoke(value);
+                    UpdateLabelVisibility();
                 }
             }
         }
@@ -80,10 +96,19 @@ namespace licenta.ViewModel
                 CanDragMap = true,
                 DragButton = System.Windows.Input.MouseButton.Left
             };
+            
+            // Subscribe to the OnPositionChanged event
+            MapControl.OnPositionChanged += MapControl_OnPositionChanged;
 
             // Handle right-click event
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
             AddPolygonToMap();
+        }
+        
+        private void MapControl_OnPositionChanged(PointLatLng point)
+        {
+            // Sync ViewModel's ZoomLevel with the map's current zoom
+            ZoomLevel = (int)MapControl.Zoom;
         }
         
         private void MapControl_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -160,18 +185,94 @@ namespace licenta.ViewModel
 
             MapControl.Markers.Add(polygon);
             
+            // Add text to the center of the polygon
+            AddTextToPolygon(polygon, "Polygon Label");
+
+            
+            // Clears only the markers
             ClearMarkers();
         }
+        
+        private void AddTextToPolygon(GMapPolygon polygon, string text)
+        {
+            PointLatLng centroid = CalculateCentroid(polygon.Points);
+
+            // Create text element
+            TextBlock textBlock = new TextBlock
+            {
+                Text = text,
+                Foreground = Brushes.Black,
+                FontSize = 12, // Base size
+                FontWeight = FontWeights.Bold,
+                Background = Brushes.Transparent,
+                Padding = new Thickness(2)
+            };
+
+            // Scale transform for dynamic resizing
+            ScaleTransform scaleTransform = new ScaleTransform();
+            textBlock.RenderTransform = scaleTransform;
+
+            // Create text marker
+            GMapMarker textMarker = new GMapMarker(centroid)
+            {
+                Shape = textBlock
+            };
+
+            // Add marker to the map
+            MapControl.Markers.Add(textMarker);
+
+            // Update text size when zoom changes
+            ZoomChanged += (zoom) => UpdateTextScale(textBlock, scaleTransform, zoom);
+    
+            // Apply initial scaling
+            UpdateTextScale(textBlock, scaleTransform, ZoomLevel);
+        }
+
+        
+        // Method to update text size based on zoom level
+        private void UpdateTextScale(TextBlock textBlock, ScaleTransform scaleTransform, int zoomLevel)
+        {
+            
+                double scale = Math.Max(0.1, zoomLevel / 18.0); // Ensures text gets smaller when zooming out
+                scaleTransform.ScaleX = scale;
+                scaleTransform.ScaleY = scale;
+            
+        }
+        
+        private void UpdateLabelVisibility()
+        {
+            foreach (var marker in MapControl.Markers)
+            {
+                if (marker.Shape is TextBlock textBlock)
+                {
+                    if (ZoomLevel < 13)
+                    {
+                        textBlock.Visibility = Visibility.Collapsed; // Hide labels
+                    }
+                    else
+                    {
+                        textBlock.Visibility = Visibility.Visible; // Show labels
+                        double scale = Math.Max(0.3, ZoomLevel / 18.0); // Adjust scale
+                        ((ScaleTransform)textBlock.RenderTransform).ScaleX = scale;
+                        ((ScaleTransform)textBlock.RenderTransform).ScaleY = scale;
+                    }
+                }
+            }
+        }
+        
+
+
         
         private void ClearMarkers()
         {
             // List to store markers to be removed
             var markersToRemove = new List<GMapMarker>();
 
-            // Iterate through the markers and identify which ones are markers (not polygons)
+            // Iterate through the markers and identify which ones are point markers (not polygons or text)
             foreach (var marker in MapControl.Markers)
             {
-                if (marker is GMapMarker && !(marker is GMapPolygon))
+                // Only remove small circle markers (skip polygons and text markers)
+                if (marker.Shape is System.Windows.Shapes.Ellipse)
                 {
                     markersToRemove.Add(marker);
                 }
@@ -193,7 +294,7 @@ namespace licenta.ViewModel
             // Example: Log the coordinates to the console
             foreach (var point in coordinates)
             {
-                Console.WriteLine($"Saved Coordinate: Lat = {point.Lat}, Lng = {point.Lng}");
+               // Console.WriteLine($"Saved Coordinate: Lat = {point.Lat}, Lng = {point.Lng}");
             }
 
             // TODO: Add logic to save to a database or file
@@ -203,7 +304,25 @@ namespace licenta.ViewModel
         private void OnMapClicked(PointLatLng point)
         {
             // Aici poți adăuga logica pentru desenare (ex: adaugă un marker)
-            System.Diagnostics.Debug.WriteLine($"Clic la: {point.Lat}, {point.Lng}");
+            Console.WriteLine($"Clic la: {point.Lat}, {point.Lng}");
+        }
+        
+        private PointLatLng CalculateCentroid(List<PointLatLng> points)
+        {
+            double latitudeSum = 0;
+            double longitudeSum = 0;
+
+            foreach (var point in points)
+            {
+                latitudeSum += point.Lat;
+                longitudeSum += point.Lng;
+            }
+
+            double centroidLat = latitudeSum / points.Count;
+            double centroidLng = longitudeSum / points.Count;
+
+            Console.WriteLine($"Centroid: Lat = {centroidLat}, Lng = {centroidLng}");
+            return new PointLatLng(centroidLat, centroidLng);
         }
 
         private void ZoomIn()
@@ -223,5 +342,7 @@ namespace licenta.ViewModel
                 Console.WriteLine($"ZoomOut: ZoomLevel = {ZoomLevel}");
             }
         }
+        
+        
     }
 }
