@@ -11,7 +11,10 @@ namespace licenta.ViewModel
     {
         private PointLatLng _mapCenter;
         private int _zoomLevel = 13; // Nivelul inițial de zoom
-        private GMapProvider _mapProvider = OpenStreetMapProvider.Instance;
+        private GMapProvider _mapProvider = GoogleMapProvider.Instance;
+        
+        // List to store marker coordinates
+        private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
 
         // Eveniment pentru notificarea schimbărilor de zoom
         public event Action<int> ZoomChanged;
@@ -49,6 +52,10 @@ namespace licenta.ViewModel
 
         // Command pentru clic pe hartă
         public ICommand MapClickedCommand { get; }
+        
+        // Command pentru crearea poligonului
+        public ICommand CreatePolygonCommand { get; }
+
 
         public AnimalsViewModel()
         {
@@ -58,6 +65,9 @@ namespace licenta.ViewModel
             // Inițializare comenzi pentru zoom
             ZoomInCommand = new RelayCommand(ZoomIn);
             ZoomOutCommand = new RelayCommand(ZoomOut);
+            
+            // Command pentru crearea poligonului
+            CreatePolygonCommand = new RelayCommand(CreatePolygon);
             
             MapControl = new GMapControl
             {
@@ -71,7 +81,37 @@ namespace licenta.ViewModel
                 DragButton = System.Windows.Input.MouseButton.Left
             };
 
+            // Handle right-click event
+            MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
             AddPolygonToMap();
+        }
+        
+        private void MapControl_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // Get the position of the right-click
+            var point = MapControl.FromLocalToLatLng((int)e.GetPosition(MapControl).X, (int)e.GetPosition(MapControl).Y);
+
+            // Add a marker at the clicked position
+            AddMarker(point);
+
+            // Add the coordinate to the list
+            _markerCoordinates.Add(point);
+        }
+        private void AddMarker(PointLatLng point)
+        {
+            GMapMarker marker = new GMapMarker(point)
+            {
+                Shape = new System.Windows.Shapes.Ellipse
+                {
+                    Width = 10,
+                    Height = 10,
+                    Fill = Brushes.Red,
+                    Stroke = Brushes.Black,
+                    StrokeThickness = 1
+                }
+            };
+
+            MapControl.Markers.Add(marker);
         }
         
         private void AddPolygonToMap()
@@ -96,6 +136,69 @@ namespace licenta.ViewModel
 
             MapControl.Markers.Add(polygon);
         }
+        
+        private void CreatePolygon()
+        {
+            if (_markerCoordinates.Count < 3)
+            {
+                // You need at least 3 points to create a polygon
+                System.Diagnostics.Debug.WriteLine("Not enough markers to create a polygon.");
+                return;
+            }
+            
+            SaveCoordinates(_markerCoordinates);
+
+            GMapPolygon polygon = new GMapPolygon(_markerCoordinates)
+            {
+                Shape = new System.Windows.Shapes.Polygon
+                {
+                    Stroke = Brushes.Red,
+                    Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                    StrokeThickness = 2
+                }
+            };
+
+            MapControl.Markers.Add(polygon);
+            
+            ClearMarkers();
+        }
+        
+        private void ClearMarkers()
+        {
+            // List to store markers to be removed
+            var markersToRemove = new List<GMapMarker>();
+
+            // Iterate through the markers and identify which ones are markers (not polygons)
+            foreach (var marker in MapControl.Markers)
+            {
+                if (marker is GMapMarker && !(marker is GMapPolygon))
+                {
+                    markersToRemove.Add(marker);
+                }
+            }
+
+            // Remove the identified markers
+            foreach (var marker in markersToRemove)
+            {
+                MapControl.Markers.Remove(marker);
+            }
+
+            // Clear the list of marker coordinates
+            _markerCoordinates.Clear();
+        }
+        
+        private void SaveCoordinates(List<PointLatLng> coordinates)
+        {
+            // Save the coordinates to a database or file
+            // Example: Log the coordinates to the console
+            foreach (var point in coordinates)
+            {
+                Console.WriteLine($"Saved Coordinate: Lat = {point.Lat}, Lng = {point.Lng}");
+            }
+
+            // TODO: Add logic to save to a database or file
+        }
+
 
         private void OnMapClicked(PointLatLng point)
         {

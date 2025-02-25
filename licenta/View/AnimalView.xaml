@@ -14,5 +14,17 @@
     
     <Grid>
         <ContentControl Content="{Binding MapControl}" />
+        <Button Content="Create Polygon" 
+                Command="{Binding CreatePolygonCommand}" 
+                Width="75" 
+                Height="20" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Margin="10" 
+                Padding="5"
+                Background="{StaticResource titleColor2}" 
+                Foreground="White" 
+                BorderBrush="Transparent" 
+                FontWeight="Bold" />
     </Grid>
 </UserControl>

@@ -63,6 +63,8 @@ public class MainViewModel : ViewModelBase
         }
 
         CurrentChildView = viewModel; // Use cached instance
+        Caption = "Home";
+        Icon = IconChar.Home;
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
     }
 
