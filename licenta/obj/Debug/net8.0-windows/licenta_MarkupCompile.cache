@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 E:\licenta\licenta\licenta\App.xaml
-31361631829
+8257679079
 
-151786441088
-1991941310816
-CustomControls\BindablePasswordBox.xaml;MainWindow.xaml;View\LoginView.xaml;
+26-362439082
+2182033629690
+CustomControls\BindablePasswordBox.xaml;MainWindow.xaml;ResourceDictionaries\ButtonStyles.xaml;ResourceDictionaries\ColorsUI.xaml;View\AnimalView.xaml;View\GrainView.xaml;View\HomeView.xaml;View\LoginView.xaml;
 
 False
 

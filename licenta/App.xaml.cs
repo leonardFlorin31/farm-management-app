@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using GMap.NET;
+using GMap.NET.MapProviders;
 using licenta.View;
 using licenta.ViewModel;
 
@@ -21,5 +23,8 @@ public partial class App : Application
                 loginView.Close();
             };
         }
+        GMapProvider.WebProxy = System.Net.WebRequest.DefaultWebProxy;
+        GMapProvider.WebProxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
+        GMaps.Instance.Mode = AccessMode.ServerAndCache;
     }
 }
