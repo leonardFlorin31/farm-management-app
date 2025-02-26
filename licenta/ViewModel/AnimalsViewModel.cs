@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,24 +10,20 @@ using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsPresentation;
 
+
 namespace licenta.ViewModel
 {
     public class AnimalsViewModel : ViewModelBase
     {
         private PointLatLng _mapCenter;
-        private int _zoomLevel = 13; // Nivelul inițial de zoom
-        private GMapProvider _mapProvider = GoogleMapProvider.Instance;
-        
-        // List to store marker coordinates
+        private int _zoomLevel = 13;
+        private GMapProvider _mapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
         private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
         private PointLatLng _polygonCentroid;
         
-        // Eveniment pentru notificarea schimbărilor de zoom
         public event Action<int> ZoomChanged;
-
         public GMapControl MapControl { get; set; }
         
-        // Proprietăți bindable
         public GMapProvider MapProvider
         {
             get => _mapProvider;
@@ -50,7 +49,6 @@ namespace licenta.ViewModel
             {
                 if (Set(ref _zoomLevel, value))
                 {
-                    // Update the map's zoom if it's out of sync (e.g., when using ZoomIn/ZoomOut commands)
                     if (MapControl.Zoom != value)
                     {
                         MapControl.Zoom = value;
@@ -62,66 +60,55 @@ namespace licenta.ViewModel
             }
         }
 
-        // Comenzi pentru zoom
         public ICommand ZoomInCommand { get; }
         public ICommand ZoomOutCommand { get; }
-
-        // Command pentru clic pe hartă
         public ICommand MapClickedCommand { get; }
-        
-        // Command pentru crearea poligonului
         public ICommand CreatePolygonCommand { get; }
 
+        // Service for communicating with the server
+        private readonly PolygonService _polygonService;
 
         public AnimalsViewModel()
         {
-            MapCenter = new PointLatLng(44.4268, 26.1025); // București
+            MapCenter = new PointLatLng(44.4268, 26.1025);
             MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
-
-            // Inițializare comenzi pentru zoom
             ZoomInCommand = new RelayCommand(ZoomIn);
             ZoomOutCommand = new RelayCommand(ZoomOut);
-            
-            // Command pentru crearea poligonului
             CreatePolygonCommand = new RelayCommand(CreatePolygon);
-            
+
+            // Initialize the map control
             MapControl = new GMapControl
             {
                 MapProvider = GMap.NET.MapProviders.OpenStreetMapProvider.Instance,
-                Position = new PointLatLng(44.4268, 26.1025), // București
+                Position = new PointLatLng(44.4268, 26.1025),
                 MinZoom = 2,
                 MaxZoom = 18,
                 Zoom = 13,
                 MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter,
                 CanDragMap = true,
-                DragButton = System.Windows.Input.MouseButton.Left
+                DragButton = MouseButton.Left
             };
-            
-            // Subscribe to the OnPositionChanged event
-            MapControl.OnPositionChanged += MapControl_OnPositionChanged;
 
-            // Handle right-click event
+            MapControl.OnPositionChanged += MapControl_OnPositionChanged;
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
             AddPolygonToMap();
+
+            // Initialize the polygon service (update the BaseAddress as needed)
+            _polygonService = new PolygonService(new HttpClient { BaseAddress = new Uri("http://localhost:7088/") });
         }
         
         private void MapControl_OnPositionChanged(PointLatLng point)
         {
-            // Sync ViewModel's ZoomLevel with the map's current zoom
             ZoomLevel = (int)MapControl.Zoom;
         }
         
-        private void MapControl_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MapControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // Get the position of the right-click
             var point = MapControl.FromLocalToLatLng((int)e.GetPosition(MapControl).X, (int)e.GetPosition(MapControl).Y);
-
-            // Add a marker at the clicked position
             AddMarker(point);
-
-            // Add the coordinate to the list
             _markerCoordinates.Add(point);
         }
+
         private void AddMarker(PointLatLng point)
         {
             GMapMarker marker = new GMapMarker(point)
@@ -162,17 +149,39 @@ namespace licenta.ViewModel
             MapControl.Markers.Add(polygon);
         }
         
-        private void CreatePolygon()
+        // Updated CreatePolygon method that sends data to the server
+        private async void CreatePolygon()
         {
             if (_markerCoordinates.Count < 3)
             {
-                // You need at least 3 points to create a polygon
-                System.Diagnostics.Debug.WriteLine("Not enough markers to create a polygon.");
+                Console.WriteLine("Not enough markers to create a polygon.");
                 return;
             }
-            
-            SaveCoordinates(_markerCoordinates);
 
+            // Build the request using the marker coordinates
+            var createPolygonRequest = new CreatePolygonRequest
+            {
+                // Replace with the actual user ID in your app
+                UserId = Guid.NewGuid(),
+                Name = "Polygon Label",
+                Points = _markerCoordinates.Select(p => new PointRequest
+                {
+                    Latitude = (decimal)p.Lat,
+                    Longitude = (decimal)p.Lng
+                }).ToList()
+            };
+
+            try
+            {
+                var polygonResponse = await _polygonService.CreatePolygonAsync(createPolygonRequest);
+                Console.WriteLine("Polygon created with id: " + polygonResponse.PolygonId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error creating polygon: " + ex.Message);
+            }
+
+            // Add the polygon to the map for visualization
             GMapPolygon polygon = new GMapPolygon(_markerCoordinates)
             {
                 Shape = new System.Windows.Shapes.Polygon
@@ -184,59 +193,43 @@ namespace licenta.ViewModel
             };
 
             MapControl.Markers.Add(polygon);
-            
-            // Add text to the center of the polygon
             AddTextToPolygon(polygon, "Polygon Label");
 
-            
-            // Clears only the markers
+            // Clear the temporary markers
             ClearMarkers();
         }
         
         private void AddTextToPolygon(GMapPolygon polygon, string text)
         {
             PointLatLng centroid = CalculateCentroid(polygon.Points);
-
-            // Create text element
             TextBlock textBlock = new TextBlock
             {
                 Text = text,
                 Foreground = Brushes.Black,
-                FontSize = 12, // Base size
+                FontSize = 12,
                 FontWeight = FontWeights.Bold,
                 Background = Brushes.Transparent,
                 Padding = new Thickness(2)
             };
 
-            // Scale transform for dynamic resizing
             ScaleTransform scaleTransform = new ScaleTransform();
             textBlock.RenderTransform = scaleTransform;
 
-            // Create text marker
             GMapMarker textMarker = new GMapMarker(centroid)
             {
                 Shape = textBlock
             };
 
-            // Add marker to the map
             MapControl.Markers.Add(textMarker);
-
-            // Update text size when zoom changes
             ZoomChanged += (zoom) => UpdateTextScale(textBlock, scaleTransform, zoom);
-    
-            // Apply initial scaling
             UpdateTextScale(textBlock, scaleTransform, ZoomLevel);
         }
 
-        
-        // Method to update text size based on zoom level
         private void UpdateTextScale(TextBlock textBlock, ScaleTransform scaleTransform, int zoomLevel)
         {
-            
-                double scale = Math.Max(0.1, zoomLevel / 18.0); // Ensures text gets smaller when zooming out
-                scaleTransform.ScaleX = scale;
-                scaleTransform.ScaleY = scale;
-            
+            double scale = Math.Max(0.1, zoomLevel / 18.0);
+            scaleTransform.ScaleX = scale;
+            scaleTransform.ScaleY = scale;
         }
         
         private void UpdateLabelVisibility()
@@ -247,12 +240,12 @@ namespace licenta.ViewModel
                 {
                     if (ZoomLevel < 13)
                     {
-                        textBlock.Visibility = Visibility.Collapsed; // Hide labels
+                        textBlock.Visibility = Visibility.Collapsed;
                     }
                     else
                     {
-                        textBlock.Visibility = Visibility.Visible; // Show labels
-                        double scale = Math.Max(0.3, ZoomLevel / 18.0); // Adjust scale
+                        textBlock.Visibility = Visibility.Visible;
+                        double scale = Math.Max(0.3, ZoomLevel / 18.0);
                         ((ScaleTransform)textBlock.RenderTransform).ScaleX = scale;
                         ((ScaleTransform)textBlock.RenderTransform).ScaleY = scale;
                     }
@@ -260,51 +253,29 @@ namespace licenta.ViewModel
             }
         }
         
-
-
-        
         private void ClearMarkers()
         {
-            // List to store markers to be removed
             var markersToRemove = new List<GMapMarker>();
 
-            // Iterate through the markers and identify which ones are point markers (not polygons or text)
             foreach (var marker in MapControl.Markers)
             {
-                // Only remove small circle markers (skip polygons and text markers)
                 if (marker.Shape is System.Windows.Shapes.Ellipse)
                 {
                     markersToRemove.Add(marker);
                 }
             }
 
-            // Remove the identified markers
             foreach (var marker in markersToRemove)
             {
                 MapControl.Markers.Remove(marker);
             }
 
-            // Clear the list of marker coordinates
             _markerCoordinates.Clear();
         }
         
-        private void SaveCoordinates(List<PointLatLng> coordinates)
-        {
-            // Save the coordinates to a database or file
-            // Example: Log the coordinates to the console
-            foreach (var point in coordinates)
-            {
-               // Console.WriteLine($"Saved Coordinate: Lat = {point.Lat}, Lng = {point.Lng}");
-            }
-
-            // TODO: Add logic to save to a database or file
-        }
-
-
         private void OnMapClicked(PointLatLng point)
         {
-            // Aici poți adăuga logica pentru desenare (ex: adaugă un marker)
-            Console.WriteLine($"Clic la: {point.Lat}, {point.Lng}");
+            Console.WriteLine($"Click at: {point.Lat}, {point.Lng}");
         }
         
         private PointLatLng CalculateCentroid(List<PointLatLng> points)
@@ -327,7 +298,7 @@ namespace licenta.ViewModel
 
         private void ZoomIn()
         {
-            if (ZoomLevel < 18) // Nivelul maxim de zoom
+            if (ZoomLevel < 18)
             {
                 ZoomLevel++;
                 Console.WriteLine($"ZoomIn: ZoomLevel = {ZoomLevel}");
@@ -336,13 +307,11 @@ namespace licenta.ViewModel
 
         private void ZoomOut()
         {
-            if (ZoomLevel > 2) // Nivelul minim de zoom
+            if (ZoomLevel > 2)
             {
                 ZoomLevel--;
                 Console.WriteLine($"ZoomOut: ZoomLevel = {ZoomLevel}");
             }
         }
-        
-        
     }
 }
