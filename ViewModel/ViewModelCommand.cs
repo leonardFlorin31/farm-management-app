@@ -1,0 +1,40 @@
+namespace licenta.ViewModel;
+using System.Windows.Input;
+
+public class ViewModelCommand : ICommand
+{
+   //Fields
+   private readonly Action<object> _executeAction;
+   private readonly Func<object, bool> _canExecuteAction;
+   
+   //Constructors
+   public ViewModelCommand(Action<object> executeAction, Func<object, bool> canExecuteAction = null)
+   {
+      _executeAction = executeAction;
+      _canExecuteAction = canExecuteAction;
+   } 
+   
+   public ViewModelCommand(Action<object> executeAction)
+   {
+      _executeAction = executeAction;
+      _canExecuteAction = null;
+   } 
+   
+   //Events
+   public event EventHandler CanExecuteChanged
+   {
+      add => CommandManager.RequerySuggested += value;
+      remove => CommandManager.RequerySuggested -= value;
+   }
+   
+   //Methods
+   public bool CanExecute(object parameter)
+   {
+      return _canExecuteAction == null || _canExecuteAction(parameter);
+   }
+   
+   public void Execute(object parameter)
+   {
+      _executeAction(parameter);
+   }
+}
