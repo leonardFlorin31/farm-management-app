@@ -97,7 +97,8 @@ public class LoginViewModel : ViewModelBase
                     // Autentificare reușită
                     Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity(Username), null);
                     IsViewVisible = false;
-
+                    
+                    UsernameForUse.Username = Username;
                     // Notificăm că autentificarea a avut succes
                     LoginSuccess?.Invoke();
                 }
@@ -147,5 +148,10 @@ public class LoginViewModel : ViewModelBase
         {
             Marshal.ZeroFreeGlobalAllocUnicode(ptr);
         }
+    }
+
+    public static class UsernameForUse
+    {
+        public static string Username { get; set; }
     }
 }
