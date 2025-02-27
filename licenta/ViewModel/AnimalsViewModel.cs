@@ -192,7 +192,7 @@ namespace licenta.ViewModel
 
                 if (polygons == null || polygons.Count == 0)
                 {
-                    MessageBox.Show("No polygons found for the current user.");
+                    Console.WriteLine("No polygons found for the current user.");
                     return;
                 }
 
@@ -204,7 +204,7 @@ namespace licenta.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading polygons: {ex.Message}");
+                Console.WriteLine($"Error loading polygons: {ex.Message}");
             }
         }
 
@@ -214,7 +214,7 @@ namespace licenta.ViewModel
             [JsonPropertyName("polygonId")]
             public Guid Id { get; set; }
             
-            [JsonPropertyName("polygonName")]
+            [JsonPropertyName("name")]
             public string Name { get; set; }
             
             [JsonPropertyName("createdByUserId")]
@@ -348,7 +348,7 @@ namespace licenta.ViewModel
         {
             if (_markerCoordinates.Count < 3)
             {
-                MessageBox.Show("You need at least 3 points to create a polygon.");
+                Console.WriteLine("You need at least 3 points to create a polygon.");
                 return;
             }
 
@@ -356,7 +356,7 @@ namespace licenta.ViewModel
             {
                 if (_currentUserId == Guid.Empty)
                 {
-                    MessageBox.Show("User ID is not available.");
+                    Console.WriteLine("User ID is not available.");
                     return;
                 }
 
@@ -379,7 +379,7 @@ namespace licenta.ViewModel
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show($"Failed to create polygon. Status code: {response.StatusCode}");
+                    Console.WriteLine($"Failed to create polygon. Status code: {response.StatusCode}");
                     return;
                 }
 
@@ -391,7 +391,7 @@ namespace licenta.ViewModel
 
                 if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
                 {
-                    MessageBox.Show("Failed to create polygon on the server.");
+                    Console.WriteLine("Failed to create polygon on the server.");
                     return;
                 }
 
@@ -401,7 +401,7 @@ namespace licenta.ViewModel
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error creating polygon: {ex.Message}");
+                Console.WriteLine($"Error creating polygon: {ex.Message}");
             }
         }
 
@@ -418,12 +418,12 @@ namespace licenta.ViewModel
                 }
                 else
                 {
-                    MessageBox.Show("Failed to delete polygon from the server.");
+                    Console.WriteLine("Failed to delete polygon from the server.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error deleting polygon: {ex.Message}");
+                Console.WriteLine($"Error deleting polygon: {ex.Message}");
             }
         }
 
