@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -50,12 +51,35 @@ namespace licenta.ViewModel
             get => _mapCenter;
             set => Set(ref _mapCenter, value);
         }
+        
 
         public PointLatLng PolygonCentroid
         {
             get => _polygonCentroid;
             set => Set(ref _polygonCentroid, value);
         }
+        
+        private string _animalName;
+
+        public string AnimalName
+        {
+            get => _animalName;
+            set
+            {
+                _animalName = value;
+                OnPropertyChanged(nameof(AnimalName));
+                OnPropertyChanged(nameof(IsPlaceholderVisible));
+            }
+        }
+        
+        public bool IsPlaceholderVisible => string.IsNullOrEmpty(AnimalName);
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
 
         public int ZoomLevel
         {
@@ -359,13 +383,20 @@ namespace licenta.ViewModel
                     Console.WriteLine("User ID is not available.");
                     return;
                 }
+                
+                // Validate that the user entered a name
+                if (string.IsNullOrWhiteSpace(AnimalName))
+                {
+                    MessageBox.Show("Please enter a polygon name.");
+                    return;
+                }
 
                 var client = new HttpClient();
 
                 var request = new CreatePolygonRequest
                 {
                     UserId = _currentUserId,
-                    Name = "TEstttttt", // You can bind this to a property for user input
+                    Name = AnimalName, // You can bind this to a property for user input
                     Points = _markerCoordinates.ConvertAll(p => new PointRequest
                     {
                         Latitude = (decimal)p.Lat,
@@ -398,6 +429,8 @@ namespace licenta.ViewModel
                 AddPolygonToMap(createdPolygon);
 
                 ClearMarkers();
+                
+                AnimalName = string.Empty;
             }
             catch (Exception ex)
             {
@@ -452,7 +485,10 @@ namespace licenta.ViewModel
                 Background = Brushes.Transparent,
                 Padding = new Thickness(2)
             };
-
+            
+            // Setăm ZIndex-ul pentru a ne asigura că textul este afișat deasupra poligonului
+            Panel.SetZIndex(textBlock, 999);
+            
             ScaleTransform scaleTransform = new ScaleTransform();
             textBlock.RenderTransform = scaleTransform;
 

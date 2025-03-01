@@ -17,8 +17,36 @@
     </UserControl.Resources>
     
     <Grid>
+        <!-- Harta -->
         <ContentControl Content="{Binding MapControl}" />
-        
+
+        <!-- Overlay pentru input, plasat în colțul stânga sus -->
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="220" Height="40" Background="Transparent">
+            <!-- Folosim o Grid pentru a suprapune TextBox-ul și TextBlock-ul placeholder -->
+            <TextBox x:Name="InputTextBox"
+                     Text="{Binding AnimalName, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="200" Height="30"
+                     Background="White"
+                     Padding="5"/>
+            <TextBlock Text="Enter parcel name..."
+                       Foreground="Gray"
+                       Margin="10,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPlaceholderVisible}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+
+        <!-- Butonul de creare poligon, plasat în colțul din dreapta sus -->
         <Button Content="Create Polygon" 
                 Command="{Binding CreatePolygonCommand}" 
                 Width="100" 
