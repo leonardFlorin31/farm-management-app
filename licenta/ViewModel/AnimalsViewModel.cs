@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -35,7 +36,8 @@ namespace licenta.ViewModel
         private string _apiBaseUrl = "https://localhost:7088/api"; // Replace with your API URL
         private Guid _currentUserId; // Will be set after login
         private string _currentUsername = LoginViewModel.UsernameForUse.Username;
-
+        private List<string> _polygonNames = new List<string> { };
+        
         public GMapControl MapControl { get; set; }
 
         // Bindable properties
@@ -50,12 +52,27 @@ namespace licenta.ViewModel
             get => _mapCenter;
             set => Set(ref _mapCenter, value);
         }
+        
 
         public PointLatLng PolygonCentroid
         {
             get => _polygonCentroid;
             set => Set(ref _polygonCentroid, value);
         }
+        
+        private string _PolygonName;
+
+        public string PolygonName
+        {
+            get => _PolygonName;
+            set
+            {
+                _PolygonName = value;
+                OnPropertyChanged(nameof(PolygonName));
+                OnPropertyChanged(nameof(IsPlaceholderVisible));
+            }
+        }
+        public bool IsPlaceholderVisible => string.IsNullOrEmpty(PolygonName);
 
         public int ZoomLevel
         {
@@ -85,6 +102,8 @@ namespace licenta.ViewModel
 
         // Command for creating a polygon
         public ICommand CreatePolygonCommand { get; }
+        
+        public ICommand DeleteLastMarkerCommand { get; }
 
         public AnimalsViewModel()
         {
@@ -102,6 +121,8 @@ namespace licenta.ViewModel
 
             // Command to create a polygon
             CreatePolygonCommand = new RelayCommand(CreatePolygon);
+            
+            DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
 
             MapControl = new GMapControl
             {
@@ -198,7 +219,8 @@ namespace licenta.ViewModel
 
                 // Add each polygon to the map
                 foreach (var polygon in polygons)
-                {
+                {   
+                    _polygonNames.Add(polygon.Name);
                     AddPolygonToMap(polygon);
                 }
             }
@@ -307,7 +329,10 @@ namespace licenta.ViewModel
                     return;
                 }
 
-                var points = polygon.Points.ConvertAll(p => new PointLatLng((double)p.Latitude, (double)p.Longitude));
+                var points = polygon.Points
+                    .OrderBy(p => p.Order)
+                    .Select(p => new PointLatLng((double)p.Latitude, (double)p.Longitude))
+                    .ToList();
 
                 if (MapControl == null)
                 {
@@ -351,6 +376,16 @@ namespace licenta.ViewModel
                 Console.WriteLine("You need at least 3 points to create a polygon.");
                 return;
             }
+            
+            
+            foreach (var polygonName in _polygonNames)
+            {   
+                if(polygonName == PolygonName)
+                {
+                    MessageBox.Show("Polygon name already exists.");
+                    return;
+                }
+            }
 
             try
             {
@@ -359,19 +394,27 @@ namespace licenta.ViewModel
                     Console.WriteLine("User ID is not available.");
                     return;
                 }
+                
+                // Validate that the user entered a name
+                if (string.IsNullOrWhiteSpace(PolygonName))
+                {
+                    MessageBox.Show("Please enter a polygon name.");
+                    return;
+                }
 
                 var client = new HttpClient();
 
                 var request = new CreatePolygonRequest
                 {
                     UserId = _currentUserId,
-                    Name = "TEstttttt", // You can bind this to a property for user input
+                    Name = PolygonName, // bound to user input
                     Points = _markerCoordinates.ConvertAll(p => new PointRequest
                     {
                         Latitude = (decimal)p.Lat,
                         Longitude = (decimal)p.Lng
                     })
                 };
+                _polygonNames.Add(request.Name);
 
                 var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
@@ -398,6 +441,8 @@ namespace licenta.ViewModel
                 AddPolygonToMap(createdPolygon);
 
                 ClearMarkers();
+                
+                PolygonName = string.Empty;
             }
             catch (Exception ex)
             {
@@ -452,7 +497,10 @@ namespace licenta.ViewModel
                 Background = Brushes.Transparent,
                 Padding = new Thickness(2)
             };
-
+            
+            // Setăm ZIndex-ul pentru a ne asigura că textul este afișat deasupra poligonului
+            Panel.SetZIndex(textBlock, 999);
+            
             ScaleTransform scaleTransform = new ScaleTransform();
             textBlock.RenderTransform = scaleTransform;
 
@@ -460,7 +508,7 @@ namespace licenta.ViewModel
             {
                 Shape = textBlock
             };
-
+            
             MapControl.Markers.Add(textMarker);
 
             ZoomChanged += (zoom) => UpdateTextScale(textBlock, scaleTransform, zoom);
@@ -548,6 +596,38 @@ namespace licenta.ViewModel
 
             Console.WriteLine($"Centroid: Lat = {centroidLat}, Lng = {centroidLng}");
             return new PointLatLng(centroidLat, centroidLng);
+        }
+        
+        private void DeleteLastMarker()
+        {
+            if (_markerCoordinates.Count == 0)
+            {
+                Console.WriteLine("No markers to remove.");
+                return;
+            }
+
+            // Get the last coordinate added
+            var lastCoordinate = _markerCoordinates.Last();
+            _markerCoordinates.RemoveAt(_markerCoordinates.Count - 1);
+
+            // Find the corresponding marker in the MapControl.Markers
+            // We look for a marker with an Ellipse shape whose position matches the last coordinate.
+            var markerToRemove = MapControl.Markers
+                .OfType<GMapMarker>()
+                .LastOrDefault(m =>
+                    m.Shape is System.Windows.Shapes.Ellipse &&
+                    m.Position.Lat.Equals(lastCoordinate.Lat) &&
+                    m.Position.Lng.Equals(lastCoordinate.Lng));
+
+            if (markerToRemove != null)
+            {
+                MapControl.Markers.Remove(markerToRemove);
+                Console.WriteLine($"Removed marker at: {lastCoordinate.Lat}, {lastCoordinate.Lng}");
+            }
+            else
+            {
+                Console.WriteLine("Marker not found for the last coordinate.");
+            }
         }
 
         private void ZoomIn()
