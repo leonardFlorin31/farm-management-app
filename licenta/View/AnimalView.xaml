@@ -24,15 +24,16 @@
         <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="220" Height="40" Background="Transparent">
             <!-- Folosim o Grid pentru a suprapune TextBox-ul și TextBlock-ul placeholder -->
             <TextBox x:Name="InputTextBox"
-                     Text="{Binding AnimalName, UpdateSourceTrigger=PropertyChanged}" 
-                     Width="200" Height="30"
+                     Text="{Binding PolygonName, UpdateSourceTrigger=PropertyChanged}" 
+                     Width="180" Height="30"
                      Background="White"
                      Padding="5"/>
-            <TextBlock Text="Enter parcel name..."
+            <TextBlock Text="Introduceti numele parcelei..."
                        Foreground="Gray"
-                       Margin="10,0,0,0"
+                       Margin="0,0,0,0"
                        VerticalAlignment="Center"
-                       IsHitTestVisible="False">
+                       IsHitTestVisible="False"
+                       HorizontalAlignment="Center">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
                         <Setter Property="Visibility" Value="Visible"/>
@@ -47,7 +48,7 @@
         </Grid>
 
         <!-- Butonul de creare poligon, plasat în colțul din dreapta sus -->
-        <Button Content="Create Polygon" 
+        <Button Content="Creaza parcela" 
                 Command="{Binding CreatePolygonCommand}" 
                 Width="100" 
                 Height="30" 
@@ -56,6 +57,20 @@
                 Margin="10" 
                 Padding="5"
                 Background="{StaticResource titleColor2}" 
+                Foreground="White" 
+                BorderBrush="Transparent" 
+                FontWeight="Bold" />
+        
+       <!--button for deleting the last marker -->
+        <Button Content="Sterge ultimul marker" 
+                Command="{Binding DeleteLastMarkerCommand}"
+                Width="150" 
+                Height="30" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Margin="10,50,10,10" 
+                Padding="5"
+                Background="Red" 
                 Foreground="White" 
                 BorderBrush="Transparent" 
                 FontWeight="Bold" />
