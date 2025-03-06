@@ -11,10 +11,10 @@
              xmlns:behavior="clr-namespace:licenta.Behavior"
              xmlns:viewModel="clr-namespace:licenta.ViewModel">
 
-    <UserControl.Resources>
-        <local:CentroidToMarginConverter x:Key="CentroidToMarginConverter" />
-        <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-    </UserControl.Resources>
+    <!-- <UserControl.Resources> -->
+    <!--     <local:CentroidToMarginConverter x:Key="CentroidToMarginConverter" /> -->
+    <!--     <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter" /> -->
+    <!-- </UserControl.Resources> -->
     
     <Grid>
         <!-- Harta -->
@@ -61,6 +61,19 @@
                 BorderBrush="Transparent" 
                 FontWeight="Bold" />
         
+        <Button Content="Sterge parcela" 
+                Command="{Binding DeletePolygonCommand}" 
+                Width="100" 
+                Height="30" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top" 
+                Margin="10,50,10,10"  
+                Padding="5"
+                Background="{StaticResource color12}" 
+                Foreground="White" 
+                BorderBrush="Transparent" 
+                FontWeight="Bold" />
+        
        <!--button for deleting the last marker -->
         <Button Content="Sterge ultimul marker" 
                 Command="{Binding DeleteLastMarkerCommand}"
@@ -68,9 +81,9 @@
                 Height="30" 
                 HorizontalAlignment="Right" 
                 VerticalAlignment="Top" 
-                Margin="10,50,10,10" 
+                Margin="10,90,10,10" 
                 Padding="5"
-                Background="Red" 
+                Background="{StaticResource color12}" 
                 Foreground="White" 
                 BorderBrush="Transparent" 
                 FontWeight="Bold" />

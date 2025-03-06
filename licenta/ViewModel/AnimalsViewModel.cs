@@ -104,6 +104,8 @@ namespace licenta.ViewModel
         public ICommand CreatePolygonCommand { get; }
         
         public ICommand DeleteLastMarkerCommand { get; }
+        
+        public ICommand DeletePolygonCommand { get; }
 
         public AnimalsViewModel()
         {
@@ -123,6 +125,8 @@ namespace licenta.ViewModel
             CreatePolygonCommand = new RelayCommand(CreatePolygon);
             
             DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
+
+            DeletePolygonCommand = new RelayCommand(DeletePolygon);
 
             MapControl = new GMapControl
             {
@@ -354,7 +358,7 @@ namespace licenta.ViewModel
                         Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
                         StrokeThickness = 2
                     },
-                    Tag = polygon.Id // Store polygon ID for reference
+                    Tag = polygon.Name // Store polygon Name for reference (!!!Daca crapa ceva schimba in polygon.Id si nu o sa mai mearga RemovePolygonFromMap)
                 };
 
                 MapControl.Markers.Add(gmapPolygon);
@@ -451,15 +455,17 @@ namespace licenta.ViewModel
         }
 
         // Method to delete a polygon from the server
-        public async void DeletePolygon(Guid polygonId)
+        public async void DeletePolygon()
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"Polygon/{polygonId}?userId={_currentUserId}");
+                var pName = PolygonName;
+                var client = new HttpClient();
+                var response = await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
 
                 if (response.IsSuccessStatusCode)
                 {
-                    RemovePolygonFromMap(polygonId);
+                    RemovePolygonFromMap(pName);
                 }
                 else
                 {
@@ -473,15 +479,27 @@ namespace licenta.ViewModel
         }
 
         // Method to remove a polygon from the map
-        private void RemovePolygonFromMap(Guid polygonId)
+        private void RemovePolygonFromMap(string polygonName)
         {
+            //remove based on the polygonName
             var toRemove = MapControl.Markers
-                .FirstOrDefault(m => m is GMapPolygon polygon && polygon.Tag is Guid id && id == polygonId);
+                .FirstOrDefault(m => m is GMapPolygon polygon && polygon.Tag != null && polygon.Tag.ToString() == polygonName);
 
             if (toRemove != null)
             {
                 MapControl.Markers.Remove(toRemove);
             }
+            
+            var textMarkers = MapControl.Markers
+                .Where(m => m.Shape is TextBlock tb && tb.Text == polygonName)
+                .ToList();
+            
+            foreach (var marker in textMarkers)
+            {
+                MapControl.Markers.Remove(marker);
+            }
+            
+            _polygonNames.Remove(polygonName);
         }
 
         private void AddTextToPolygon(GMapPolygon polygon, string text)
