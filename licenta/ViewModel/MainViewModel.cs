@@ -44,7 +44,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ShowHomeViewCommand { get; }
     public ICommand ShowMapViewCommand { get; }
     
-    public ICommand ShowGrainViewCommand { get; } 
+    public ICommand ShowParcelViewCommand { get; } 
         
     private void ExecuteShowHomeViewCommand(object obj)
     {
@@ -83,19 +83,19 @@ public class MainViewModel : ViewModelBase
         Icon = IconChar.Map;
     }
 
-    private void ExecuteShowGrainViewCommand(object obj)
+    private void ExecuteShowParcelViewCommand(object obj)
     {
-        Console.WriteLine("Executing ShowGrainViewCommand");
-        if (!_viewModelCache.TryGetValue(typeof(GrainViewModel), out var viewModel))
+        Console.WriteLine("Executing ShowParcelViewCommand");
+        if (!_viewModelCache.TryGetValue(typeof(ParcelViewModel), out var viewModel))
         {
-            Console.WriteLine("Creating new GrainViewModel");
-            viewModel = new GrainViewModel();
-            _viewModelCache[typeof(GrainViewModel)] = viewModel;
+            Console.WriteLine("Creating new ParcelViewModel");
+            viewModel = new ParcelViewModel();
+            _viewModelCache[typeof(ParcelViewModel)] = viewModel;
         }
         CurrentChildView = viewModel;
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
-        Caption = "Grain";
-        Icon = IconChar.WheatAwn;
+        Caption = "Parcel";
+        Icon = IconChar.LocationCrosshairs;
     }
     
     public IconChar Icon
@@ -127,7 +127,7 @@ public class MainViewModel : ViewModelBase
         //Initialize Commands
         ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
         ShowMapViewCommand = new ViewModelCommand(ExecuteShowMapViewCommand);
-        ShowGrainViewCommand = new ViewModelCommand(ExecuteShowGrainViewCommand);
+        ShowParcelViewCommand = new ViewModelCommand(ExecuteShowParcelViewCommand);
         
         //Default view
         ExecuteShowHomeViewCommand(null);

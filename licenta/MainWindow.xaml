@@ -27,8 +27,8 @@
             <view:MapView />
         </DataTemplate>
         
-        <DataTemplate DataType="{x:Type viewModel:GrainViewModel}">
-            <view:GrainView />
+        <DataTemplate DataType="{x:Type viewModel:ParcelViewModel}">
+            <view:ParcelView />
         </DataTemplate>
     </Window.Resources>
 
@@ -99,10 +99,10 @@
 
                     <RadioButton Style="{StaticResource menuButton}"
                                  Tag="{StaticResource color3}"
-                                 Command="{Binding ShowGrainViewCommand}">
+                                 Command="{Binding ShowParcelViewCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <fa:IconImage Icon="WheatAwn" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
-                            <TextBlock Text="Grain" Style="{StaticResource menuButtonText}"></TextBlock>
+                            <fa:IconImage Icon="LocationCrosshairs" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
+                            <TextBlock Text="Parcele" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
 

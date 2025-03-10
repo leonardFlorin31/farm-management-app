@@ -91,7 +91,6 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\Resourc
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\ResourceDictionaries\ColorsUI.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\MainWindow.g.cs
-C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\GrainView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\HomeView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\LoginView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\App.g.cs
@@ -101,7 +100,6 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\licenta
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\App.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\CustomControls\BindablePasswordBox.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\MainWindow.baml
-C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\GrainView.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\HomeView.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\LoginView.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\licenta.g.resources
@@ -118,3 +116,5 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\licenta
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\ref\licenta.dll
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\MapView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\MapView.baml
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ParcelView.g.cs
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ParcelView.baml

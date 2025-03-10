@@ -1,0 +1,63 @@
+<UserControl x:Class="licenta.View.ParcelView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:licenta.View"
+             xmlns:viewModel="clr-namespace:licenta.ViewModel"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Rând pentru input -->
+            <RowDefinition Height="*"/>   <!-- Spațiu flexibil pentru alte elemente -->
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="10">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                <!-- ComboBox pentru alegere -->
+                <StackPanel Margin="5, 5, 0, 5">
+                    <TextBlock Text="Select Option"/>
+                    <ComboBox Width="100" 
+                              ItemsSource="{Binding Options}"
+                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}"/>
+                </StackPanel>
+
+                <!-- TextBox-urile cu etichete dinamice -->
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label1}" />
+                    <TextBox Width="100" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label2}" />
+                    <TextBox Width="100" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label3}" />
+                    <TextBox Width="100" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label3}" />
+                    <TextBox Width="100" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </StackPanel>
+
+            <Button Content="Save"
+                    Width="80"
+                    DockPanel.Dock="Right"
+                    Margin="10" 
+                    Padding="5"
+                    Background="{StaticResource titleColor2}" 
+                    Foreground="White" 
+                    BorderBrush="Transparent" 
+                    FontWeight="Bold"
+                    Command="{Binding SaveCommand}" />
+        </DockPanel>
+    </Grid>
+</UserControl>
+
+<!-- <TextBox Width="100" Margin="5, 5, 0, 5" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" /> -->
+<!-- <TextBox Width="100" Margin="0, 5, 0, 5" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" /> -->
+<!-- <TextBox Width="100" Margin="0, 5, 0, 5" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" /> -->
+<!-- <TextBox Width="100" Margin="0, 5, 5, 5" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" /> -->
