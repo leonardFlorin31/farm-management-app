@@ -42,7 +42,7 @@ public class MainViewModel : ViewModelBase
     
     //Commands
     public ICommand ShowHomeViewCommand { get; }
-    public ICommand ShowAnimalViewCommand { get; }
+    public ICommand ShowMapViewCommand { get; }
     
     public ICommand ShowGrainViewCommand { get; } 
         
@@ -68,19 +68,19 @@ public class MainViewModel : ViewModelBase
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
     }
 
-    private void ExecuteShowAnimalViewCommand(object obj)
+    private void ExecuteShowMapViewCommand(object obj)
     {
-        Console.WriteLine("Executing ShowAnimalViewCommand");
-        if (!_viewModelCache.TryGetValue(typeof(AnimalsViewModel), out var viewModel))
+        Console.WriteLine("Executing ShowMapViewCommand");
+        if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var viewModel))
         {
-            Console.WriteLine("Creating new AnimalsViewModel");
-            viewModel = new AnimalsViewModel();
-            _viewModelCache[typeof(AnimalsViewModel)] = viewModel;
+            Console.WriteLine("Creating new MapViewModel");
+            viewModel = new MapViewModel();
+            _viewModelCache[typeof(MapViewModel)] = viewModel;
         }
         CurrentChildView = viewModel;
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
-        Caption = "Animals";
-        Icon = IconChar.UserGroup;
+        Caption = "Harta";
+        Icon = IconChar.Map;
     }
 
     private void ExecuteShowGrainViewCommand(object obj)
@@ -126,7 +126,7 @@ public class MainViewModel : ViewModelBase
         
         //Initialize Commands
         ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
-        ShowAnimalViewCommand = new ViewModelCommand(ExecuteShowAnimalViewCommand);
+        ShowMapViewCommand = new ViewModelCommand(ExecuteShowMapViewCommand);
         ShowGrainViewCommand = new ViewModelCommand(ExecuteShowGrainViewCommand);
         
         //Default view

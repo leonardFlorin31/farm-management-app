@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
 C:\Users\leofl\Documents\GitHub\licenta\licenta\App.xaml
-8257679079
+8-1422269975
 
-27-1672967951
+25928814275
 218-11222589
-CustomControls\BindablePasswordBox.xaml;MainWindow.xaml;ResourceDictionaries\ButtonStyles.xaml;ResourceDictionaries\ColorsUI.xaml;View\AnimalView.xaml;View\GrainView.xaml;View\HomeView.xaml;View\LoginView.xaml;
+CustomControls\BindablePasswordBox.xaml;MainWindow.xaml;ResourceDictionaries\ButtonStyles.xaml;ResourceDictionaries\ColorsUI.xaml;View\GrainView.xaml;View\HomeView.xaml;View\LoginView.xaml;View\MapView.xaml;
 
 False
 
