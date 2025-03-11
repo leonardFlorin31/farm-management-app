@@ -8,18 +8,13 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
 
-     <UserControl.Resources>
+    <UserControl.Resources>
         <!-- Custom ToggleButton for ComboBox -->
         <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton">
             <Grid>
                 <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" />
-        
-                <!-- StackPanel for Content and Arrow -->
                 <Grid>
-                    <!-- ContentPresenter to display the selected item -->
                     <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/>
-            
-                    <!-- Arrow on the right -->
                     <Path Name="Arrow" Fill="Black"
                           Data="M 0 0 L 4 4 L 8 0 Z"
                           HorizontalAlignment="Right"
@@ -41,20 +36,15 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
                         <Grid>
-                            <!-- ToggleButton controls dropdown opening -->
                             <ToggleButton Name="DropDownToggle"
                                           ClickMode="Press"
                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                           Template="{StaticResource CustomToggleButton}" />
-                            
-                            <!-- Displays Selected Item -->
                             <ContentPresenter Name="ContentSite"
                                               Content="{TemplateBinding SelectionBoxItem}"
                                               VerticalAlignment="Center"
                                               HorizontalAlignment="Left"
                                               Margin="5,0,0,0" />
-                            
-                            <!-- Popup Dropdown -->
                             <Popup Name="Popup"
                                    IsOpen="{TemplateBinding IsDropDownOpen}"
                                    Placement="Bottom"
@@ -72,17 +62,17 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    
+
     <Grid>
-        
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/> <!-- Rând pentru input -->
-            <RowDefinition Height="*"/>   <!-- Spațiu flexibil pentru alte elemente -->
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Input Section -->
         <DockPanel Grid.Row="0" Margin="10">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                <!-- ComboBox pentru alegere -->
                 <StackPanel Margin="5, 5, 0, 5">
                     <TextBlock Text="Select Option"/>
                     <ComboBox Width="100"
@@ -91,7 +81,6 @@
                               Style="{StaticResource {x:Type ComboBox}}"/>
                 </StackPanel>
 
-                <!-- TextBox-urile cu etichete dinamice -->
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label1}" />
                     <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" />
@@ -115,18 +104,120 @@
                     DockPanel.Dock="Right"
                     Margin="10" 
                     Padding="5"
-                    Background="{StaticResource titleColor2}" 
+                    Background="Black" 
                     Foreground="White" 
                     BorderBrush="Transparent" 
                     FontWeight="Bold"
                     Command="{Binding SaveCommand}" />
         </DockPanel>
+
+        <!-- Search Box -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,5,10,5">
+            <StackPanel>
+                <TextBlock Text="Optiuni" />
+                <TextBox Width="120" Margin="5"  Text="{Binding SearchOption, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Label1}" />
+                <TextBox Width="120" Margin="5"  Text="{Binding SearchField1, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Label2}" />
+                <TextBox Width="120" Margin="5"  Text="{Binding SearchField2, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Label3}" />
+                <TextBox Width="120" Margin="5"  Text="{Binding SearchField3, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Label4}" />
+                <TextBox Width="120" Margin="5"  Text="{Binding SearchField4, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- List of Parcels -->
+        <ListView Grid.Row="2"
+                  ItemsSource="{Binding SavedParcels}"
+                  Margin="10,0,10,10">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Option" DisplayMemberBinding="{Binding Option}" Width="100"/>
+                    <GridViewColumn Header="Field1" DisplayMemberBinding="{Binding Field1}" Width="100"/>
+                    <GridViewColumn Header="Field2" DisplayMemberBinding="{Binding Field2}" Width="100"/>
+                    <GridViewColumn Header="Field3" DisplayMemberBinding="{Binding Field3}" Width="100"/>
+                    <GridViewColumn Header="Field4" DisplayMemberBinding="{Binding Field4}" Width="100"/>
+                </GridView>
+                
+            </ListView.View>
+        </ListView>
     </Grid>
-    
-    
 </UserControl>
 
-<!-- <TextBox Width="100" Margin="5, 5, 0, 5" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" /> -->
-<!-- <TextBox Width="100" Margin="0, 5, 0, 5" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" /> -->
-<!-- <TextBox Width="100" Margin="0, 5, 0, 5" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" /> -->
-<!-- <TextBox Width="100" Margin="0, 5, 5, 5" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" /> -->
+<!-- <UserControl.Resources> -->
+<!--         ~1~ Custom ToggleButton for ComboBox @1@ -->
+<!--         <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton"> -->
+<!--             <Grid> -->
+<!--                 <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" /> -->
+<!--          -->
+<!--                 ~1~ StackPanel for Content and Arrow @1@ -->
+<!--                 <Grid> -->
+<!--                     ~1~ ContentPresenter to display the selected item @1@ -->
+<!--                     <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/> -->
+<!--              -->
+<!--                     ~1~ Arrow on the right @1@ -->
+<!--                     <Path Name="Arrow" Fill="Black" -->
+<!--                           Data="M 0 0 L 4 4 L 8 0 Z" -->
+<!--                           HorizontalAlignment="Right" -->
+<!--                           VerticalAlignment="Center" -->
+<!--                           Margin="0,0,5,0"/> -->
+<!--                 </Grid> -->
+<!--             </Grid> -->
+<!--         </ControlTemplate> -->
+<!-- -->
+<!--         ~1~ Custom ComboBox Style @1@ -->
+<!--         <Style TargetType="{x:Type ComboBox}"> -->
+<!--             <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" /> -->
+<!--             <Setter Property="Background" Value="White"/> -->
+<!--             <Setter Property="Foreground" Value="Black"/> -->
+<!--             <Setter Property="FontSize" Value="16"/> -->
+<!--             <Setter Property="BorderBrush" Value="Black"/> -->
+<!--             <Setter Property="Padding" Value="4"/> -->
+<!--             <Setter Property="Control.Template"> -->
+<!--                 <Setter.Value> -->
+<!--                     <ControlTemplate TargetType="ComboBox"> -->
+<!--                         <Grid> -->
+<!--                             ~1~ ToggleButton controls dropdown opening @1@ -->
+<!--                             <ToggleButton Name="DropDownToggle" -->
+<!--                                           ClickMode="Press" -->
+<!--                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" -->
+<!--                                           Template="{StaticResource CustomToggleButton}" /> -->
+<!--                              -->
+<!--                             ~1~ Displays Selected Item @1@ -->
+<!--                             <ContentPresenter Name="ContentSite" -->
+<!--                                               Content="{TemplateBinding SelectionBoxItem}" -->
+<!--                                               VerticalAlignment="Center" -->
+<!--                                               HorizontalAlignment="Left" -->
+<!--                                               Margin="5,0,0,0" /> -->
+<!--                              -->
+<!--                             ~1~ Popup Dropdown @1@ -->
+<!--                             <Popup Name="Popup" -->
+<!--                                    IsOpen="{TemplateBinding IsDropDownOpen}" -->
+<!--                                    Placement="Bottom" -->
+<!--                                    AllowsTransparency="True" -->
+<!--                                    PopupAnimation="Slide"> -->
+<!--                                 <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White"> -->
+<!--                                     <ScrollViewer> -->
+<!--                                         <ItemsPresenter /> -->
+<!--                                     </ScrollViewer> -->
+<!--                                 </Border> -->
+<!--                             </Popup> -->
+<!--                         </Grid> -->
+<!--                     </ControlTemplate> -->
+<!--                 </Setter.Value> -->
+<!--             </Setter> -->
+<!--         </Style> -->
+<!--     </UserControl.Resources> -->
+<!-- -->
+<!-- -->
+
+<!-- </StackPanel> -->
