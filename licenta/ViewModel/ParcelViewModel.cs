@@ -15,6 +15,7 @@ public class ParcelViewModel : ViewModelBase
     private string _label1 = "Label A1";
     private string _label2 = "Label A2";
     private string _label3 = "Label A3";
+    private string _label4 = "Label A3";
     
     public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Option A", "Option B" };
 
@@ -45,6 +46,12 @@ public class ParcelViewModel : ViewModelBase
     {
         get => _label3;
         set { _label3 = value; OnPropertyChanged(nameof(Label3)); }
+    }
+    
+    public string Label4
+    {
+        get => _label4;
+        set { _label4 = value; OnPropertyChanged(nameof(Label4)); }
     }
 
     public string Field1
@@ -79,6 +86,8 @@ public class ParcelViewModel : ViewModelBase
 
     public ParcelViewModel()
     {
+        Options = new ObservableCollection<string> { "Option A", "Option B" };
+        SelectedOption = Options.First(); // Selectează automat prima opțiune
         SaveCommand = new RelayCommand(SaveData);
     }
 
@@ -95,12 +104,14 @@ public class ParcelViewModel : ViewModelBase
             Label1 = "Label A1";
             Label2 = "Label A2";
             Label3 = "Label A3";
+            Label4 = "Label A4";
         }
         else if (SelectedOption == "Option B")
         {
             Label1 = "Label B1";
             Label2 = "Label B2";
             Label3 = "Label B3";
+            Label4 = "Label B4";
         }
     }
 

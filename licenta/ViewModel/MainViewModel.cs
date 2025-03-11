@@ -94,7 +94,7 @@ public class MainViewModel : ViewModelBase
         }
         CurrentChildView = viewModel;
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
-        Caption = "Parcel";
+        Caption = "Parcele";
         Icon = IconChar.LocationCrosshairs;
     }
     

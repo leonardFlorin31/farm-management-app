@@ -8,7 +8,73 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
 
+     <UserControl.Resources>
+        <!-- Custom ToggleButton for ComboBox -->
+        <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" />
+        
+                <!-- StackPanel for Content and Arrow -->
+                <Grid>
+                    <!-- ContentPresenter to display the selected item -->
+                    <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/>
+            
+                    <!-- Arrow on the right -->
+                    <Path Name="Arrow" Fill="Black"
+                          Data="M 0 0 L 4 4 L 8 0 Z"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center"
+                          Margin="0,0,5,0"/>
+                </Grid>
+            </Grid>
+        </ControlTemplate>
+
+        <!-- Custom ComboBox Style -->
+        <Style TargetType="{x:Type ComboBox}">
+            <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" />
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <!-- ToggleButton controls dropdown opening -->
+                            <ToggleButton Name="DropDownToggle"
+                                          ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          Template="{StaticResource CustomToggleButton}" />
+                            
+                            <!-- Displays Selected Item -->
+                            <ContentPresenter Name="ContentSite"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"
+                                              Margin="5,0,0,0" />
+                            
+                            <!-- Popup Dropdown -->
+                            <Popup Name="Popup"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   PopupAnimation="Slide">
+                                <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White">
+                                    <ScrollViewer>
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Rând pentru input -->
             <RowDefinition Height="*"/>   <!-- Spațiu flexibil pentru alte elemente -->
@@ -19,27 +85,28 @@
                 <!-- ComboBox pentru alegere -->
                 <StackPanel Margin="5, 5, 0, 5">
                     <TextBlock Text="Select Option"/>
-                    <ComboBox Width="100" 
+                    <ComboBox Width="100"
                               ItemsSource="{Binding Options}"
-                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}"/>
+                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
+                              Style="{StaticResource {x:Type ComboBox}}"/>
                 </StackPanel>
 
                 <!-- TextBox-urile cu etichete dinamice -->
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label1}" />
-                    <TextBox Width="100" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label2}" />
-                    <TextBox Width="100" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label3}" />
-                    <TextBox Width="100" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label3}" />
-                    <TextBox Width="100" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="{Binding Label4}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </StackPanel>
 
@@ -55,6 +122,8 @@
                     Command="{Binding SaveCommand}" />
         </DockPanel>
     </Grid>
+    
+    
 </UserControl>
 
 <!-- <TextBox Width="100" Margin="5, 5, 0, 5" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" /> -->
