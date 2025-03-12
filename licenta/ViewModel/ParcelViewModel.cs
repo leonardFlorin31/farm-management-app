@@ -1,11 +1,18 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Windows;
 using System.Windows.Input;
 
 namespace licenta.ViewModel;
 
 public class ParcelViewModel : ViewModelBase
 {
+    public Guid _currentUserId; // Will be set after login
+    public string _currentUsername = LoginViewModel.UsernameForUse.Username;
+    
     private string _field1;
     private string _field2;
     private string _field3;
@@ -41,7 +48,8 @@ public class ParcelViewModel : ViewModelBase
     public ObservableCollection<ParcelData> SavedParcels
     {
         get => _savedParcels;
-        set { _savedParcels = value; OnPropertyChanged(nameof(SavedParcels)); }
+        set { _savedParcels = value; 
+            OnPropertyChanged(nameof(SavedParcels)); }
     }
 
     public string SearchOption
@@ -153,6 +161,121 @@ public class ParcelViewModel : ViewModelBase
     {
         SelectedOption = Options.First(); // Selectează automat prima opțiune
         SaveCommand = new RelayCommand(SaveData);
+
+        InitializeUserAndData();
+    }
+    private async void InitializeUserAndData()
+    {
+        await InitializeUser(); // Așteptăm finalizarea inițializării utilizatorului
+    
+        if (_currentUserId != Guid.Empty)
+        {
+            GetParcelNamesAndIDs(); // Acum _currentUserId este setat
+        }
+        else
+        {
+            MessageBox.Show("User ID invalid.");
+        }
+    }
+    private async void GetParcelNamesAndIDs()
+    {
+        //https://localhost:7088/api/Polygons/names?userId=4cff5da4-c2e5-4125-9a63-997e7d040565
+        try
+        {
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+
+            var client = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            };
+            // Fetch polygons for the current user
+            Console.WriteLine(_currentUserId);
+            var response = await client
+                .GetAsync($"https://localhost:7088/api/Polygons/names?userId={_currentUserId.ToString()}")
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                MessageBox.Show($"Failed to fetch polygons. Status code: {response.StatusCode}");
+                return;
+            }
+
+            var polygonsJson = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Răspuns server: {polygonsJson}"); // Log răspunsul serverului
+
+            // Use case-insensitive options to avoid casing issues
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
+
+            foreach (var polygon in polygons)
+            {
+                try
+                {
+                    ParcelData parcel = new ParcelData
+                    {
+                        Field1 = polygon.Name ?? "Nume indisponibil",
+                        Field2 = polygon.Id != Guid.Empty ? polygon.Id.ToString() : "ID invalid"
+                    };
+
+                    App.Current.Dispatcher.Invoke((Action)delegate()
+                    {
+                        _savedParcels.Add(parcel);
+                        _allParcels.Add(parcel);
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Eroare la procesarea poligonului: {ex.Message}");
+                }
+            }
+        }
+        catch
+        {
+            MessageBox.Show("Failed to fetch polygons");
+        }
+    }
+    
+    private async Task  InitializeUser()
+    {
+        try
+        {
+            // Folosiți HttpClient cu handler care ignoră erorile SSL (doar pentru mediu de dezvoltare!)
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            };
+
+            var client = new HttpClient(handler)
+            {
+                Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            };
+
+            var response = await client.GetAsync($"http://localhost:5035/api/auth/{_currentUsername}")
+                .ConfigureAwait(false); // Evită blocarea contextului UI
+
+            response.EnsureSuccessStatusCode(); // Aruncă excepție dacă răspunsul nu e succes
+
+            var userJson = await response.Content.ReadAsStringAsync();
+
+            // Use case-insensitive deserialization for the user DTO
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var userDto = JsonSerializer.Deserialize<MapViewModel.UserDto>(userJson, options);
+            if (userDto == null || userDto.Id == Guid.Empty)
+            {
+                MessageBox.Show("Failed to fetch current user information.");
+                return;
+            }
+
+            _currentUserId = userDto.Id;
+            
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine(e.InnerException.Message);
+        }
     }
 
     private void SaveData()
@@ -174,14 +297,14 @@ public class ParcelViewModel : ViewModelBase
     {
         if (SelectedOption == "Option A")
         {
-            Label1 = "Label A1";
+            Label1 = "Denumire";
             Label2 = "Label A2";
             Label3 = "Label A3";
             Label4 = "Label A4";
         }
         else if (SelectedOption == "Option B")
         {
-            Label1 = "Label B1";
+            Label1 = "Denumire";
             Label2 = "Label B2";
             Label3 = "Label B3";
             Label4 = "Label B4";
@@ -219,14 +342,22 @@ public class ParcelViewModel : ViewModelBase
 
         SavedParcels = new ObservableCollection<ParcelData>(filteredParcels);
     }
+    
+}
 
+public class ParcelData
+{
+    public string Option { get; set; }
+    public string Field1 { get; set; }
+    public string Field2 { get; set; }
+    public string Field3 { get; set; }
+    public string Field4 { get; set; }
+}
 
-    public class ParcelData
-    {
-        public string Option { get; set; }
-        public string Field1 { get; set; }
-        public string Field2 { get; set; }
-        public string Field3 { get; set; }
-        public string Field4 { get; set; }
-    }
+public class ParcelNameAndID()
+{
+    [JsonPropertyName("Id")]
+    public Guid Id { get; set; }
+    [JsonPropertyName("Name")]
+    public string Name { get; set; }
 }

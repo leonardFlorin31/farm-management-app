@@ -160,8 +160,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field1" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA1" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB1" FontSize="12"/>
+                                <TextBlock Text="Denumire" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Denumire" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>

@@ -33,7 +33,7 @@ namespace licenta.ViewModel
 
         // Fields for server interaction
         private readonly HttpClient _httpClient = new HttpClient();
-        private string _apiBaseUrl = "https://localhost:7088/api"; // Replace with your API URL
+        private string _apiBaseUrl = "https://localhost:7088/api"; 
         private Guid _currentUserId; // Will be set after login
         private string _currentUsername = LoginViewModel.UsernameForUse.Username;
         private List<string> _polygonNames = new List<string> { };
