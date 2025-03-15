@@ -20,9 +20,12 @@ namespace licenta.ViewModel
 {
     public class MapViewModel : ViewModelBase
     {
+        private static MapViewModel _instance;
+        public static MapViewModel Instance => _instance ??= new MapViewModel();
+        
         private PointLatLng _mapCenter;
         private int _zoomLevel = 13; // Initial zoom level
-        private GMapProvider _mapProvider = GoogleMapProvider.Instance;
+        private GMapProvider _mapProvider = GoogleSatelliteMapProvider.Instance;
 
         // List to store marker coordinates
         private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
@@ -39,6 +42,8 @@ namespace licenta.ViewModel
         private List<string> _polygonNames = new List<string> { };
         
         public GMapControl MapControl { get; set; }
+        
+        public event Action? PolygonsUpdated;
 
         // Bindable properties
         public GMapProvider MapProvider
@@ -130,7 +135,7 @@ namespace licenta.ViewModel
 
             MapControl = new GMapControl
             {
-                MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance,
+                MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
                 Position = new PointLatLng(44.4268, 26.1025), // București
                 MinZoom = 2,
                 MaxZoom = 18,
@@ -443,6 +448,12 @@ namespace licenta.ViewModel
                 }
 
                 AddPolygonToMap(createdPolygon);
+                
+                
+                //Console.WriteLine($"Before invoking PolygonsUpdated, it is {(PolygonsUpdated == null ? "null" : "not null")}");
+                PolygonsUpdated?.Invoke(); 
+                //Console.WriteLine("PolygonsUpdated was invoked.");
+                
 
                 ClearMarkers();
                 
@@ -461,10 +472,12 @@ namespace licenta.ViewModel
             {
                 var pName = PolygonName;
                 var client = new HttpClient();
+                
                 var response = await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
 
                 if (response.IsSuccessStatusCode)
                 {
+                    PolygonsUpdated?.Invoke();
                     RemovePolygonFromMap(pName);
                 }
                 else

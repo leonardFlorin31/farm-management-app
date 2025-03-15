@@ -86,13 +86,24 @@ public class MainViewModel : ViewModelBase
     private void ExecuteShowParcelViewCommand(object obj)
     {
         Console.WriteLine("Executing ShowParcelViewCommand");
-        if (!_viewModelCache.TryGetValue(typeof(ParcelViewModel), out var viewModel))
+
+        // Obține instanța de MapViewModel din cache sau creează una nouă
+        if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
+        {
+            Console.WriteLine("Creating new MapViewModel");
+            mapViewModel = new MapViewModel();
+            _viewModelCache[typeof(MapViewModel)] = mapViewModel;
+        }
+
+        // Verifică dacă ParcelViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
+        if (!_viewModelCache.TryGetValue(typeof(ParcelViewModel), out var parcelViewModel))
         {
             Console.WriteLine("Creating new ParcelViewModel");
-            viewModel = new ParcelViewModel();
-            _viewModelCache[typeof(ParcelViewModel)] = viewModel;
+            parcelViewModel = new ParcelViewModel((MapViewModel)mapViewModel);
+            _viewModelCache[typeof(ParcelViewModel)] = parcelViewModel;
         }
-        CurrentChildView = viewModel;
+
+        CurrentChildView = parcelViewModel;
         Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
         Caption = "Parcele";
         Icon = IconChar.LocationCrosshairs;

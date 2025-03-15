@@ -33,6 +33,8 @@ public class ParcelViewModel : ViewModelBase
     public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Option A", "Option B" };
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
+    
+    private readonly MapViewModel _mapViewModel;
 
     public string SelectedOption
     {
@@ -156,14 +158,27 @@ public class ParcelViewModel : ViewModelBase
     }
 
     public ICommand SaveCommand { get; }
-
-    public ParcelViewModel()
+    
+    public ParcelViewModel(MapViewModel mapViewModel)
     {
+        _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
+        
         SelectedOption = Options.First(); // Selectează automat prima opțiune
         SaveCommand = new RelayCommand(SaveData);
-
+        
         InitializeUserAndData();
+        
+        _mapViewModel.PolygonsUpdated += RefreshParcels;
     }
+    
+    private void RefreshParcels()
+    {
+        _allParcels.Clear();
+        _savedParcels.Clear();
+        GetParcelNamesAndIDs();
+        Console.WriteLine("refresh parcels");
+    }
+    
     private async void InitializeUserAndData()
     {
         await InitializeUser(); // Așteptăm finalizarea inițializării utilizatorului
@@ -182,15 +197,15 @@ public class ParcelViewModel : ViewModelBase
         //https://localhost:7088/api/Polygons/names?userId=4cff5da4-c2e5-4125-9a63-997e7d040565
         try
         {
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
-            };
+            // var handler = new HttpClientHandler
+            // {
+            //     ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            // };
 
-            var client = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
-            };
+            var client = new HttpClient();//handler)
+            // {
+            //     Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            // };
             // Fetch polygons for the current user
             Console.WriteLine(_currentUserId);
             var response = await client
@@ -243,15 +258,15 @@ public class ParcelViewModel : ViewModelBase
         try
         {
             // Folosiți HttpClient cu handler care ignoră erorile SSL (doar pentru mediu de dezvoltare!)
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
-            };
+            // var handler = new HttpClientHandler
+            // {
+            //     ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            // };
 
-            var client = new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
-            };
+            var client = new HttpClient();//handler)
+            // {
+            //     Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            // };
 
             var response = await client.GetAsync($"http://localhost:5035/api/auth/{_currentUsername}")
                 .ConfigureAwait(false); // Evită blocarea contextului UI
