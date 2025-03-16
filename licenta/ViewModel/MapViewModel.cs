@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -26,6 +27,13 @@ namespace licenta.ViewModel
         private PointLatLng _mapCenter;
         private int _zoomLevel = 13; // Initial zoom level
         private GMapProvider _mapProvider = GoogleSatelliteMapProvider.Instance;
+        public int _mapTypeCounter = 0;
+        private ObservableCollection<CenterPointsAndName> _centerPoints = new ObservableCollection<CenterPointsAndName>();
+        private CenterPointsAndName _selectedCenterPoint;
+        public ObservableCollection<string> CenterPointNames { get; } = new ObservableCollection<string>
+        {
+            
+        };
 
         // List to store marker coordinates
         private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
@@ -46,6 +54,7 @@ namespace licenta.ViewModel
         public event Action? PolygonsUpdated;
 
         // Bindable properties
+        
         public GMapProvider MapProvider
         {
             get => _mapProvider;
@@ -64,6 +73,48 @@ namespace licenta.ViewModel
             get => _polygonCentroid;
             set => Set(ref _polygonCentroid, value);
         }
+        
+        public ObservableCollection<CenterPointsAndName> CenterPoints
+        {
+            get { return _centerPoints; }
+            set
+            {
+                _centerPoints = value;
+                OnPropertyChanged(nameof(CenterPoints));
+            }
+        }
+        
+        public CenterPointsAndName SelectedCenterPoint
+        {
+            get { return _selectedCenterPoint; }
+            set
+            {
+                _selectedCenterPoint = value;
+                OnPropertyChanged(nameof(SelectedCenterPoint));
+
+                // Aici poți adăuga logica pentru selecție
+                // if (value != null)
+                // {
+                //     Console.WriteLine($"Ai selectat: {value.Name}");
+                // }
+                
+            }
+        }
+        
+        private string _selectedCenterPointName;
+        public string SelectedCenterPointName
+        {
+            get => _selectedCenterPointName;
+            set
+            {
+                if (_selectedCenterPointName != value)
+                {
+                    _selectedCenterPointName = value;
+                    OnPropertyChanged(nameof(SelectedCenterPointName));
+                }
+            }
+        }
+
         
         private string _PolygonName;
 
@@ -111,6 +162,10 @@ namespace licenta.ViewModel
         public ICommand DeleteLastMarkerCommand { get; }
         
         public ICommand DeletePolygonCommand { get; }
+        
+        public ICommand ChangeMapTypeCommand { get; }
+        
+        public ICommand SelectionChangedCommand { get; }
 
         public MapViewModel()
         {
@@ -133,6 +188,10 @@ namespace licenta.ViewModel
 
             DeletePolygonCommand = new RelayCommand(DeletePolygon);
 
+            ChangeMapTypeCommand = new RelayCommand(ChangeMapType);
+
+            SelectionChangedCommand = new RelayCommand(SelectionChanged);
+
             MapControl = new GMapControl
             {
                 MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
@@ -153,6 +212,44 @@ namespace licenta.ViewModel
 
             // Handle right-click events
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
+        }
+
+        private void SelectionChanged()
+        {
+            if (string.IsNullOrEmpty(SelectedCenterPointName))
+            {
+                MessageBox.Show("Niciun element selectat sau elementul este null.");
+                return;
+            }
+            MessageBox.Show($"Ai selectat: {SelectedCenterPointName}");
+
+            foreach (var item in CenterPoints)
+            {
+                if (item.Name == SelectedCenterPointName)
+                {
+                        
+                    MapControl.Position = item.Points;
+                    Console.WriteLine(item.Points.ToString());
+                }
+            };
+            //MapControl.Position = new PointLatLng();
+        }
+
+        private void ChangeMapType()
+        {
+            switch (_mapTypeCounter)
+            {
+                case 0:
+                    MapControl.MapProvider = GoogleMapProvider.Instance;
+                    _mapTypeCounter++;
+                    break;
+                
+                case 1:
+                    MapControl.MapProvider = GoogleSatelliteMapProvider.Instance;
+                    _mapTypeCounter--;
+                    break;
+            }
+                
         }
 
         private async void InitializeUserAndPolygons()
@@ -517,7 +614,13 @@ namespace licenta.ViewModel
 
         private void AddTextToPolygon(GMapPolygon polygon, string text)
         {
-            PointLatLng centroid = CalculateCentroid(polygon.Points);
+            PointLatLng centroid = CalculateCentroid(polygon.Points, text);
+            
+            CenterPointsAndName _centroidPointsAndName = new CenterPointsAndName();
+             _centroidPointsAndName.Points = centroid;
+             _centroidPointsAndName.Name = text;
+             _centerPoints.Add(_centroidPointsAndName);
+             CenterPointNames.Add(text);
 
             TextBlock textBlock = new TextBlock
             {
@@ -611,7 +714,7 @@ namespace licenta.ViewModel
             Console.WriteLine($"Clicked at: {point.Lat}, {point.Lng}");
         }
 
-        private PointLatLng CalculateCentroid(List<PointLatLng> points)
+        private PointLatLng CalculateCentroid(List<PointLatLng> points, string text)
         {
             double latitudeSum = 0;
             double longitudeSum = 0;
@@ -678,5 +781,12 @@ namespace licenta.ViewModel
                 Console.WriteLine($"ZoomOut: ZoomLevel = {ZoomLevel}");
             }
         }
+    }
+
+    public class CenterPointsAndName
+    {
+        public PointLatLng Points { get; set; }
+        public string Name { get; set; }
+        
     }
 }
