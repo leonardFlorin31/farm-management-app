@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace licenta.ViewModel;
 
-public class ParcelViewModel : ViewModelBase
+public class ParcelViewModel : ViewModelBase, IDisposable
 {
     public Guid _currentUserId; // Will be set after login
     public string _currentUsername = LoginViewModel.UsernameForUse.Username;
@@ -35,6 +35,11 @@ public class ParcelViewModel : ViewModelBase
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
     
     private readonly MapViewModel _mapViewModel;
+    
+    public void Dispose()
+    {
+        _mapViewModel.PolygonsUpdated -= RefreshParcels;
+    }
 
     public string SelectedOption
     {

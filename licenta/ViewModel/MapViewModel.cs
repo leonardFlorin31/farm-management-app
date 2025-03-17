@@ -218,10 +218,10 @@ namespace licenta.ViewModel
         {
             if (string.IsNullOrEmpty(SelectedCenterPointName))
             {
-                MessageBox.Show("Niciun element selectat sau elementul este null.");
+                //MessageBox.Show("Niciun element selectat sau elementul este null."); // astea ruleaza pe thread secundar si fac ca aplicatia sa dea crash
                 return;
             }
-            MessageBox.Show($"Ai selectat: {SelectedCenterPointName}");
+           // MessageBox.Show($"Ai selectat: {SelectedCenterPointName}");
 
             foreach (var item in CenterPoints)
             {
