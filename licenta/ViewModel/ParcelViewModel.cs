@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace licenta.ViewModel;
 
@@ -219,7 +221,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 
             if (!response.IsSuccessStatusCode)
             {
-                MessageBox.Show($"Failed to fetch polygons. Status code: {response.StatusCode}");
+                Console.WriteLine($"Failed to fetch polygons. Status code: {response.StatusCode}");
                 return;
             }
 
@@ -240,6 +242,9 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                         Field2 = polygon.Id != Guid.Empty ? polygon.Id.ToString() : "ID invalid"
                     };
 
+                    DataTest(parcel.Field2);
+                    
+
                     App.Current.Dispatcher.Invoke((Action)delegate()
                     {
                         _savedParcels.Add(parcel);
@@ -255,6 +260,39 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         catch
         {
             MessageBox.Show("Failed to fetch polygons");
+        }
+    }
+
+    private async Task DataTest(string parcelId)
+    {
+        //https://localhost:7088/api/ParcelData/polygon/302836ff-eac0-4efa-a0fe-03124b578fb2
+                    
+        HttpClient client = new HttpClient();
+                    
+        var response  = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{parcelId}").ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+        }
+                    
+        var json = await response.Content.ReadAsStringAsync();
+        
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
+        };
+        var GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
+
+        if (GrainParcelDataList != null && GrainParcelDataList.Count > 0)
+        {
+            var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
+            Console.WriteLine(firstParcel.FertilizerUsed.ToString());
+        }
+        else
+        {
+            Console.WriteLine("No data found.");
         }
     }
     
@@ -380,4 +418,85 @@ public class ParcelNameAndID()
     public Guid Id { get; set; }
     [JsonPropertyName("Name")]
     public string Name { get; set; }
+}
+
+public class GrainParcelDataDto
+{
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("polygonId")]
+    public Guid PolygonId { get; set; }
+
+    [JsonPropertyName("cropType")]
+    public string CropType { get; set; }
+
+    [JsonPropertyName("parcelArea")]
+    public double ParcelArea { get; set; }
+
+    [JsonPropertyName("irrigationType")]
+    public string IrrigationType { get; set; }
+
+    [JsonPropertyName("fertilizerUsed")]
+    public double FertilizerUsed { get; set; }
+
+    [JsonPropertyName("pesticideUsed")]
+    public double PesticideUsed { get; set; }
+
+    [JsonPropertyName("yield")]
+    public double Yield { get; set; }
+
+    [JsonPropertyName("soilType")]
+    public string SoilType { get; set; }
+
+    [JsonPropertyName("season")]
+    public string Season { get; set; }
+
+    [JsonPropertyName("waterUsage")]
+    public double WaterUsage { get; set; }
+
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
+    
+    [JsonPropertyName("polygon")]
+    public Polygon Polygon { get; set; }
+}
+
+public class Polygon
+{
+    [JsonPropertyName("polygonId")]
+    public Guid PolygonId { get; set; }
+
+    [JsonPropertyName("polygonName")]
+    public string PolygonName { get; set; }
+
+    [JsonPropertyName("createdByUserId")]
+    public Guid CreatedByUserId { get; set; }
+
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
+
+    [JsonPropertyName("points")]
+    public PolygonPoint[] Points { get; set; }
+}
+
+public class PolygonPoint
+{
+    [JsonPropertyName("pointId")]
+    public Guid PointId { get; set; }
+
+    [JsonPropertyName("polygonId")]
+    public Guid PolygonId { get; set; }
+
+    [JsonPropertyName("latitude")]
+    public double Latitude { get; set; }
+
+    [JsonPropertyName("longitude")]
+    public double Longitude { get; set; }
+
+    [JsonPropertyName("order")]
+    public int Order { get; set; }
+
+    [JsonPropertyName("polygon")]
+    public string Polygon { get; set; }
 }

@@ -25,6 +25,7 @@
       <PackageReference Include="GMap.NET.WinPresentation" Version="2.1.7" />
       <PackageReference Include="GMap.Net.WPF" Version="1.0.0.1" />
       <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
       <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
       <PackageReference Include="System.Drawing.Common" Version="9.0.2" />
