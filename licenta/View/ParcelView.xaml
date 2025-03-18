@@ -81,9 +81,16 @@
                               Style="{StaticResource {x:Type ComboBox}}"/>
                 </StackPanel>
 
+                <!-- <StackPanel Margin="0, 5, 0, 5"> -->
+                <!--     <TextBlock Text="{Binding Label1}" /> -->
+                <!--     <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" /> -->
+                <!-- </StackPanel> -->
                 <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label1}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="Numele Parcelei"/>
+                    <ComboBox Width="100"
+                              ItemsSource="{Binding Parcels}"
+                              SelectedItem="{Binding SelectedParcel, Mode=TwoWay}"
+                              Style="{StaticResource {x:Type ComboBox}}"/>
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label2}" />

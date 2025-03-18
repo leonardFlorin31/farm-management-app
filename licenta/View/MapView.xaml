@@ -97,8 +97,8 @@
                 </TextBlock.Style>
             </TextBlock>
             
-            <StackPanel Margin="5,50,0,5">
-                <TextBlock Text="Selectează un parc:"/>
+            <StackPanel Margin="5,70,0,5">
+                <!-- <TextBlock Text="Selectează un parc:"/> -->
                 <ComboBox x:Name="comboBox"
                           Width="150"
                           ItemsSource="{Binding CenterPointNames}"

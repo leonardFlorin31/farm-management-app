@@ -14,7 +14,8 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 {
     public Guid _currentUserId; // Will be set after login
     public string _currentUsername = LoginViewModel.UsernameForUse.Username;
-    
+
+    #region Fields / Labels / SearchOptions
     private string _field1;
     private string _field2;
     private string _field3;
@@ -46,8 +47,12 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     private string _searchField7;
     private string _searchField8;
     private string _searchField9;
+
+    private string _selectedParcel;
+    #endregion
     
     public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Animale", "Grane" };
+    private ObservableCollection<string> _parcels = new ObservableCollection<string>();
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
     
@@ -58,6 +63,16 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         _mapViewModel.PolygonsUpdated -= RefreshParcels;
     }
 
+    public string SelectedParcel
+    {
+        get => _selectedParcel;
+        set
+        {
+            _selectedParcel = value;
+            OnPropertyChanged(nameof(SelectedParcel));
+        }
+    }
+
     public string SelectedOption
     {
         get => _selectedOption;
@@ -66,6 +81,16 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             _selectedOption = value;
             UpdateLabels();
             OnPropertyChanged(nameof(SelectedOption));
+        }
+    }
+
+    public ObservableCollection<string> Parcels
+    {
+        get => _parcels;
+        set
+        {
+            _parcels = value;
+            OnPropertyChanged(nameof(Parcels));
         }
     }
 
@@ -364,6 +389,18 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             // Use case-insensitive options to avoid casing issues
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
+            
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Parcels.Clear();
+                if (polygons != null)
+                {
+                    foreach (var polygon in polygons)
+                    {
+                        Parcels.Add(polygon.Name);
+                    }
+                }
+            });
 
             foreach (var polygon in polygons)
             {
@@ -483,7 +520,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         var newParcel = new ParcelData
         {
             Option = SelectedOption,
-            Field1 = Field1,
+            Field1 = SelectedParcel,
             Field2 = Field2,
             Field3 = Field3,
             Field4 = Field4,
@@ -493,6 +530,9 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             Field8 = Field8,
             Field9 = Field9
         };
+        
+        
+        
 
         _allParcels.Add(newParcel);
         SavedParcels.Add(newParcel);
