@@ -41,6 +41,11 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     private string _searchField2;
     private string _searchField3;
     private string _searchField4;
+    private string _searchField5;
+    private string _searchField6;
+    private string _searchField7;
+    private string _searchField8;
+    private string _searchField9;
     
     public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Animale", "Grane" };
     private List<ParcelData> _allParcels = new List<ParcelData>();
@@ -71,6 +76,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             OnPropertyChanged(nameof(SavedParcels)); }
     }
 
+    #region SearchField
     public string SearchOption
     {
         get => _searchOption;
@@ -125,7 +131,63 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             FilterParcels();
         }
     }
+    
+    public string SearchField5
+    {
+        get => _searchField5;
+        set
+        {
+            _searchField5 = value;
+            OnPropertyChanged(nameof(SearchField5));
+            FilterParcels();
+        }
+    }
 
+    public string SearchField6
+    {
+        get => _searchField6;
+        set
+        {
+            _searchField6 = value;
+            OnPropertyChanged(nameof(SearchField6));
+            FilterParcels();
+        }
+    }
+
+    public string SearchField7
+    {
+        get => _searchField7;
+        set
+        {
+            _searchField7 = value;
+            OnPropertyChanged(nameof(SearchField7));
+            FilterParcels();
+        }
+    }
+
+    public string SearchField8
+    {
+        get => _searchField8;
+        set
+        {
+            _searchField8 = value;
+            OnPropertyChanged(nameof(SearchField8));
+            FilterParcels();
+        }
+    }
+    public string SearchField9
+    {
+        get => _searchField9;
+        set
+        {
+            _searchField9 = value;
+            OnPropertyChanged(nameof(SearchField9));
+            FilterParcels();
+        }
+    }
+    #endregion
+    
+    #region Label
     public string Label1
     {
         get => _label1;
@@ -178,7 +240,9 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         get => _label9;
         set { _label9 = value; OnPropertyChanged(nameof(Label9)); }
     }
-
+    #endregion
+    
+    #region Field
     public string Field1
     {
         get => _field1;
@@ -232,7 +296,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         get => _field9;
         set { _field9 = value; OnPropertyChanged(nameof(Field4)); }
     }
-
+#endregion
     public ICommand SaveCommand { get; }
     
     public ParcelViewModel(MapViewModel mapViewModel)
@@ -305,7 +369,6 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             {
                 try
                 {
-                    
                     ParcelData parcel = await DataTest(polygon.Name, polygon.Id.ToString());
 
                     App.Current.Dispatcher.Invoke((Action)delegate()
@@ -490,6 +553,31 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         if (!string.IsNullOrWhiteSpace(SearchField4))
         {
             filteredParcels = filteredParcels.Where(p => p.Field4.Contains(SearchField4, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(SearchField5))
+        {
+            filteredParcels = filteredParcels.Where(p => p.Field5.Contains(SearchField5, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchField6))
+        {
+            filteredParcels = filteredParcels.Where(p => p.Field6.Contains(SearchField6, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchField7))
+        {
+            filteredParcels = filteredParcels.Where(p => p.Field7.Contains(SearchField7, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchField8))
+        {
+            filteredParcels = filteredParcels.Where(p => p.Field8.Contains(SearchField8, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        if (!string.IsNullOrWhiteSpace(SearchField9))
+        {
+            filteredParcels = filteredParcels.Where(p => p.Field9.Contains(SearchField9, StringComparison.OrdinalIgnoreCase));
         }
 
         SavedParcels = new ObservableCollection<ParcelData>(filteredParcels);

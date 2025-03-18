@@ -131,29 +131,92 @@
                     Command="{Binding SaveCommand}" />
         </DockPanel>
 
-        <!-- Search Box -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10,5,10,5">
-            <StackPanel>
-                <TextBlock Text="Optiuni" />
-                <TextBox Width="120" Margin="0, 5, 0 ,0"  Text="{Binding SearchOption, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="{Binding Label1}" Margin="35, 0, 0 ,0" />
-                <TextBox Width="120" Margin="35, 5, 0 ,0"  Text="{Binding SearchField1, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="{Binding Label2}" Margin="30, 0, 0 ,0" />
-                <TextBox Width="120" Margin="30, 5, 0 ,0"  Text="{Binding SearchField2, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="{Binding Label3}" Margin="28, 0, 0 ,0" />
-                <TextBox Width="120" Margin="28, 5, 0 ,0"  Text="{Binding SearchField3, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-            <StackPanel>
-                <TextBlock Text="{Binding Label4}" Margin="32, 0, 0 ,0"/>
-                <TextBox Width="120" Margin="32, 5, 0 ,0"  Text="{Binding SearchField4, UpdateSourceTrigger=PropertyChanged}"/>
-            </StackPanel>
-        </StackPanel>
+        <!-- Rândul pentru Search Box -->
+<Grid Grid.Row="1" Margin="10,5,10,10">
+    <Grid.ColumnDefinitions>
+        <!-- 10 coloane, fiecare de 120 -->
+        <ColumnDefinition Width="123"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+        <ColumnDefinition Width="120"/>
+    </Grid.ColumnDefinitions>
+
+    <!-- Coloana 0: Optiuni -->
+    <StackPanel Grid.Column="0" Margin="2,0,0,0">
+        <TextBlock Text="Optiuni" />
+        <TextBox Width="120"
+                 Text="{Binding SearchOption, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 1: Field1 -->
+    <StackPanel Grid.Column="1" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label1}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField1, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 2: Field2 -->
+    <StackPanel Grid.Column="2" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label2}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField2, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 3: Field3 -->
+    <StackPanel Grid.Column="3" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label3}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField3, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 4: Field4 -->
+    <StackPanel Grid.Column="4" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label4}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField4, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 5: Field5 -->
+    <StackPanel Grid.Column="5" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label5}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField5, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 6: Field6 -->
+    <StackPanel Grid.Column="6" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label6}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField6, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 7: Field7 -->
+    <StackPanel Grid.Column="7" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label7}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField7, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 8: Field8 -->
+    <StackPanel Grid.Column="8" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label8}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField8, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+
+    <!-- Coloana 9: Field9 -->
+    <StackPanel Grid.Column="9" Margin="0,0,0,0">
+        <TextBlock Text="{Binding Label9}" />
+        <TextBox Width="120"
+                 Text="{Binding SearchField9, UpdateSourceTrigger=PropertyChanged}" />
+    </StackPanel>
+</Grid>
 
         <!-- List of Parcels -->
         <ListView Grid.Row="2"
@@ -161,7 +224,7 @@
                   Margin="10,0,10,10">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Optiuni" FontWeight="Bold"/>
@@ -176,7 +239,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field1" FontWeight="Bold"/>
@@ -191,7 +254,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field2" FontWeight="Bold"/>
@@ -206,7 +269,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field3" FontWeight="Bold"/>
@@ -221,7 +284,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field4" FontWeight="Bold"/>
@@ -236,7 +299,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field5" FontWeight="Bold"/>
@@ -251,7 +314,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field6" FontWeight="Bold"/>
@@ -266,7 +329,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field7" FontWeight="Bold"/>
@@ -281,7 +344,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field8" FontWeight="Bold"/>
@@ -296,7 +359,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
-                    <GridViewColumn Width="150">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field9" FontWeight="Bold"/>
