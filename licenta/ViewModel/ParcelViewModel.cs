@@ -55,6 +55,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     private ObservableCollection<string> _parcels = new ObservableCollection<string>();
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
+    private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
     
     private readonly MapViewModel _mapViewModel;
     
@@ -406,6 +407,11 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             {
                 try
                 {
+                    ParcelNameAndID parcelData = new ParcelNameAndID();
+                    parcelData.Name = polygon.Name;
+                    parcelData.Id = polygon.Id;
+                    _parcelNameAndIDs.Add(parcelData);
+                    
                     ParcelData parcel = await DataTest(polygon.Name, polygon.Id.ToString());
 
                     App.Current.Dispatcher.Invoke((Action)delegate()
@@ -515,7 +521,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private void SaveData()
+    private async void SaveData()
     {
         var newParcel = new ParcelData
         {
@@ -532,7 +538,78 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         };
         
         
-        
+        // Verificăm că avem un polygon selectat și încercăm să-l convertim într-un GUID
+    if (string.IsNullOrWhiteSpace(SelectedParcel))
+    {
+        MessageBox.Show("Selectați un poligon.");
+        return;
+    }
+    var _parcelId = new Guid();
+    
+    foreach (var parcel in _parcelNameAndIDs)
+    {
+        if(SelectedParcel == parcel.Name)
+            _parcelId = parcel.Id;
+    }
+    
+    
+    // Construim obiectul de request cu valorile din UI.
+    // Aici se presupune următoarea mapare (ajustează după necesități):
+    // Field4 = CropType, Field2 = ParcelArea, Field5 = IrrigationType,
+    // Field7 = FertilizerUsed, Field8 = PesticideUsed, Field6 = Yield,
+    // Field1 sau alt câmp poate fi folosit pentru SoilType, iar Field3 pentru Season,
+    // Field9 = WaterUsage.
+
+    if (_parcelId == Guid.Empty)
+    {
+        MessageBox.Show("n a mers sefule");
+    }
+    var requestObj = new CreateGrainParcelDataRequest
+    {
+        Id = Guid.NewGuid(),
+        PolygonId = _parcelId,
+        CropType = Field3,
+        // Notă: Folosim conversia directă; dacă Field3 este gol sau invalid, se va arunca o excepție
+        ParcelArea = double.Parse(Field4),
+        IrrigationType = Field6,
+        FertilizerUsed = double.Parse(Field7),
+        PesticideUsed = double.Parse(Field8),
+        Yield = double.Parse(Field7),
+        SoilType = Field2,
+        // Atenție: Ai folosit Field3 pentru ParcelArea și pentru Season; verifică dacă acesta este intenția
+        Season = Field5,
+        WaterUsage = double.Parse(Field9),
+        CreatedDate = DateTime.Now
+    };
+    
+
+    try
+    {
+        using (HttpClient client = new HttpClient())
+        {
+            // Serializăm obiectul request în JSON.
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            string json = JsonSerializer.Serialize(requestObj, options);
+
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+            // Trimitem request-ul POST către API-ul nostru
+            var response = await client.PostAsync("https://localhost:7088/api/ParcelData", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                MessageBox.Show("Datele au fost salvate cu succes.");
+            }
+            else
+            {
+                MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show($"A apărut o eroare: {ex.Message}");
+    }
 
         _allParcels.Add(newParcel);
         SavedParcels.Add(newParcel);
@@ -686,6 +763,35 @@ public class GrainParcelDataDto
     public DateTime CreatedDate { get; set; }
     
     [JsonPropertyName("polygon")]
+    public Polygon Polygon { get; set; }
+}
+
+public class CreateGrainParcelDataRequest
+{
+    public Guid Id { get; set; }
+    
+    public Guid PolygonId { get; set; }
+    
+    public string CropType { get; set; }
+    
+    public double ParcelArea { get; set; }
+    
+    public string IrrigationType { get; set; }
+    
+    public double FertilizerUsed { get; set; }
+    
+    public double PesticideUsed { get; set; }
+    
+    public double Yield { get; set; }
+    
+    public string SoilType { get; set; }
+    
+    public string Season { get; set; }
+    
+    public double WaterUsage { get; set; }
+    
+    public DateTime CreatedDate { get; set; }
+    
     public Polygon Polygon { get; set; }
 }
 
