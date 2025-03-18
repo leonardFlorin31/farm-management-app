@@ -74,7 +74,7 @@
         <DockPanel Grid.Row="0" Margin="10">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
                 <StackPanel Margin="5, 5, 0, 5">
-                    <TextBlock Text="Select Option"/>
+                    <TextBlock Text="Tipul parcelei"/>
                     <ComboBox Width="100"
                               ItemsSource="{Binding Options}"
                               SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
@@ -96,6 +96,26 @@
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label4}" />
                     <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label5}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field5, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label6}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field6, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label7}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field7, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label8}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field8, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <StackPanel Margin="0, 5, 0, 5">
+                    <TextBlock Text="{Binding Label9}" />
+                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field9, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </StackPanel>
 
@@ -212,6 +232,81 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Field4}" Width="100"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Width="150">
+                        <GridViewColumn.Header>
+                            <StackPanel>
+                                <TextBlock Text="Field5" FontWeight="Bold"/>
+                                <TextBlock Text="LabelA5" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="LabelB5" FontSize="12"/>
+                            </StackPanel>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Field5}" Width="100"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Width="150">
+                        <GridViewColumn.Header>
+                            <StackPanel>
+                                <TextBlock Text="Field6" FontWeight="Bold"/>
+                                <TextBlock Text="LabelA6" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="LabelB6" FontSize="12"/>
+                            </StackPanel>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Field6}" Width="100"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Width="150">
+                        <GridViewColumn.Header>
+                            <StackPanel>
+                                <TextBlock Text="Field7" FontWeight="Bold"/>
+                                <TextBlock Text="LabelA7" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="LabelB7" FontSize="12"/>
+                            </StackPanel>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Field7}" Width="100"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Width="150">
+                        <GridViewColumn.Header>
+                            <StackPanel>
+                                <TextBlock Text="Field8" FontWeight="Bold"/>
+                                <TextBlock Text="LabelA8" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="LabelB8" FontSize="12"/>
+                            </StackPanel>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Field8}" Width="100"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
+                    <GridViewColumn Width="150">
+                        <GridViewColumn.Header>
+                            <StackPanel>
+                                <TextBlock Text="Field9" FontWeight="Bold"/>
+                                <TextBlock Text="LabelA9" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="LabelB9" FontSize="12"/>
+                            </StackPanel>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Field9}" Width="100"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

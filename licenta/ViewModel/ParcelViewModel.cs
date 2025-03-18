@@ -19,12 +19,22 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     private string _field2;
     private string _field3;
     private string _field4;
+    private string _field5;
+    private string _field6;
+    private string _field7;
+    private string _field8;
+    private string _field9;
     
     private string _selectedOption;
     private string _label1 = "Label A1";
     private string _label2 = "Label A2";
     private string _label3 = "Label A3";
     private string _label4 = "Label A4";
+    private string _label5 = "Label A5";
+    private string _label6 = "Label A6";
+    private string _label7 = "Label A7";
+    private string _label8 = "Label A8";
+    private string _label9 = "Label A9";
     
     private string _searchOption;
     private string _searchField1;
@@ -32,7 +42,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     private string _searchField3;
     private string _searchField4;
     
-    public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Option A", "Option B" };
+    public ObservableCollection<string> Options { get; } = new ObservableCollection<string> { "Animale", "Grane" };
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
     
@@ -139,6 +149,35 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         get => _label4;
         set { _label4 = value; OnPropertyChanged(nameof(Label4)); }
     }
+    
+    public string Label5
+    {
+        get => _label5;
+        set { _label5 = value; OnPropertyChanged(nameof(Label5)); }
+    }
+
+    public string Label6
+    {
+        get => _label6;
+        set { _label6 = value; OnPropertyChanged(nameof(Label6)); }
+    }
+
+    public string Label7
+    {
+        get => _label7;
+        set { _label7 = value; OnPropertyChanged(nameof(Label7)); }
+    }
+    
+    public string Label8
+    {
+        get => _label8;
+        set { _label8 = value; OnPropertyChanged(nameof(Label8)); }
+    }
+    public string Label9
+    {
+        get => _label9;
+        set { _label9 = value; OnPropertyChanged(nameof(Label9)); }
+    }
 
     public string Field1
     {
@@ -162,6 +201,36 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     {
         get => _field4;
         set { _field4 = value; OnPropertyChanged(nameof(Field4)); }
+    }
+    
+    public string Field5
+    {
+        get => _field5;
+        set { _field5 = value; OnPropertyChanged(nameof(Field1)); }
+    }
+
+    public string Field6
+    {
+        get => _field6;
+        set { _field6 = value; OnPropertyChanged(nameof(Field2)); }
+    }
+
+    public string Field7
+    {
+        get => _field7;
+        set { _field7 = value; OnPropertyChanged(nameof(Field3)); }
+    }
+
+    public string Field8
+    {
+        get => _field8;
+        set { _field8 = value; OnPropertyChanged(nameof(Field4)); }
+    }
+    
+    public string Field9
+    {
+        get => _field9;
+        set { _field9 = value; OnPropertyChanged(nameof(Field4)); }
     }
 
     public ICommand SaveCommand { get; }
@@ -236,14 +305,8 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             {
                 try
                 {
-                    ParcelData parcel = new ParcelData
-                    {
-                        Field1 = polygon.Name ?? "Nume indisponibil",
-                        Field2 = polygon.Id != Guid.Empty ? polygon.Id.ToString() : "ID invalid"
-                    };
-
-                    DataTest(parcel.Field2);
                     
+                    ParcelData parcel = await DataTest(polygon.Name, polygon.Id.ToString());
 
                     App.Current.Dispatcher.Invoke((Action)delegate()
                     {
@@ -263,10 +326,12 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         }
     }
 
-    private async Task DataTest(string parcelId)
+    private async Task<ParcelData> DataTest(string polygonName, string parcelId)
     {
         //https://localhost:7088/api/ParcelData/polygon/302836ff-eac0-4efa-a0fe-03124b578fb2
                     
+        ParcelData parcelData = new ParcelData();
+        
         HttpClient client = new HttpClient();
                     
         var response  = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{parcelId}").ConfigureAwait(false);
@@ -274,6 +339,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         if (!response.IsSuccessStatusCode)
         {
             Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+            
         }
                     
         var json = await response.Content.ReadAsStringAsync();
@@ -285,15 +351,28 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         };
         var GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
 
+        
         if (GrainParcelDataList != null && GrainParcelDataList.Count > 0)
         {
             var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
-            Console.WriteLine(firstParcel.FertilizerUsed.ToString());
+            parcelData.Option = "Grane";
+            parcelData.Field1 = polygonName;
+            parcelData.Field2 = firstParcel.ParcelArea.ToString();
+            parcelData.Field3 = firstParcel.Season;
+            parcelData.Field4 = firstParcel.CropType;
+            parcelData.Field5 = firstParcel.IrrigationType;
+            parcelData.Field6 = firstParcel.Yield.ToString();
+            parcelData.Field7 = firstParcel.FertilizerUsed.ToString();
+            parcelData.Field8 = firstParcel.PesticideUsed.ToString();
+            parcelData.Field9 = firstParcel.WaterUsage.ToString();
+
         }
         else
         {
             Console.WriteLine("No data found.");
         }
+
+        return parcelData;
     }
     
     private async Task  InitializeUser()
@@ -344,7 +423,12 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             Field1 = Field1,
             Field2 = Field2,
             Field3 = Field3,
-            Field4 = Field4
+            Field4 = Field4,
+            Field5 = Field5,
+            Field6 = Field6,
+            Field7 = Field7,
+            Field8 = Field8,
+            Field9 = Field9
         };
 
         _allParcels.Add(newParcel);
@@ -353,19 +437,29 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     
     private void UpdateLabels()
     {
-        if (SelectedOption == "Option A")
+        if (SelectedOption == "Animale")
         {
             Label1 = "Denumire";
             Label2 = "Label A2";
             Label3 = "Label A3";
             Label4 = "Label A4";
+            Label5 = "Label A5";
+            Label6 = "Label A6";
+            Label7 = "Label A7";
+            Label8 = "Label A8";
+            Label9 = "Label A9";
         }
-        else if (SelectedOption == "Option B")
+        else if (SelectedOption == "Grane")
         {
             Label1 = "Denumire";
             Label2 = "Label B2";
             Label3 = "Label B3";
             Label4 = "Label B4";
+            Label5 = "Label B5";
+            Label6 = "Label B6";
+            Label7 = "Label B7";
+            Label8 = "Label B8";
+            Label9 = "Label B9";
         }
     }
     
@@ -410,6 +504,11 @@ public class ParcelData
     public string Field2 { get; set; }
     public string Field3 { get; set; }
     public string Field4 { get; set; }
+    public string Field5 { get; set; }
+    public string Field6 { get; set; }
+    public string Field7 { get; set; }
+    public string Field8 { get; set; }
+    public string Field9 { get; set; }
 }
 
 public class ParcelNameAndID()
