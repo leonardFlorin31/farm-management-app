@@ -540,8 +540,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             Field8 = Field8,
             Field9 = Field9
         };
-        
-        
+
         // Verificăm că avem un polygon selectat și încercăm să-l convertim într-un GUID
     if (string.IsNullOrWhiteSpace(SelectedParcel))
     {
@@ -555,14 +554,6 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         if(SelectedParcel == parcel.Name)
             _parcelId = parcel.Id;
     }
-    
-    
-    // Construim obiectul de request cu valorile din UI.
-    // Aici se presupune următoarea mapare (ajustează după necesități):
-    // Field4 = CropType, Field2 = ParcelArea, Field5 = IrrigationType,
-    // Field7 = FertilizerUsed, Field8 = PesticideUsed, Field6 = Yield,
-    // Field1 sau alt câmp poate fi folosit pentru SoilType, iar Field3 pentru Season,
-    // Field9 = WaterUsage.
 
     if (_parcelId == Guid.Empty)
     {
@@ -572,16 +563,15 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     {
         Id = Guid.NewGuid(),
         PolygonId = _parcelId,
-        CropType = Field3,
+        CropType = Field2,
         // Notă: Folosim conversia directă; dacă Field3 este gol sau invalid, se va arunca o excepție
-        ParcelArea = double.Parse(Field4),
-        IrrigationType = Field6,
-        FertilizerUsed = double.Parse(Field7),
-        PesticideUsed = double.Parse(Field8),
+        ParcelArea = double.Parse(Field3),
+        IrrigationType = Field4,
+        FertilizerUsed = double.Parse(Field5),
+        PesticideUsed = double.Parse(Field6),
         Yield = double.Parse(Field7),
-        SoilType = Field2,
-        // Atenție: Am folosit field urile ca din cur nu mai stiu care e care
-        Season = Field5,
+        SoilType = Field8,
+        Season = Field8,
         WaterUsage = double.Parse(Field9),
         CreatedDate = DateTime.Now
     };

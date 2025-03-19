@@ -168,5 +168,95 @@
                 Foreground="White" 
                 BorderBrush="Transparent" 
                 FontWeight="Bold" />
+        
+        <Border Background="White" 
+        BorderBrush="Black" 
+        BorderThickness="1" 
+        CornerRadius="5"
+        HorizontalAlignment="Right" 
+        VerticalAlignment="Top"
+        Margin="10,180,10,10"
+        Padding="10"
+        Width="250">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ID Parcelă -->
+        <TextBlock Text="ID Parcelă:" FontWeight="Bold"/>
+        <TextBlock Grid.Row="0" 
+                   Text="{Binding SelectedParcel.Field1}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Tip Cultură -->
+        <TextBlock Grid.Row="1" Text="Tip Cultură:" FontWeight="Bold"/>
+        <TextBlock Grid.Row="1" 
+                   Text="{Binding SelectedParcel.Field2}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Suprafață (ha) -->
+        <TextBlock Grid.Row="2" Text="Suprafață (ha):" FontWeight="Bold"/>
+        <TextBlock Grid.Row="2" 
+                   Text="{Binding SelectedParcel.Field3}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Tip Irigare -->
+        <TextBlock Grid.Row="3" Text="Tip Irigare:" FontWeight="Bold"/>
+        <TextBlock Grid.Row="3" 
+                   Text="{Binding SelectedParcel.Field4}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Îngrășământ (kg) -->
+        <TextBlock Grid.Row="4" Text="Îngrășământ (kg):" FontWeight="Bold"/>
+        <TextBlock Grid.Row="4" 
+                   Text="{Binding SelectedParcel.Field5}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Pesticide (L) -->
+        <TextBlock Grid.Row="5" Text="Pesticide (L):" FontWeight="Bold"/>
+        <TextBlock Grid.Row="5" 
+                   Text="{Binding SelectedParcel.Field6}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Producție (kg) -->
+        <TextBlock Grid.Row="6" Text="Producție (kg):" FontWeight="Bold"/>
+        <TextBlock Grid.Row="6" 
+                   Text="{Binding SelectedParcel.Field7}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Tip Sol -->
+        <TextBlock Grid.Row="7" Text="Tip Sol:" FontWeight="Bold"/>
+        <TextBlock Grid.Row="7" 
+                   Text="{Binding SelectedParcel.Field8}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+
+        <!-- Consum Apă (m³) -->
+        <TextBlock Grid.Row="8" Text="Consum Apă (m³):" FontWeight="Bold"/>
+        <TextBlock Grid.Row="8" 
+                   Text="{Binding SelectedParcel.Field9}" 
+                   Foreground="Black"
+                   Margin="0,20,0,0"/>
+    </Grid>
+</Border>
+
+
     </Grid>
 </UserControl>

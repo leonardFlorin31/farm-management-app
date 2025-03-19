@@ -30,6 +30,7 @@ namespace licenta.ViewModel
         public int _mapTypeCounter = 0;
         private ObservableCollection<CenterPointsAndName> _centerPoints = new ObservableCollection<CenterPointsAndName>();
         private CenterPointsAndName _selectedCenterPoint;
+        private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
         public ObservableCollection<string> CenterPointNames { get; } = new ObservableCollection<string>
         {
             
@@ -622,14 +623,24 @@ namespace licenta.ViewModel
              _centerPoints.Add(_centroidPointsAndName);
              CenterPointNames.Add(text);
 
-            TextBlock textBlock = new TextBlock
+            Button textBlock = new Button()
             {
-                Text = text,
+                Content = text,
                 Foreground = Brushes.Black,
                 FontSize = 12,
                 FontWeight = FontWeights.Bold,
                 Background = Brushes.Transparent,
-                Padding = new Thickness(2)
+                Padding = new Thickness(2),
+                BorderThickness = new Thickness(0)
+            };
+            
+            textBlock.Click += (sender, args) =>
+            {
+                if (sender is Button clickedButton && clickedButton.Content is string buttonText)
+                {
+                    
+                    InitiateDataForPolygon(buttonText);
+                }
             };
             
             // Setăm ZIndex-ul pentru a ne asigura că textul este afișat deasupra poligonului
@@ -649,9 +660,132 @@ namespace licenta.ViewModel
 
             UpdateTextScale(textBlock, scaleTransform, ZoomLevel);
         }
+        
+        private ParcelData _selectedParcel;
+        public ParcelData SelectedParcel
+        {
+            get => _selectedParcel;
+            set
+            {
+                _selectedParcel = value;
+                OnPropertyChanged(nameof(SelectedParcel));
+            }
+        }
 
+        private async void InitiateDataForPolygon(string polygonName)
+        {
+            Console.WriteLine($"Ai apăsat pe butonul: {polygonName}");
+            
+            await InitiatePolygonsNameAndId();
+            
+            Guid _id = new Guid();
+            foreach (var item in _parcelNameAndIDs)
+            {
+                if(item.Name == polygonName)
+                    _id = item.Id;
+                    
+            }
+            Console.WriteLine(_id);
+            
+            try {
+            ParcelData parcelData = new ParcelData();
+        
+            HttpClient client = new HttpClient();
+                    
+            var response  = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{_id}").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+            
+            }
+                    
+            var json = await response.Content.ReadAsStringAsync();
+        
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
+            };
+            var GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
+
+        
+            if (GrainParcelDataList != null && GrainParcelDataList.Count > 0)
+            {
+                var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
+                parcelData.Option = "Grane";
+                parcelData.Field1 = polygonName;
+                parcelData.Field2 = firstParcel.CropType;
+                parcelData.Field3 = firstParcel.ParcelArea.ToString();
+                parcelData.Field4 = firstParcel.IrrigationType;
+                parcelData.Field5 = firstParcel.FertilizerUsed.ToString();
+                parcelData.Field6 = firstParcel.PesticideUsed.ToString();
+                parcelData.Field7 = firstParcel.Yield.ToString();
+                parcelData.Field8 = firstParcel.SoilType;
+                parcelData.Field9 = firstParcel.WaterUsage.ToString();
+
+                SelectedParcel = parcelData;
+            }
+            else
+            {
+                Console.WriteLine("No data found.");
+            }
+            }
+            catch
+            {
+                Console.WriteLine("Failed to initiate data for a Polygon.");
+            }
+        }
+        
+        private async Task InitiatePolygonsNameAndId()
+        {
+            _parcelNameAndIDs.Clear();
+    
+            HttpClient client = new HttpClient();
+            Console.WriteLine($"Current user ID: {_currentUserId}");
+    
+            var response = await client.GetAsync($"https://localhost:7088/api/Polygons/names?userId={_currentUserId}");
+    
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to fetch polygons. Status code: {response.StatusCode}");
+                return;
+            }
+    
+            var polygonsJson = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Răspuns server: {polygonsJson}"); // Verifică ce primești
+    
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
+    
+            if (polygons == null || polygons.Count == 0)
+            {
+                Console.WriteLine("Nu s-au găsit poligoane pentru acest utilizator.");
+                return;
+            }
+    
+            foreach (var polygon in polygons)
+            {
+                try
+                {
+                    ParcelNameAndID parcelData = new ParcelNameAndID
+                    {
+                        Name = polygon.Name,
+                        Id = polygon.Id
+                    };
+                    _parcelNameAndIDs.Add(parcelData);
+                    Console.WriteLine($"Adăugat poligon: {parcelData.Name} cu Id: {parcelData.Id}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Eroare la procesarea poligonului: {ex.Message}");
+                }
+            }
+        }
+
+        
         // Update text size based on zoom level
-        private void UpdateTextScale(TextBlock textBlock, ScaleTransform scaleTransform, int zoomLevel)
+        private void UpdateTextScale(Button textBlock, ScaleTransform scaleTransform, int zoomLevel)
         {
             double scale = Math.Max(0.1, zoomLevel / 18.0);
             scaleTransform.ScaleX = scale;
@@ -662,7 +796,7 @@ namespace licenta.ViewModel
         {
             foreach (var marker in MapControl.Markers)
             {
-                if (marker.Shape is TextBlock textBlock)
+                if (marker.Shape is Button textBlock)
                 {
                     if (ZoomLevel < 13)
                     {
