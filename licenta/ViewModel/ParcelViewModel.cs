@@ -325,12 +325,16 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 #endregion
     public ICommand SaveCommand { get; }
     
+    public ICommand DeleteCommand { get; }
+    
     public ParcelViewModel(MapViewModel mapViewModel)
     {
         _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         
         SelectedOption = Options.First(); // Selectează automat prima opțiune
+        
         SaveCommand = new RelayCommand(SaveData);
+        DeleteCommand = new RelayCommand(DeleteData);
         
         InitializeUserAndData();
         
@@ -562,7 +566,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 
     if (_parcelId == Guid.Empty)
     {
-        MessageBox.Show("n a mers sefule");
+        MessageBox.Show("n a mers idu sefule");
     }
     var requestObj = new CreateGrainParcelDataRequest
     {
@@ -576,7 +580,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         PesticideUsed = double.Parse(Field8),
         Yield = double.Parse(Field7),
         SoilType = Field2,
-        // Atenție: Ai folosit Field3 pentru ParcelArea și pentru Season; verifică dacă acesta este intenția
+        // Atenție: Am folosit field urile ca din cur nu mai stiu care e care
         Season = Field5,
         WaterUsage = double.Parse(Field9),
         CreatedDate = DateTime.Now
@@ -611,8 +615,87 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         MessageBox.Show($"A apărut o eroare: {ex.Message}");
     }
 
-        _allParcels.Add(newParcel);
-        SavedParcels.Add(newParcel);
+    
+    for (int i = _allParcels.Count - 1; i >= 0; i--)
+    {
+        if (_allParcels[i].Field1 == SelectedParcel)
+        {
+            _allParcels.RemoveAt(i);
+        }
+    }
+
+    App.Current.Dispatcher.Invoke(() =>
+    {
+        for (int i = _savedParcels.Count - 1; i >= 0; i--)
+        {
+            if (_savedParcels[i].Field1 == SelectedParcel)
+            {
+                _savedParcels.RemoveAt(i);
+            }
+        }
+    });
+    
+    _savedParcels.Add(newParcel);
+    _allParcels.Add(newParcel);
+   
+    }
+
+    private async void DeleteData()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedParcel))
+        {
+            MessageBox.Show("Selectați un poligon.");
+            return;
+        }
+        
+        try
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                Guid _parcelId = new Guid();
+                    
+                foreach (var parcel in _parcelNameAndIDs)
+                {
+                    if(SelectedParcel == parcel.Name)
+                        _parcelId = parcel.Id;
+                }
+
+                var response = await client.DeleteAsync($"https://localhost:7088/api/ParcelData/polygon/{_parcelId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Datele au fost sterse cu succes.");
+                }
+                else
+                {
+                    MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"A apărut o eroare: {ex.Message}");
+        }
+        
+        for (int i = _allParcels.Count - 1; i >= 0; i--)
+        {
+            if (_allParcels[i].Field1 == SelectedParcel)
+            {
+                _allParcels.RemoveAt(i);
+            }
+        }
+
+        App.Current.Dispatcher.Invoke(() =>
+        {
+            for (int i = _savedParcels.Count - 1; i >= 0; i--)
+            {
+                if (_savedParcels[i].Field1 == SelectedParcel)
+                {
+                    _savedParcels.RemoveAt(i);
+                }
+            }
+        });
+        
     }
     
     private void UpdateLabels()

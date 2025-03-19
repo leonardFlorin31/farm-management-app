@@ -126,16 +126,28 @@
                 </StackPanel>
             </StackPanel>
 
+            <Button Content="Delete"
+                    Width="80"
+                    DockPanel.Dock="Right"
+                    Margin="10, 15, 10, 10" 
+                    Padding="5"
+                    Background="{StaticResource color12}" 
+                    Foreground="White" 
+                    BorderBrush="Transparent" 
+                    FontWeight="Bold"
+                    Command="{Binding DeleteCommand}" />
+            
             <Button Content="Save"
                     Width="80"
                     DockPanel.Dock="Right"
-                    Margin="10" 
+                    Margin="10, 15, 10, 10" 
                     Padding="5"
-                    Background="Black" 
+                    Background="{StaticResource titleColor2}" 
                     Foreground="White" 
                     BorderBrush="Transparent" 
                     FontWeight="Bold"
                     Command="{Binding SaveCommand}" />
+            
         </DockPanel>
 
         <!-- Rândul pentru Search Box -->
@@ -228,7 +240,7 @@
         <!-- List of Parcels -->
         <ListView Grid.Row="2"
                   ItemsSource="{Binding SavedParcels}"
-                  Margin="10,0,10,10">
+                  Margin="10,0,30,10">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="120">
