@@ -467,15 +467,15 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
             parcelData.Option = "Grane";
             parcelData.Field1 = polygonName;
-            parcelData.Field2 = firstParcel.ParcelArea.ToString();
-            parcelData.Field3 = firstParcel.Season;
-            parcelData.Field4 = firstParcel.CropType;
-            parcelData.Field5 = firstParcel.IrrigationType;
-            parcelData.Field6 = firstParcel.Yield.ToString();
-            parcelData.Field7 = firstParcel.FertilizerUsed.ToString();
-            parcelData.Field8 = firstParcel.PesticideUsed.ToString();
+            parcelData.Field2 = firstParcel.CropType;
+            parcelData.Field3 = firstParcel.ParcelArea.ToString();
+            parcelData.Field4 = firstParcel.IrrigationType;
+            parcelData.Field5 = firstParcel.FertilizerUsed.ToString();
+            parcelData.Field6 = firstParcel.PesticideUsed.ToString();
+            parcelData.Field7 = firstParcel.Yield.ToString();
+            parcelData.Field8 = firstParcel.SoilType;
             parcelData.Field9 = firstParcel.WaterUsage.ToString();
-
+            
         }
         else
         {
@@ -559,26 +559,30 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     {
         MessageBox.Show("n a mers idu sefule");
     }
-    var requestObj = new CreateGrainParcelDataRequest
-    {
-        Id = Guid.NewGuid(),
-        PolygonId = _parcelId,
-        CropType = Field2,
-        // Notă: Folosim conversia directă; dacă Field3 este gol sau invalid, se va arunca o excepție
-        ParcelArea = double.Parse(Field3),
-        IrrigationType = Field4,
-        FertilizerUsed = double.Parse(Field5),
-        PesticideUsed = double.Parse(Field6),
-        Yield = double.Parse(Field7),
-        SoilType = Field8,
-        Season = Field8,
-        WaterUsage = double.Parse(Field9),
-        CreatedDate = DateTime.Now
-    };
+    
+    
+   
     
 
     try
     {
+        var requestObj = new CreateGrainParcelDataRequest
+        {
+            Id = Guid.NewGuid(),
+            PolygonId = _parcelId,
+            CropType = Field2,
+            // Notă: Folosim conversia directă; dacă Field3 este gol sau invalid, se va arunca o excepție
+            ParcelArea = double.Parse(Field3),
+            IrrigationType = Field4,
+            FertilizerUsed = double.Parse(Field5),
+            PesticideUsed = double.Parse(Field6),
+            Yield = double.Parse(Field7),
+            SoilType = Field8,
+            Season = Field8,
+            WaterUsage = double.Parse(Field9),
+            CreatedDate = DateTime.Now
+        };
+        
         using (HttpClient client = new HttpClient())
         {
             // Serializăm obiectul request în JSON.
@@ -599,34 +603,33 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                 MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
             }
         }
+        
+        for (int i = _allParcels.Count - 1; i >= 0; i--)
+        {
+            if (_allParcels[i].Field1 == SelectedParcel)
+            {
+                _allParcels.RemoveAt(i);
+            }
+        }
+
+        App.Current.Dispatcher.Invoke(() =>
+        {
+            for (int i = _savedParcels.Count - 1; i >= 0; i--)
+            {
+                if (_savedParcels[i].Field1 == SelectedParcel)
+                {
+                    _savedParcels.RemoveAt(i);
+                }
+            }
+        });
+    
+        _savedParcels.Add(newParcel);
+        _allParcels.Add(newParcel);
     }
     catch (Exception ex)
     {
         MessageBox.Show($"A apărut o eroare: {ex.Message}");
     }
-
-    
-    for (int i = _allParcels.Count - 1; i >= 0; i--)
-    {
-        if (_allParcels[i].Field1 == SelectedParcel)
-        {
-            _allParcels.RemoveAt(i);
-        }
-    }
-
-    App.Current.Dispatcher.Invoke(() =>
-    {
-        for (int i = _savedParcels.Count - 1; i >= 0; i--)
-        {
-            if (_savedParcels[i].Field1 == SelectedParcel)
-            {
-                _savedParcels.RemoveAt(i);
-            }
-        }
-    });
-    
-    _savedParcels.Add(newParcel);
-    _allParcels.Add(newParcel);
    
     }
 
@@ -692,19 +695,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     {
         if (SelectedOption == "Animale")
         {
-            Label1 = "Denumire";
-            Label2 = "Label A2";
-            Label3 = "Label A3";
-            Label4 = "Label A4";
-            Label5 = "Label A5";
-            Label6 = "Label A6";
-            Label7 = "Label A7";
-            Label8 = "Label A8";
-            Label9 = "Label A9";
-        }
-        else if (SelectedOption == "Grane")
-        {
-            Label1 = "Denumire";
+            Label1 = "Nume";
             Label2 = "Label B2";
             Label3 = "Label B3";
             Label4 = "Label B4";
@@ -713,6 +704,18 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             Label7 = "Label B7";
             Label8 = "Label B8";
             Label9 = "Label B9";
+        }
+        else if (SelectedOption == "Grane")
+        {
+            Label1 = "Nume";
+            Label2 = "Tip Cultură";
+            Label3 = "Suprafață (ha)";
+            Label4 = "Tip Irigare";
+            Label5 = "Îngrășământ (kg)";
+            Label6 = "Pesticide (L)";
+            Label7 = "Producție (kg)";
+            Label8 = "Tip Sol";
+            Label9 = "Consum Apă (m\u00b3)";
         }
     }
     
