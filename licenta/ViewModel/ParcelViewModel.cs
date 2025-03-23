@@ -503,31 +503,29 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                     parcelData.Id = polygon.Id;
                     _parcelNameAndIDs.Add(parcelData);
 
-                    ParcelData parcel = await GetParcelData(polygon.Name, polygon.Id.ToString(), "Grains");
+                    ParcelData parcel = await GetParcelData(polygon.Name, polygon.Id.ToString(), "Grane");
                     App.Current.Dispatcher.Invoke((Action)delegate()
                     {
                         _savedParcels.Add(parcel);
                         _allParcels.Add(parcel);
                     });
-                    
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Eroare la procesarea poligonului (GrainParcel): {ex.Message}");
                 }
             }
-            
+
             foreach (var polygon in polygons)
             {
                 try
                 {
-                    ParcelData parcel = await GetParcelData(polygon.Name, polygon.Id.ToString(), "Animals");
+                    ParcelData parcel = await GetParcelData(polygon.Name, polygon.Id.ToString(), "Animale");
                     App.Current.Dispatcher.Invoke((Action)delegate()
                     {
                         _savedParcels.Add(parcel);
                         _allParcels.Add(parcel);
                     });
-                    
                 }
                 catch (Exception ex)
                 {
@@ -550,7 +548,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         HttpClient client = new HttpClient();
 
         HttpResponseMessage response;
-        if (option == "Grains")
+        if (option == "Grane")
         {
             response = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{parcelId}")
                 .ConfigureAwait(false);
@@ -576,7 +574,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 
         List<GrainParcelDataDto> GrainParcelDataList = null;
         List<AnimalParcelDataDto> AnimalParcelDataList = null;
-        if (option == "Grains")
+        if (option == "Grane")
         {
             GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
         }
@@ -586,7 +584,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         }
 
 
-        if (GrainParcelDataList != null && GrainParcelDataList.Count > 0 && option == "Grains")
+        if (GrainParcelDataList != null && GrainParcelDataList.Count > 0 && option == "Grane")
         {
             var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
             parcelData.Option = "Grane";
@@ -600,13 +598,13 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             parcelData.Field8 = firstParcel.SoilType;
             parcelData.Field9 = firstParcel.WaterUsage.ToString();
         }
-        else if (AnimalParcelDataList != null && AnimalParcelDataList.Count > 0 && option == "Animals")
+        else if (AnimalParcelDataList != null && AnimalParcelDataList.Count > 0 && option == "Animale")
         {
             var firstParcel = AnimalParcelDataList[0]; // Ia primul element dacă e nevoie
             parcelData.Option = "Animale";
             parcelData.Field1 = polygonName;
             parcelData.Field2 = firstParcel.AnimalType;
-            parcelData.Field3 = firstParcel.NumberOfAnimals.ToString();
+            parcelData.Field3 = firstParcel.NumberOfAnimale.ToString();
             parcelData.Field4 = firstParcel.FeedType;
             parcelData.Field5 = firstParcel.WaterConsumption.ToString();
             parcelData.Field6 = firstParcel.VeterinaryVisits.ToString();
@@ -665,7 +663,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
     {
         ParcelData newParcel = null;
 
-        if (SelectedOption == "Grains")
+        if (SelectedOption == "Grane")
         {
             newParcel = new ParcelData
             {
@@ -749,7 +747,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                     Id = Guid.NewGuid(),
                     PolygonId = _parcelId,
                     AnimalType = Field2, // Example value
-                    NumberOfAnimals = int.Parse(Field3), // Example value
+                    NumberOfAnimale = int.Parse(Field3), // Example value
                     FeedType = Field4, // Example value
                     WaterConsumption = decimal.Parse(Field5), // Example value
                     VeterinaryVisits = int.Parse(Field6), // Example value
@@ -763,7 +761,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                 // Serializăm obiectul request în JSON.
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 string json;
-                if (SelectedOption == "Grains")
+                if (SelectedOption == "Grane")
                 {
                     json = JsonSerializer.Serialize(requestObj, options);
                 }
@@ -797,7 +795,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 
             for (int i = _allParcels.Count - 1; i >= 0; i--)
             {
-                if (_allParcels[i].Field1 == SelectedParcel)
+                if (_allParcels[i].Field1 == SelectedParcel && _allParcels[i].Option == newParcel.Option)
                 {
                     _allParcels.RemoveAt(i);
                 }
@@ -807,7 +805,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             {
                 for (int i = _savedParcels.Count - 1; i >= 0; i--)
                 {
-                    if (_savedParcels[i].Field1 == SelectedParcel)
+                    if (_savedParcels[i].Field1 == SelectedParcel && _savedParcels[i].Option == newParcel.Option)
                     {
                         _savedParcels.RemoveAt(i);
                     }
@@ -831,53 +829,108 @@ public class ParcelViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        try
+        if (SelectedOption == "Grane")
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                Guid _parcelId = new Guid();
-
-                foreach (var parcel in _parcelNameAndIDs)
+                using (HttpClient client = new HttpClient())
                 {
-                    if (SelectedParcel == parcel.Name)
-                        _parcelId = parcel.Id;
-                }
+                    Guid _parcelId = new Guid();
 
-                var response = await client.DeleteAsync($"https://localhost:7088/api/ParcelData/polygon/{_parcelId}");
+                    foreach (var parcel in _parcelNameAndIDs)
+                    {
+                        if (SelectedParcel == parcel.Name)
+                            _parcelId = parcel.Id;
+                    }
 
-                if (response.IsSuccessStatusCode)
-                {
-                    MessageBox.Show("Datele au fost sterse cu succes.");
-                }
-                else
-                {
-                    MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                    var response =
+                        await client.DeleteAsync($"https://localhost:7088/api/ParcelData/polygon/{_parcelId}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Datele au fost sterse cu succes.");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                    }
+                    
+                    for (int i = _allParcels.Count - 1; i >= 0; i--)
+                    {
+                        if (_allParcels[i].Field1 == SelectedParcel && _allParcels[i].Option != "Animale")
+                        {
+                            _allParcels.RemoveAt(i);
+                        }
+                    }
+
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        for (int i = _savedParcels.Count - 1; i >= 0; i--)
+                        {
+                            if (_savedParcels[i].Field1 == SelectedParcel && _savedParcels[i].Option != "Animale")
+                            {
+                                _savedParcels.RemoveAt(i);
+                            }
+                        }
+                    });
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"A apărut o eroare: {ex.Message}");
-        }
-
-        for (int i = _allParcels.Count - 1; i >= 0; i--)
-        {
-            if (_allParcels[i].Field1 == SelectedParcel)
+            catch (Exception ex)
             {
-                _allParcels.RemoveAt(i);
+                MessageBox.Show($"A apărut o eroare: {ex.Message}");
             }
         }
-
-        App.Current.Dispatcher.Invoke(() =>
+        else
         {
-            for (int i = _savedParcels.Count - 1; i >= 0; i--)
+            try
             {
-                if (_savedParcels[i].Field1 == SelectedParcel)
+                using (HttpClient client = new HttpClient())
                 {
-                    _savedParcels.RemoveAt(i);
+                    Guid _parcelId = new Guid();
+
+                    foreach (var parcel in _parcelNameAndIDs)
+                    {
+                        if (SelectedParcel == parcel.Name)
+                            _parcelId = parcel.Id;
+                    }
+
+                    var response = await client.DeleteAsync($"https://localhost:7088/api/AnimalParcelData/polygon/{_parcelId}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Datele au fost sterse cu succes.");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                    }
                 }
             }
-        });
+            catch (Exception ex)
+            {
+                MessageBox.Show($"A apărut o eroare: {ex.Message}");
+            }
+            
+            for (int i = _allParcels.Count - 1; i >= 0; i--)
+            {
+                if (_allParcels[i].Field1 == SelectedParcel && _allParcels[i].Option == "Animale")
+                {
+                    _allParcels.RemoveAt(i);
+                }
+            }
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                for (int i = _savedParcels.Count - 1; i >= 0; i--)
+                {
+                    if (_savedParcels[i].Field1 == SelectedParcel && _savedParcels[i].Option == "Animale")
+                    {
+                        _savedParcels.RemoveAt(i);
+                    }
+                }
+            });
+        }
+        
     }
 
     private void UpdateLabels()
@@ -1033,7 +1086,7 @@ public class AnimalParcelDataDto
 
     [JsonPropertyName("animalType")] public string AnimalType { get; set; }
 
-    [JsonPropertyName("numberOfAnimals")] public int NumberOfAnimals { get; set; }
+    [JsonPropertyName("numberOfAnimale")] public int NumberOfAnimale { get; set; }
 
     [JsonPropertyName("feedType")] public string FeedType { get; set; }
 
@@ -1086,7 +1139,7 @@ public class CreateAnimalParcelDataRequest
 
     public string AnimalType { get; set; }
 
-    public int NumberOfAnimals { get; set; }
+    public int NumberOfAnimale { get; set; }
 
     public string FeedType { get; set; }
 
