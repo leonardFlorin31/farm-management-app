@@ -571,6 +571,7 @@ namespace licenta.ViewModel
                 var pName = PolygonName;
                 var client = new HttpClient();
                 
+               // var encodedName = Uri.EscapeDataString(PolygonName);
                 var response = await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
 
                 if (response.IsSuccessStatusCode)
@@ -602,7 +603,7 @@ namespace licenta.ViewModel
             }
             
             var textMarkers = MapControl.Markers
-                .Where(m => m.Shape is TextBlock tb && tb.Text == polygonName)
+                .Where(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName)
                 .ToList();
             
             foreach (var marker in textMarkers)
