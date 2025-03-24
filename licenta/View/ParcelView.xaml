@@ -114,7 +114,7 @@
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label7}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field7, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBox  Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field7, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
                 <StackPanel Margin="0, 5, 0, 5">
                     <TextBlock Text="{Binding Label8}" />
@@ -257,7 +257,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
+                    
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
@@ -277,8 +277,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field2" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA2" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB2" FontSize="12"/>
+                                <TextBlock Text="Tip Animale" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Tip Cultură" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -292,8 +292,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field3" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA3" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB3" FontSize="12"/>
+                                <TextBlock Text="Număr Animale" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Suprafață (ha)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -307,8 +307,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field4" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA4" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB4" FontSize="12"/>
+                                <TextBlock Text="Tip Mâncare" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Tip Irigare" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -322,8 +322,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field5" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA5" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB5" FontSize="12"/>
+                                <TextBlock Text="Consum Apă" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Îngrășământ (kg)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -337,8 +337,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field6" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA6" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB6" FontSize="12"/>
+                                <TextBlock Text="Vizite Veterinar" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Pesticide (L)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -352,8 +352,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field7" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA7" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB7" FontSize="12"/>
+                                <TextBlock Text="Eliminare deșeuri" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Producție (kg)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -367,8 +367,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field8" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA8" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB8" FontSize="12"/>
+                                <TextBlock Text="" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Tip Sol" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
@@ -382,8 +382,8 @@
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field9" FontWeight="Bold"/>
-                                <TextBlock Text="LabelA9" FontSize="12" Margin="0,5, 0, 5"/>
-                                <TextBlock Text="LabelB9" FontSize="12"/>
+                                <TextBlock Text="" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Consum Apă (m³)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>

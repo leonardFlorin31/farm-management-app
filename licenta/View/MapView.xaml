@@ -10,19 +10,19 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behavior="clr-namespace:licenta.Behavior"
              xmlns:viewModel="clr-namespace:licenta.ViewModel">
-    
+
     <UserControl.Resources>
         <!-- Custom ToggleButton for ComboBox -->
         <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton">
             <Grid>
                 <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" />
                 <Grid>
-                    <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/>
+                    <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center" />
                     <Path Name="Arrow" Fill="Black"
                           Data="M 0 0 L 4 4 L 8 0 Z"
                           HorizontalAlignment="Right"
                           VerticalAlignment="Center"
-                          Margin="0,0,5,0"/>
+                          Margin="0,0,5,0" />
                 </Grid>
             </Grid>
         </ControlTemplate>
@@ -30,11 +30,11 @@
         <!-- Custom ComboBox Style -->
         <Style TargetType="{x:Type ComboBox}">
             <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" />
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="BorderBrush" Value="Black" />
+            <Setter Property="Padding" Value="4" />
             <Setter Property="Control.Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -65,20 +65,21 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    
+
     <Grid>
-        
+
         <!-- Harta -->
         <ContentControl Content="{Binding MapControl}" />
 
         <!-- Overlay pentru input, plasat în colțul stânga sus -->
-        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="220" Height="100" Background="Transparent">
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Width="220" Height="100"
+              Background="Transparent">
             <!-- Folosim o Grid pentru a suprapune TextBox-ul și TextBlock-ul placeholder -->
             <TextBox x:Name="InputTextBox"
-                     Text="{Binding PolygonName, UpdateSourceTrigger=PropertyChanged}" 
+                     Text="{Binding PolygonName, UpdateSourceTrigger=PropertyChanged}"
                      Width="180" Height="30"
                      Background="White"
-                     Padding="5"/>
+                     Padding="5" />
             <TextBlock Text="Introduceti numele parcelei..."
                        Foreground="Gray"
                        Margin="0,0,0,0"
@@ -87,16 +88,16 @@
                        HorizontalAlignment="Center">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Visibility" Value="Visible"/>
+                        <Setter Property="Visibility" Value="Visible" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPlaceholderVisible}" Value="False">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>
             </TextBlock>
-            
+
             <StackPanel Margin="5,70,0,5">
                 <!-- <TextBlock Text="Selectează un parc:"/> -->
                 <ComboBox x:Name="comboBox"
@@ -111,151 +112,236 @@
                     </i:Interaction.Triggers>
                 </ComboBox>
             </StackPanel>
-            
+
         </Grid>
 
         <!-- Butonul de creare poligon, plasat în colțul din dreapta sus -->
-        <Button Content="Creaza parcela" 
-                Command="{Binding CreatePolygonCommand}" 
-                Width="100" 
-                Height="30" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Margin="10" 
+        <Button Content="Creaza parcela"
+                Command="{Binding CreatePolygonCommand}"
+                Width="100"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10"
                 Padding="5"
-                Background="{StaticResource titleColor2}" 
-                Foreground="White" 
-                BorderBrush="Transparent" 
+                Background="{StaticResource titleColor2}"
+                Foreground="White"
+                BorderBrush="Transparent"
                 FontWeight="Bold" />
-        
-        <Button Content="Sterge parcela" 
-                Command="{Binding DeletePolygonCommand}" 
-                Width="100" 
-                Height="30" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Margin="10,50,10,10"  
+
+        <Button Content="Sterge parcela"
+                Command="{Binding DeletePolygonCommand}"
+                Width="100"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10,50,10,10"
                 Padding="5"
-                Background="{StaticResource color12}" 
-                Foreground="White" 
-                BorderBrush="Transparent" 
+                Background="{StaticResource color12}"
+                Foreground="White"
+                BorderBrush="Transparent"
                 FontWeight="Bold" />
-        
-       <!--button for deleting the last marker -->
-        <Button Content="Sterge ultimul marker" 
+
+        <!--button for deleting the last marker -->
+        <Button Content="Sterge ultimul marker"
                 Command="{Binding DeleteLastMarkerCommand}"
-                Width="150" 
-                Height="30" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Margin="10,90,10,10" 
+                Width="150"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10,90,10,10"
                 Padding="5"
-                Background="{StaticResource color12}" 
-                Foreground="White" 
-                BorderBrush="Transparent" 
+                Background="{StaticResource color12}"
+                Foreground="White"
+                BorderBrush="Transparent"
                 FontWeight="Bold" />
-        
+
         <!-- button for switching map provider -->
-        <Button Content="Schimba tipul hartii" 
+        <Button Content="Schimba tipul hartii"
                 Command="{Binding ChangeMapTypeCommand}"
-                Width="150" 
-                Height="30" 
-                HorizontalAlignment="Right" 
-                VerticalAlignment="Top" 
-                Margin="10,130,10,10" 
+                Width="150"
+                Height="30"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10,130,10,10"
                 Padding="5"
-                Background="{StaticResource titleColor2}" 
-                Foreground="White" 
-                BorderBrush="Transparent" 
+                Background="{StaticResource titleColor2}"
+                Foreground="White"
+                BorderBrush="Transparent"
                 FontWeight="Bold" />
-        
-        <Border Background="White" 
-        BorderBrush="Black" 
-        BorderThickness="1" 
-        CornerRadius="5"
-        HorizontalAlignment="Right" 
-        VerticalAlignment="Top"
-        Margin="10,180,10,10"
-        Padding="10"
-        Width="250">
-    
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
 
-        <!-- ID Parcelă -->
-        <TextBlock Text="ID Parcelă:" FontWeight="Bold"/>
-        <TextBlock Grid.Row="0" 
-                   Text="{Binding SelectedParcel.Field1}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+        <Border Background="White"
+                BorderBrush="Black"
+                BorderThickness="1"
+                CornerRadius="5"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10,180,10,10"
+                Padding="10"
+                Width="300">
 
-        <!-- Tip Cultură -->
-        <TextBlock Grid.Row="1" Text="Tip Cultură:" FontWeight="Bold"/>
-        <TextBlock Grid.Row="1" 
-                   Text="{Binding SelectedParcel.Field2}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+            <Grid> <!-- Grid părinte care conține cele două griduri -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" /> <!-- Lățime fixă pentru primul grid -->
+                    <ColumnDefinition Width="35" /> <!-- Spațiu între griduri -->
+                    <ColumnDefinition Width="100" /> <!-- Lățime fixă pentru al doilea grid -->
+                </Grid.ColumnDefinitions>
 
-        <!-- Suprafață (ha) -->
-        <TextBlock Grid.Row="2" Text="Suprafață (ha):" FontWeight="Bold"/>
-        <TextBlock Grid.Row="2" 
-                   Text="{Binding SelectedParcel.Field3}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-        <!-- Tip Irigare -->
-        <TextBlock Grid.Row="3" Text="Tip Irigare:" FontWeight="Bold"/>
-        <TextBlock Grid.Row="3" 
-                   Text="{Binding SelectedParcel.Field4}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                    <!-- ID Parcelă -->
+                    <TextBlock Text="Nume Parcelă:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding SelectedParcel.Field1}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
 
-        <!-- Îngrășământ (kg) -->
-        <TextBlock Grid.Row="4" Text="Îngrășământ (kg):" FontWeight="Bold"/>
-        <TextBlock Grid.Row="4" 
-                   Text="{Binding SelectedParcel.Field5}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                    <!-- Tip Cultură -->
+                    <TextBlock Grid.Row="1" Text="Tip Cultură:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding SelectedParcel.Field2}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
 
-        <!-- Pesticide (L) -->
-        <TextBlock Grid.Row="5" Text="Pesticide (L):" FontWeight="Bold"/>
-        <TextBlock Grid.Row="5" 
-                   Text="{Binding SelectedParcel.Field6}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                    <!-- Suprafață (ha) -->
+                    <TextBlock Grid.Row="2" Text="Suprafață (ha):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding SelectedParcel.Field3}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
 
-        <!-- Producție (kg) -->
-        <TextBlock Grid.Row="6" Text="Producție (kg):" FontWeight="Bold"/>
-        <TextBlock Grid.Row="6" 
-                   Text="{Binding SelectedParcel.Field7}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                    <!-- Tip Irigare -->
+                    <TextBlock Grid.Row="3" Text="Tip Irigare:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="3"
+                               Text="{Binding SelectedParcel.Field4}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
 
-        <!-- Tip Sol -->
-        <TextBlock Grid.Row="7" Text="Tip Sol:" FontWeight="Bold"/>
-        <TextBlock Grid.Row="7" 
-                   Text="{Binding SelectedParcel.Field8}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
+                    <!-- Îngrășământ (kg) -->
+                    <TextBlock Grid.Row="4" Text="Îngrășământ (kg):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="4"
+                               Text="{Binding SelectedParcel.Field5}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
 
-        <!-- Consum Apă (m³) -->
-        <TextBlock Grid.Row="8" Text="Consum Apă (m³):" FontWeight="Bold"/>
-        <TextBlock Grid.Row="8" 
-                   Text="{Binding SelectedParcel.Field9}" 
-                   Foreground="Black"
-                   Margin="0,20,0,0"/>
-    </Grid>
-</Border>
+                    <!-- Pesticide (L) -->
+                    <TextBlock Grid.Row="5" Text="Pesticide (L):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="5"
+                               Text="{Binding SelectedParcel.Field6}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+
+                    <!-- Producție (kg) -->
+                    <TextBlock Grid.Row="6" Text="Producție (kg):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="6"
+                               Text="{Binding SelectedParcel.Field7}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+
+                    <!-- Tip Sol -->
+                    <TextBlock Grid.Row="7" Text="Tip Sol:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="7"
+                               Text="{Binding SelectedParcel.Field8}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+
+                    <!-- Consum Apă (m³) -->
+                    <TextBlock Grid.Row="8" Text="Consum Apă (m³):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="8"
+                               Text="{Binding SelectedParcel.Field9}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                </Grid>
+
+                <Grid Grid.Column="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Text="Nume Parcelă:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="0"
+                               Text="{Binding SelectedParcel.Field1}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="1" Text="Tip Animale:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="1"
+                               Text="{Binding SelectedParcel.Field2}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="2" Text="Număr Animale:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="2"
+                               Text="{Binding SelectedParcel.Field3}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="3" Text="Tip Mâncare:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="3"
+                               Text="{Binding SelectedParcel.Field4}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="4" Text="Consum Apă (m³):" FontWeight="Bold" />
+                    <TextBlock Grid.Row="4"
+                               Text="{Binding SelectedParcel.Field5}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="5" Text="Vizite Veterinar:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="5"
+                               Text="{Binding SelectedParcel.Field6}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                    <TextBlock Grid.Row="6" Text="Eliminare deșeuri:" FontWeight="Bold" />
+                    <TextBlock Grid.Row="6"
+                               Text="{Binding SelectedParcel.Field7}"
+                               Foreground="Black"
+                               Margin="0,20,0,0" />
+                    
+                </Grid>
+                </Grid>
+
+
+        </Border>
 
 
     </Grid>

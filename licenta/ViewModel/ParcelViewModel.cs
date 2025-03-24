@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -938,14 +939,15 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         if (SelectedOption == "Animale")
         {
             Label1 = "Nume";
-            Label2 = "Label B2";
-            Label3 = "Label B3";
-            Label4 = "Label B4";
-            Label5 = "Label B5";
-            Label6 = "Label B6";
-            Label7 = "Label B7";
-            Label8 = "Label B8";
-            Label9 = "Label B9";
+            Label2 = "Tip Animale";
+            Label3 = "Număr Animale";
+            Label4 = "Tip Mâncare";
+            Label5 = "Consum Apă";
+            Label6 = "Vizite Veterinar";
+            Label7 = "Eliminare deșeuri";
+            Label8 = "";
+            Label9 = "";
+            
         }
         else if (SelectedOption == "Grane")
         {
