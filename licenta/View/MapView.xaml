@@ -297,43 +297,43 @@
                     
                     <TextBlock Text="Nume Parcelă:" FontWeight="Bold" />
                     <TextBlock Grid.Row="0"
-                               Text="{Binding SelectedParcel.Field1}"
+                               Text="{Binding SelectedParcel2.Field1}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="1" Text="Tip Animale:" FontWeight="Bold" />
                     <TextBlock Grid.Row="1"
-                               Text="{Binding SelectedParcel.Field2}"
+                               Text="{Binding SelectedParcel2.Field2}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="2" Text="Număr Animale:" FontWeight="Bold" />
                     <TextBlock Grid.Row="2"
-                               Text="{Binding SelectedParcel.Field3}"
+                               Text="{Binding SelectedParcel2.Field3}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="3" Text="Tip Mâncare:" FontWeight="Bold" />
                     <TextBlock Grid.Row="3"
-                               Text="{Binding SelectedParcel.Field4}"
+                               Text="{Binding SelectedParcel2.Field4}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="4" Text="Consum Apă (m³):" FontWeight="Bold" />
                     <TextBlock Grid.Row="4"
-                               Text="{Binding SelectedParcel.Field5}"
+                               Text="{Binding SelectedParcel2.Field5}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="5" Text="Vizite Veterinar:" FontWeight="Bold" />
                     <TextBlock Grid.Row="5"
-                               Text="{Binding SelectedParcel.Field6}"
+                               Text="{Binding SelectedParcel2.Field6}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     
                     <TextBlock Grid.Row="6" Text="Eliminare deșeuri:" FontWeight="Bold" />
                     <TextBlock Grid.Row="6"
-                               Text="{Binding SelectedParcel.Field7}"
+                               Text="{Binding SelectedParcel2.Field7}"
                                Foreground="Black"
                                Margin="0,20,0,0" />
                     

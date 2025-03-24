@@ -35,6 +35,8 @@ namespace licenta.ViewModel
         {
             
         };
+        private ParcelData _selectedParcel;
+        private ParcelData _selectedParcel2;
 
         // List to store marker coordinates
         private List<PointLatLng> _markerCoordinates = new List<PointLatLng>();
@@ -611,6 +613,8 @@ namespace licenta.ViewModel
                 MapControl.Markers.Remove(marker);
             }
             
+            CenterPointNames.Remove(polygonName);
+            
             _polygonNames.Remove(polygonName);
         }
 
@@ -662,7 +666,6 @@ namespace licenta.ViewModel
             UpdateTextScale(textBlock, scaleTransform, ZoomLevel);
         }
         
-        private ParcelData _selectedParcel;
         public ParcelData SelectedParcel
         {
             get => _selectedParcel;
@@ -670,6 +673,16 @@ namespace licenta.ViewModel
             {
                 _selectedParcel = value;
                 OnPropertyChanged(nameof(SelectedParcel));
+            }
+        }
+        
+        public ParcelData SelectedParcel2
+        {
+            get => _selectedParcel2;
+            set
+            {
+                _selectedParcel2 = value;
+                OnPropertyChanged(nameof(SelectedParcel2));
             }
         }
 
@@ -687,6 +700,8 @@ namespace licenta.ViewModel
                     
             }
             Console.WriteLine(_id);
+            
+            InitiateDataForPolygonAnimals(polygonName, _id);
             
             try {
             ParcelData parcelData = new ParcelData();
@@ -726,6 +741,58 @@ namespace licenta.ViewModel
                 parcelData.Field9 = firstParcel.WaterUsage.ToString();
 
                 SelectedParcel = parcelData;
+            }
+            else
+            {
+                Console.WriteLine("No data found.");
+            }
+            }
+            catch
+            {
+                Console.WriteLine("Failed to initiate data for a Polygon.");
+            }
+        }
+        
+        private async void InitiateDataForPolygonAnimals(string polygonName, Guid _id)
+        {
+            try {
+            ParcelData parcelData = new ParcelData();
+        
+            HttpClient client = new HttpClient();
+                    
+            var response  = await client.GetAsync($"https://localhost:7088/api/AnimalParcelData/polygon/{_id}").ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+            
+            }
+                    
+            var json = await response.Content.ReadAsStringAsync();
+        
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
+            };
+            var AnimalParcelDataList = JsonSerializer.Deserialize<List<AnimalParcelDataDto>>(json, options);
+
+        
+            if (AnimalParcelDataList != null && AnimalParcelDataList.Count > 0)
+            {
+                var firstParcel = AnimalParcelDataList[0]; // Ia primul element dacă e nevoie
+                parcelData.Option = "Animale";
+                parcelData.Field1 = polygonName;
+                parcelData.Field2 = firstParcel.AnimalType;
+                parcelData.Field3 = firstParcel.NumberOfAnimale.ToString();
+                parcelData.Field4 = firstParcel.FeedType;
+                parcelData.Field5 = firstParcel.WaterConsumption.ToString();
+                parcelData.Field6 = firstParcel.VeterinaryVisits.ToString();
+                parcelData.Field7 = firstParcel.WasteManagement;
+                parcelData.Field8 = "";
+                parcelData.Field9 = "";
+
+                SelectedParcel2 = parcelData;
             }
             else
             {
