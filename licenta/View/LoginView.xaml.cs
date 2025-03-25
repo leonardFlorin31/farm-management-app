@@ -10,7 +10,6 @@ public partial class LoginView : Window
     {
         InitializeComponent();
         
-        
         if (this.DataContext is LoginViewModel loginViewModel)
         {
             loginViewModel.LoginSuccess += () =>

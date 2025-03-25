@@ -37,7 +37,7 @@
             </Border.Background>
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="30" />
+                    <RowDefinition Height="40" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <!-- Header similar to LoginView -->
@@ -107,7 +107,7 @@
                 <StackPanel Width="250"
                             Grid.Row="1"
                             Orientation="Vertical"
-                            Margin="0,35,0,0">
+                            Margin="0,0,0,0">
                     <Image Source="/Images/logo.png"
                            Width="100"
                            Height="100"
@@ -169,11 +169,11 @@
                                FontWeight="Bold"
                                FontFamily="Arial"
                                TextWrapping="Wrap"
-                               Margin="0,0,0,10" />
+                               Margin="0,0,0,0" />
 
                     <Button Content="Register"
                             Command="{Binding RegisterCommand}"
-                            Height="30"
+                            Height="40"
                             Background="#EF2121"
                             Foreground="White"
                             Cursor="Hand"
