@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Windows.Input;
 using licenta.Model;
+using licenta.View;
 
 namespace licenta.ViewModel;
 
@@ -22,6 +23,7 @@ public class LoginViewModel : ViewModelBase
 
     // Events
     public event Action LoginSuccess;
+    public event Action RegisterWindow;
 
     // Properties
     public string Username
@@ -67,12 +69,22 @@ public class LoginViewModel : ViewModelBase
     // Commands
     public ICommand LoginCommand { get; }
     public ICommand RecoverPasswordCommand { get; }
+    
+    public ICommand RegisterCommand { get; }
+    
 
     // Constructors
     public LoginViewModel()
     {
         LoginCommand = new ViewModelCommand(ExecuteLoginCommand, CanExecuteLoginCommand);
         RecoverPasswordCommand = new ViewModelCommand(p => ExecuteRecoverPasswordCommand("", ""));
+        RegisterCommand = new RelayCommand(Register);
+       
+    }
+
+    private void Register()
+    {
+    RegisterWindow?.Invoke();
     }
 
     // Methods

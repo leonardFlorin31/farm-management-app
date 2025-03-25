@@ -1,0 +1,206 @@
+<Window x:Class="licenta.View.RegisterView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:licenta.ViewModel"
+        xmlns:customControls="clr-namespace:licenta.CustomControls"
+        Title="Register" Height="450" Width="800"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent"
+        AllowsTransparency="True">
+    <Window.DataContext>
+        <vm:RegisterViewModel />
+    </Window.DataContext>
+    <Border CornerRadius="50"
+            BorderThickness="5">
+        <Border.Background>
+            <ImageBrush ImageSource="/Images/background.jpg"
+                        Stretch="UniformToFill" />
+        </Border.Background>
+        <Border CornerRadius="50"
+                BorderThickness="1"
+                Opacity="0.90">
+            <Border.BorderBrush>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#6BFF84" Offset="0" />
+                    <GradientStop Color="#4BBD5E" Offset="0.5" />
+                    <GradientStop Color="#309C42" Offset="1" />
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,1" EndPoint="1,1">
+                    <GradientStop Color="#6BFF84" Offset="0" />
+                    <GradientStop Color="#4BBD5E" Offset="0.5" />
+                    <GradientStop Color="#309C42" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <!-- Header similar to LoginView -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="25" />
+                        <ColumnDefinition Width="25" />
+                        <ColumnDefinition Width="5" />
+                    </Grid.ColumnDefinitions>
+                    <Button Content="Inapoi"
+                            Command="{Binding BackCommand}"
+                            VerticalAlignment="Top"
+                            HorizontalAlignment="Left"
+                            Margin="120,2,0,0"
+                            Background="#01000000"  
+                            Foreground="WhiteSmoke"
+                            FontWeight="Bold"
+                            Padding="5,2"
+                            BorderThickness="2"
+                            BorderBrush="{StaticResource titleColor2}"/>
+                    <TextBlock Text="Inregistrare"
+                               Foreground="White"
+                               FontSize="10"
+                               FontFamily="Arial"
+                               FontWeight="Bold"
+                               Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Margin="20,0,0,0" />
+                    <!-- Using a Back or Close button -->
+                    <Button x:Name="BtnClose"
+                            BorderThickness="0"
+                            Content="x"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Foreground="White"
+                            FontSize="16"
+                            FontFamily="Arial"
+                            Cursor="Hand"
+                            Margin="0,12,5,0"
+                            Grid.Column="2"
+                            Command="{Binding BackCommand}">
+                    
+
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="DarkRed" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="Red" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Width="18" Height="18"
+                                        CornerRadius="9"
+                                        Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+                <StackPanel Width="250"
+                            Grid.Row="1"
+                            Orientation="Vertical"
+                            Margin="0,35,0,0">
+                    <Image Source="/Images/logo.png"
+                           Width="100"
+                           Height="100"
+                           HorizontalAlignment="Center" />
+
+                    <TextBlock Text="Inregistrare"
+                               Foreground="White"
+                               FontSize="25"
+                               FontWeight="Medium"
+                               FontFamily="Arial"
+                               HorizontalAlignment="Center"
+                               Margin="0,10,0,20" />
+
+                    <TextBlock Text="Username:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,10"
+                             Padding="20,0,0,0">
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/username.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left" />
+                        </TextBox.Background>
+                    </TextBox>
+
+                    <TextBlock Text="Password:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <customControls:BindablePasswordBox
+                        Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Height="28"
+                        Margin="0,5,0,10" />
+
+                    <TextBlock Text="Confirm Password:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <customControls:BindablePasswordBox
+                        Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Height="28"
+                        Margin="0,5,0,20" />
+
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               Foreground="Red"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10" />
+
+                    <Button Content="Register"
+                            Command="{Binding RegisterCommand}"
+                            Height="30"
+                            Background="#EF2121"
+                            Foreground="White"
+                            Cursor="Hand"
+                            Margin="0,0,0,10">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#EF2121" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="DarkRed" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Width="150" Height="40"
+                                        CornerRadius="20"
+                                        Background="{TemplateBinding Background}">
+                                    <ContentPresenter VerticalAlignment="Center"
+                                                      HorizontalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Border>
+</Window>

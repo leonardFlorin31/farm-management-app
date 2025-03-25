@@ -118,3 +118,5 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\Ma
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\MapView.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ParcelView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ParcelView.baml
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\RegisterView.g.cs
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\RegisterView.baml
