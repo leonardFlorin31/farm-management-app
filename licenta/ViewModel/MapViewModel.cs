@@ -482,128 +482,132 @@ namespace licenta.ViewModel
         }
 
         // Modified CreatePolygon method to save to the server
-        private async void CreatePolygon()
+       private async void CreatePolygon()
+{
+    if (_markerCoordinates.Count < 3)
+    {
+        Console.WriteLine("Trebuie să ai cel puțin 3 puncte pentru a crea un poligon.");
+        return;
+    }
+
+    foreach (var polygonName in _polygonNames)
+    {
+        if (polygonName == PolygonName)
         {
-            if (_markerCoordinates.Count < 3)
+            MessageBox.Show("Numele poligonului există deja.");
+            return;
+        }
+    }
+
+    try
+    {
+        if (_currentUserId == Guid.Empty)
+        {
+            Console.WriteLine("User ID nu este disponibil.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(PolygonName))
+        {
+            MessageBox.Show("Te rog să introduci un nume pentru poligon.");
+            return;
+        }
+
+        // Factor de scalare pentru a mări precizia coordonatelor
+        double scale = 1000000.0;
+
+        // Convertim markerCoordinates într-un PathD pentru noul poligon (aplicăm scalare)
+        var newPolygonPathD = new PathD();
+        foreach (var marker in _markerCoordinates)
+        {
+            newPolygonPathD.Add(new PointD(marker.Lng * scale, marker.Lat * scale));
+        }
+        // Convertim noul poligon în Path64 (valorile scalate)
+        var newPolygonPath64 = Clipper.Path64(newPolygonPathD);
+
+        // Verificăm suprapunerea cu fiecare poligon existent din listă
+        foreach (var existingPolygonDto in _polygons)
+        {
+            // Convertim poligonul existent (PolygonDto) într-un PathD (aplicăm scalare)
+            var existingPolygonPathD = new PathD();
+            foreach (var pt in existingPolygonDto.Points.OrderBy(p => p.Order))
             {
-                Console.WriteLine("Trebuie să ai cel puțin 3 puncte pentru a crea un poligon.");
+                // Folosim Longitude pentru x și Latitude pentru y
+                existingPolygonPathD.Add(new PointD((double)pt.Longitude * scale, (double)pt.Latitude * scale));
+            }
+            // Convertim în Path64
+            var existingPolygonPath64 = Clipper.Path64(existingPolygonPathD);
+
+            // Efectuăm operația de intersecție între noul poligon și cel existent
+            Paths64 intersectionResult = Clipper.Intersect(
+                new Paths64 { newPolygonPath64 },
+                new Paths64 { existingPolygonPath64 },
+                FillRule.NonZero
+            );
+
+            // Dacă rezultatul intersecției nu este gol, există suprapunere
+            if (intersectionResult != null && intersectionResult.Any())
+            {
+                MessageBox.Show("Noul poligon se suprapune peste un poligon existent!");
                 return;
             }
-
-            foreach (var polygonName in _polygonNames)
-            {
-                if (polygonName == PolygonName)
-                {
-                    MessageBox.Show("Numele poligonului există deja.");
-                    return;
-                }
-            }
-
-            try
-            {
-                if (_currentUserId == Guid.Empty)
-                {
-                    Console.WriteLine("User ID nu este disponibil.");
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(PolygonName))
-                {
-                    MessageBox.Show("Te rog să introduci un nume pentru poligon.");
-                    return;
-                }
-
-                // Convertim markerCoordinates într-un PathD pentru noul poligon
-                var newPolygonPathD = new PathD();
-                foreach (var marker in _markerCoordinates)
-                {
-                    newPolygonPathD.Add(new PointD(marker.Lng, marker.Lat));
-                }
-// Convertim noul poligon în Path64
-                var newPolygonPath64 = Clipper.Path64(newPolygonPathD);
-
-// Dacă există cel puțin un poligon existent, verificăm suprapunerea
-                foreach (var polygon in _polygons)
-                {
-                    if (_polygons.Count > 0)
-                    {
-                        // Exemplu: folosim primul poligon existent; poți schimba criteriul de selecție
-                        var existingPolygonDto = polygon;
-
-                        // Convertim poligonul existent din PolygonDto într-un PathD
-                        var existingPolygonPathD = new PathD();
-                        foreach (var pt in existingPolygonDto.Points.OrderBy(p => p.Order))
-                        {
-                            // Folosim Longitude pentru x și Latitude pentru y (asigură-te de ordinea corectă a coordonatelor)
-                            existingPolygonPathD.Add(new PointD((double)pt.Longitude, (double)pt.Latitude));
-                        }
-
-                        // Convertim în Path64
-                        var existingPolygonPath64 = Clipper.Path64(existingPolygonPathD);
-
-                        // Efectuăm operația de intersecție
-                        // Efectuăm operația de intersecție
-                        Paths64 intersectionResult = Clipper.Intersect(
-                            new Paths64 { newPolygonPath64 },
-                            new Paths64 { existingPolygonPath64 },
-                            FillRule.NonZero
-                        );
-
-// Dacă rezultatul intersecției nu este gol, există suprapunere
-                        if (intersectionResult != null && intersectionResult.Any())
-                        {
-                            MessageBox.Show("Noul poligon se suprapune peste un poligon existent!");
-                            return;
-                        }
-                    }
-                }
-
-                // Continuăm cu logica de trimitere către server (dacă este cazul)
-                var client = new HttpClient();
-                var request = new CreatePolygonRequest
-                {
-                    UserId = _currentUserId,
-                    Name = PolygonName,
-                    Points = _markerCoordinates.ConvertAll(p => new PointRequest
-                    {
-                        Latitude = (decimal)p.Lat,
-                        Longitude = (decimal)p.Lng
-                    })
-                };
-                _polygonNames.Add(request.Name);
-
-                var jsonContent =
-                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}",
-                    jsonContent);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
-                    return;
-                }
-
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
-
-                if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
-                {
-                    Console.WriteLine("Crearea poligonului pe server a eșuat.");
-                    return;
-                }
-
-                // Adăugăm poligonul nou pe hartă (folosim newPolygonPathD, care are coordonatele reale)
-                AddClipperPolygonToMap(newPolygonPathD, createdPolygon.Name);
-                PolygonsUpdated?.Invoke();
-                ClearMarkers();
-                PolygonName = string.Empty;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
-            }
         }
+
+        // Nu a fost detectată nicio suprapunere, deci continuăm cu trimiterea către server
+        var client = new HttpClient();
+        var request = new CreatePolygonRequest
+        {
+            UserId = _currentUserId,
+            Name = PolygonName,
+            Points = _markerCoordinates.ConvertAll(p => new PointRequest
+            {
+                Latitude = (decimal)p.Lat,
+                Longitude = (decimal)p.Lng
+            })
+        };
+
+        _polygonNames.Add(request.Name);
+
+        var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+        var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}", jsonContent);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
+            return;
+        }
+
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
+
+        if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
+        {
+            Console.WriteLine("Crearea poligonului pe server a eșuat.");
+            return;
+        }
+
+        // Dacă dorești să afișezi poligonul la coordonate reale, poți scala invers (opțional)
+        // Aici folosim newPolygonPathD, dar fără scalare inversă arată coordonatele scalate
+        // Pentru afișare, este recomandat să refaci conversia la coordonate reale:
+        var newPolygonPathDForDisplay = new PathD();
+        foreach (var pt in newPolygonPathD)
+        {
+            newPolygonPathDForDisplay.Add(new PointD(pt.x / scale, pt.y / scale));
+        }
+
+        // Adăugăm poligonul nou pe hartă
+        AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
+        PolygonsUpdated?.Invoke();
+        ClearMarkers();
+        PolygonName = string.Empty;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
+    }
+}
+
 
         private void AddClipperPolygonToMap(PathD clipperPolygon, string polygonName)
         {
