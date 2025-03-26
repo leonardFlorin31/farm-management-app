@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "ZCOxN1JVJXc=",
+  "dgSpecHash": "t+69o4L3z/Y=",
   "success": true,
   "projectFilePath": "C:\\Users\\leofl\\Documents\\GitHub\\licenta\\licenta\\licenta.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\leofl\\.nuget\\packages\\clipper2\\1.4.0\\clipper2.1.4.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\entityframework\\6.4.4\\entityframework.6.4.4.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\fontawesome.sharp\\6.6.0\\fontawesome.sharp.6.6.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\gmap.net.core\\2.1.7\\gmap.net.core.2.1.7.nupkg.sha512",

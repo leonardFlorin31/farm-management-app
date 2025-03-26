@@ -12,10 +12,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Clipper2Lib;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsPresentation;
 using licenta.Repositories;
+using FillRule = Clipper2Lib.FillRule;
 
 namespace licenta.ViewModel
 {
@@ -23,18 +25,23 @@ namespace licenta.ViewModel
     {
         private static MapViewModel _instance;
         public static MapViewModel Instance => _instance ??= new MapViewModel();
-        
+
         private PointLatLng _mapCenter;
         private int _zoomLevel = 13; // Initial zoom level
         private GMapProvider _mapProvider = GoogleSatelliteMapProvider.Instance;
         public int _mapTypeCounter = 0;
-        private ObservableCollection<CenterPointsAndName> _centerPoints = new ObservableCollection<CenterPointsAndName>();
+
+        private ObservableCollection<CenterPointsAndName> _centerPoints =
+            new ObservableCollection<CenterPointsAndName>();
+
         private CenterPointsAndName _selectedCenterPoint;
         private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
+        private List<PolygonDto> _polygons = new List<PolygonDto>();
+
         public ObservableCollection<string> CenterPointNames { get; } = new ObservableCollection<string>
         {
-            
         };
+
         private ParcelData _selectedParcel;
         private ParcelData _selectedParcel2;
 
@@ -47,17 +54,17 @@ namespace licenta.ViewModel
 
         // Fields for server interaction
         private readonly HttpClient _httpClient = new HttpClient();
-        private string _apiBaseUrl = "https://localhost:7088/api"; 
+        private string _apiBaseUrl = "https://localhost:7088/api";
         private Guid _currentUserId; // Will be set after login
         private string _currentUsername = LoginViewModel.UsernameForUse.Username;
         private List<string> _polygonNames = new List<string> { };
-        
+
         public GMapControl MapControl { get; set; }
-        
+
         public event Action? PolygonsUpdated;
 
         // Bindable properties
-        
+
         public GMapProvider MapProvider
         {
             get => _mapProvider;
@@ -69,14 +76,14 @@ namespace licenta.ViewModel
             get => _mapCenter;
             set => Set(ref _mapCenter, value);
         }
-        
+
 
         public PointLatLng PolygonCentroid
         {
             get => _polygonCentroid;
             set => Set(ref _polygonCentroid, value);
         }
-        
+
         public ObservableCollection<CenterPointsAndName> CenterPoints
         {
             get { return _centerPoints; }
@@ -86,7 +93,7 @@ namespace licenta.ViewModel
                 OnPropertyChanged(nameof(CenterPoints));
             }
         }
-        
+
         public CenterPointsAndName SelectedCenterPoint
         {
             get { return _selectedCenterPoint; }
@@ -100,11 +107,11 @@ namespace licenta.ViewModel
                 // {
                 //     Console.WriteLine($"Ai selectat: {value.Name}");
                 // }
-                
             }
         }
-        
+
         private string _selectedCenterPointName;
+
         public string SelectedCenterPointName
         {
             get => _selectedCenterPointName;
@@ -118,7 +125,7 @@ namespace licenta.ViewModel
             }
         }
 
-        
+
         private string _PolygonName;
 
         public string PolygonName
@@ -131,6 +138,7 @@ namespace licenta.ViewModel
                 OnPropertyChanged(nameof(IsPlaceholderVisible));
             }
         }
+
         public bool IsPlaceholderVisible => string.IsNullOrEmpty(PolygonName);
 
         public int ZoomLevel
@@ -145,6 +153,7 @@ namespace licenta.ViewModel
                     {
                         MapControl.Zoom = value;
                     }
+
                     Console.WriteLine(ZoomLevel);
                     ZoomChanged?.Invoke(value);
                     UpdateLabelVisibility();
@@ -161,13 +170,13 @@ namespace licenta.ViewModel
 
         // Command for creating a polygon
         public ICommand CreatePolygonCommand { get; }
-        
+
         public ICommand DeleteLastMarkerCommand { get; }
-        
+
         public ICommand DeletePolygonCommand { get; }
-        
+
         public ICommand ChangeMapTypeCommand { get; }
-        
+
         public ICommand SelectionChangedCommand { get; }
 
         public MapViewModel()
@@ -186,7 +195,7 @@ namespace licenta.ViewModel
 
             // Command to create a polygon
             CreatePolygonCommand = new RelayCommand(CreatePolygon);
-            
+
             DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
 
             DeletePolygonCommand = new RelayCommand(DeletePolygon);
@@ -223,18 +232,19 @@ namespace licenta.ViewModel
             {
                 //MessageBox.Show("Niciun element selectat sau elementul este null."); // astea ruleaza pe thread secundar si fac ca aplicatia sa dea crash
                 return;
-            } 
+            }
             // MessageBox.Show($"Ai selectat: {SelectedCenterPointName}");
 
             foreach (var item in CenterPoints)
             {
                 if (item.Name == SelectedCenterPointName)
                 {
-                        
                     MapControl.Position = item.Points;
                     Console.WriteLine(item.Points.ToString());
                 }
-            };
+            }
+
+            ;
             //MapControl.Position = new PointLatLng();
         }
 
@@ -246,13 +256,12 @@ namespace licenta.ViewModel
                     MapControl.MapProvider = GoogleMapProvider.Instance;
                     _mapTypeCounter++;
                     break;
-                
+
                 case 1:
                     MapControl.MapProvider = GoogleSatelliteMapProvider.Instance;
                     _mapTypeCounter--;
                     break;
             }
-                
         }
 
         private async void InitializeUserAndPolygons()
@@ -328,7 +337,8 @@ namespace licenta.ViewModel
 
                 // Add each polygon to the map
                 foreach (var polygon in polygons)
-                {   
+                {
+                    _polygons.Add(polygon);
                     _polygonNames.Add(polygon.Name);
                     AddPolygonToMap(polygon);
                 }
@@ -342,36 +352,28 @@ namespace licenta.ViewModel
         // Updated DTO classes with JSON property mapping
         public class PolygonDto
         {
-            [JsonPropertyName("polygonId")]
-            public Guid Id { get; set; }
-            
-            [JsonPropertyName("name")]
-            public string Name { get; set; }
-            
-            [JsonPropertyName("createdByUserId")]
-            public Guid CreatedByUserId { get; set; }
-            
-            [JsonPropertyName("createdDate")]
-            public DateTime CreatedDate { get; set; }
-            
-            [JsonPropertyName("points")]
-            public List<PointDto> Points { get; set; }
+            [JsonPropertyName("polygonId")] public Guid Id { get; set; }
+
+            [JsonPropertyName("name")] public string Name { get; set; }
+
+            [JsonPropertyName("createdByUserId")] public Guid CreatedByUserId { get; set; }
+
+            [JsonPropertyName("createdDate")] public DateTime CreatedDate { get; set; }
+
+            [JsonPropertyName("points")] public List<PointDto> Points { get; set; }
         }
 
         public class PointDto
         {
-            [JsonPropertyName("pointId")]
-            public Guid PointId { get; set; }
-            
-            [JsonPropertyName("latitude")]
-            public decimal Latitude { get; set; }
-            
-            [JsonPropertyName("longitude")]
-            public decimal Longitude { get; set; }
-            
-            [JsonPropertyName("order")]
-            public int Order { get; set; }
+            [JsonPropertyName("pointId")] public Guid PointId { get; set; }
+
+            [JsonPropertyName("latitude")] public decimal Latitude { get; set; }
+
+            [JsonPropertyName("longitude")] public decimal Longitude { get; set; }
+
+            [JsonPropertyName("order")] public int Order { get; set; }
         }
+        
 
         public class CreatePolygonRequest
         {
@@ -395,7 +397,8 @@ namespace licenta.ViewModel
         private void MapControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Get the position of the right-click
-            var point = MapControl.FromLocalToLatLng((int)e.GetPosition(MapControl).X, (int)e.GetPosition(MapControl).Y);
+            var point = MapControl.FromLocalToLatLng((int)e.GetPosition(MapControl).X,
+                (int)e.GetPosition(MapControl).Y);
 
             // Add a marker at the clicked position
             AddMarker(point);
@@ -463,7 +466,8 @@ namespace licenta.ViewModel
                         Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
                         StrokeThickness = 2
                     },
-                    Tag = polygon.Name // Store polygon Name for reference (!!!Daca crapa ceva schimba in polygon.Id si nu o sa mai mearga RemovePolygonFromMap)
+                    Tag = polygon
+                        .Name // Store polygon Name for reference (!!!Daca crapa ceva schimba in polygon.Id si nu o sa mai mearga RemovePolygonFromMap)
                 };
 
                 MapControl.Markers.Add(gmapPolygon);
@@ -482,16 +486,15 @@ namespace licenta.ViewModel
         {
             if (_markerCoordinates.Count < 3)
             {
-                Console.WriteLine("You need at least 3 points to create a polygon.");
+                Console.WriteLine("Trebuie să ai cel puțin 3 puncte pentru a crea un poligon.");
                 return;
             }
-            
-            
+
             foreach (var polygonName in _polygonNames)
-            {   
-                if(polygonName == PolygonName)
+            {
+                if (polygonName == PolygonName)
                 {
-                    MessageBox.Show("Polygon name already exists.");
+                    MessageBox.Show("Numele poligonului există deja.");
                     return;
                 }
             }
@@ -500,23 +503,67 @@ namespace licenta.ViewModel
             {
                 if (_currentUserId == Guid.Empty)
                 {
-                    Console.WriteLine("User ID is not available.");
+                    Console.WriteLine("User ID nu este disponibil.");
                     return;
                 }
-                
-                // Validate that the user entered a name
+
                 if (string.IsNullOrWhiteSpace(PolygonName))
                 {
-                    MessageBox.Show("Please enter a polygon name.");
+                    MessageBox.Show("Te rog să introduci un nume pentru poligon.");
                     return;
                 }
 
-                var client = new HttpClient();
+                // Convertim markerCoordinates într-un PathD pentru noul poligon
+                var newPolygonPathD = new PathD();
+                foreach (var marker in _markerCoordinates)
+                {
+                    newPolygonPathD.Add(new PointD(marker.Lng, marker.Lat));
+                }
+// Convertim noul poligon în Path64
+                var newPolygonPath64 = Clipper.Path64(newPolygonPathD);
 
+// Dacă există cel puțin un poligon existent, verificăm suprapunerea
+                foreach (var polygon in _polygons)
+                {
+                    if (_polygons.Count > 0)
+                    {
+                        // Exemplu: folosim primul poligon existent; poți schimba criteriul de selecție
+                        var existingPolygonDto = polygon;
+
+                        // Convertim poligonul existent din PolygonDto într-un PathD
+                        var existingPolygonPathD = new PathD();
+                        foreach (var pt in existingPolygonDto.Points.OrderBy(p => p.Order))
+                        {
+                            // Folosim Longitude pentru x și Latitude pentru y (asigură-te de ordinea corectă a coordonatelor)
+                            existingPolygonPathD.Add(new PointD((double)pt.Longitude, (double)pt.Latitude));
+                        }
+
+                        // Convertim în Path64
+                        var existingPolygonPath64 = Clipper.Path64(existingPolygonPathD);
+
+                        // Efectuăm operația de intersecție
+                        // Efectuăm operația de intersecție
+                        Paths64 intersectionResult = Clipper.Intersect(
+                            new Paths64 { newPolygonPath64 },
+                            new Paths64 { existingPolygonPath64 },
+                            FillRule.NonZero
+                        );
+
+// Dacă rezultatul intersecției nu este gol, există suprapunere
+                        if (intersectionResult != null && intersectionResult.Any())
+                        {
+                            MessageBox.Show("Noul poligon se suprapune peste un poligon existent!");
+                            return;
+                        }
+                    }
+                }
+
+                // Continuăm cu logica de trimitere către server (dacă este cazul)
+                var client = new HttpClient();
                 var request = new CreatePolygonRequest
                 {
                     UserId = _currentUserId,
-                    Name = PolygonName, // bound to user input
+                    Name = PolygonName,
                     Points = _markerCoordinates.ConvertAll(p => new PointRequest
                     {
                         Latitude = (decimal)p.Lat,
@@ -525,45 +572,61 @@ namespace licenta.ViewModel
                 };
                 _polygonNames.Add(request.Name);
 
-                var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
-                var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}", jsonContent);
+                var jsonContent =
+                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}",
+                    jsonContent);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"Failed to create polygon. Status code: {response.StatusCode}");
+                    Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
                     return;
                 }
 
                 var responseContent = await response.Content.ReadAsStringAsync();
-
-                // Use case-insensitive options to match JSON properties
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
 
                 if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
                 {
-                    Console.WriteLine("Failed to create polygon on the server.");
+                    Console.WriteLine("Crearea poligonului pe server a eșuat.");
                     return;
                 }
 
-                AddPolygonToMap(createdPolygon);
-                
-                
-                //Console.WriteLine($"Before invoking PolygonsUpdated, it is {(PolygonsUpdated == null ? "null" : "not null")}");
-                PolygonsUpdated?.Invoke(); 
-                //Console.WriteLine("PolygonsUpdated was invoked.");
-                
-
+                // Adăugăm poligonul nou pe hartă (folosim newPolygonPathD, care are coordonatele reale)
+                AddClipperPolygonToMap(newPolygonPathD, createdPolygon.Name);
+                PolygonsUpdated?.Invoke();
                 ClearMarkers();
-                
                 PolygonName = string.Empty;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating polygon: {ex.Message}");
+                Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
             }
         }
+
+        private void AddClipperPolygonToMap(PathD clipperPolygon, string polygonName)
+        {
+            // Convertește PathD la o listă de PointLatLng (asigură-te că ordinea coordonatelor e corectă)
+            var points = clipperPolygon
+                .Select(p => new PointLatLng(p.y, p.x)) // reține: în Clipper2, de obicei se folosește (X, Y)
+                .ToList();
+
+            var gmapPolygon = new GMapPolygon(points)
+            {
+                Shape = new System.Windows.Shapes.Polygon
+                {
+                    Stroke = Brushes.Red,
+                    Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                    StrokeThickness = 2
+                },
+                Tag = polygonName
+            };
+
+            MapControl.Markers.Add(gmapPolygon);
+            AddTextToPolygon(gmapPolygon, polygonName);
+        }
+
 
         // Method to delete a polygon from the server
         public async void DeletePolygon()
@@ -572,9 +635,10 @@ namespace licenta.ViewModel
             {
                 var pName = PolygonName;
                 var client = new HttpClient();
-                
-               // var encodedName = Uri.EscapeDataString(PolygonName);
-                var response = await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
+
+                // var encodedName = Uri.EscapeDataString(PolygonName);
+                var response =
+                    await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -597,36 +661,37 @@ namespace licenta.ViewModel
         {
             //remove based on the polygonName
             var toRemove = MapControl.Markers
-                .FirstOrDefault(m => m is GMapPolygon polygon && polygon.Tag != null && polygon.Tag.ToString() == polygonName);
+                .FirstOrDefault(m =>
+                    m is GMapPolygon polygon && polygon.Tag != null && polygon.Tag.ToString() == polygonName);
 
             if (toRemove != null)
             {
                 MapControl.Markers.Remove(toRemove);
             }
-            
+
             var textMarkers = MapControl.Markers
                 .Where(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName)
                 .ToList();
-            
+
             foreach (var marker in textMarkers)
             {
                 MapControl.Markers.Remove(marker);
             }
-            
+
             CenterPointNames.Remove(polygonName);
-            
+
             _polygonNames.Remove(polygonName);
         }
 
         private void AddTextToPolygon(GMapPolygon polygon, string text)
         {
             PointLatLng centroid = CalculateCentroid(polygon.Points, text);
-            
+
             CenterPointsAndName _centroidPointsAndName = new CenterPointsAndName();
-             _centroidPointsAndName.Points = centroid;
-             _centroidPointsAndName.Name = text;
-             _centerPoints.Add(_centroidPointsAndName);
-             CenterPointNames.Add(text);
+            _centroidPointsAndName.Points = centroid;
+            _centroidPointsAndName.Name = text;
+            _centerPoints.Add(_centroidPointsAndName);
+            CenterPointNames.Add(text);
 
             Button textBlock = new Button()
             {
@@ -638,19 +703,18 @@ namespace licenta.ViewModel
                 Padding = new Thickness(2),
                 BorderThickness = new Thickness(0)
             };
-            
+
             textBlock.Click += (sender, args) =>
             {
                 if (sender is Button clickedButton && clickedButton.Content is string buttonText)
                 {
-                    
                     InitiateDataForPolygon(buttonText);
                 }
             };
-            
+
             // Setăm ZIndex-ul pentru a ne asigura că textul este afișat deasupra poligonului
             Panel.SetZIndex(textBlock, 999);
-            
+
             ScaleTransform scaleTransform = new ScaleTransform();
             textBlock.RenderTransform = scaleTransform;
 
@@ -658,14 +722,14 @@ namespace licenta.ViewModel
             {
                 Shape = textBlock
             };
-            
+
             MapControl.Markers.Add(textMarker);
 
             ZoomChanged += (zoom) => UpdateTextScale(textBlock, scaleTransform, zoom);
 
             UpdateTextScale(textBlock, scaleTransform, ZoomLevel);
         }
-        
+
         public ParcelData SelectedParcel
         {
             get => _selectedParcel;
@@ -675,7 +739,7 @@ namespace licenta.ViewModel
                 OnPropertyChanged(nameof(SelectedParcel));
             }
         }
-        
+
         public ParcelData SelectedParcel2
         {
             get => _selectedParcel2;
@@ -689,149 +753,151 @@ namespace licenta.ViewModel
         private async void InitiateDataForPolygon(string polygonName)
         {
             Console.WriteLine($"Ai apăsat pe butonul: {polygonName}");
-            
+
             await InitiatePolygonsNameAndId();
-            
+
             Guid _id = new Guid();
             foreach (var item in _parcelNameAndIDs)
             {
-                if(item.Name == polygonName)
+                if (item.Name == polygonName)
                     _id = item.Id;
-                    
             }
+
             Console.WriteLine(_id);
-            
+
             InitiateDataForPolygonAnimals(polygonName, _id);
-            
-            try {
-            ParcelData parcelData = new ParcelData();
-        
-            HttpClient client = new HttpClient();
-                    
-            var response  = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{_id}").ConfigureAwait(false);
 
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
-            
-            }
-                    
-            var json = await response.Content.ReadAsStringAsync();
-        
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
-            };
-            var GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
+                ParcelData parcelData = new ParcelData();
 
-        
-            if (GrainParcelDataList != null && GrainParcelDataList.Count > 0)
-            {
-                var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
-                parcelData.Option = "Grane";
-                parcelData.Field1 = polygonName;
-                parcelData.Field2 = firstParcel.CropType;
-                parcelData.Field3 = firstParcel.ParcelArea.ToString();
-                parcelData.Field4 = firstParcel.IrrigationType;
-                parcelData.Field5 = firstParcel.FertilizerUsed.ToString();
-                parcelData.Field6 = firstParcel.PesticideUsed.ToString();
-                parcelData.Field7 = firstParcel.Yield.ToString();
-                parcelData.Field8 = firstParcel.SoilType;
-                parcelData.Field9 = firstParcel.WaterUsage.ToString();
+                HttpClient client = new HttpClient();
 
-                SelectedParcel = parcelData;
-            }
-            else
-            {
-                Console.WriteLine("No data found.");
-            }
+                var response = await client.GetAsync($"https://localhost:7088/api/ParcelData/polygon/{_id}")
+                    .ConfigureAwait(false);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
+                };
+                var GrainParcelDataList = JsonSerializer.Deserialize<List<GrainParcelDataDto>>(json, options);
+
+
+                if (GrainParcelDataList != null && GrainParcelDataList.Count > 0)
+                {
+                    var firstParcel = GrainParcelDataList[0]; // Ia primul element dacă e nevoie
+                    parcelData.Option = "Grane";
+                    parcelData.Field1 = polygonName;
+                    parcelData.Field2 = firstParcel.CropType;
+                    parcelData.Field3 = firstParcel.ParcelArea.ToString();
+                    parcelData.Field4 = firstParcel.IrrigationType;
+                    parcelData.Field5 = firstParcel.FertilizerUsed.ToString();
+                    parcelData.Field6 = firstParcel.PesticideUsed.ToString();
+                    parcelData.Field7 = firstParcel.Yield.ToString();
+                    parcelData.Field8 = firstParcel.SoilType;
+                    parcelData.Field9 = firstParcel.WaterUsage.ToString();
+
+                    SelectedParcel = parcelData;
+                }
+                else
+                {
+                    Console.WriteLine("No data found.");
+                }
             }
             catch
             {
                 Console.WriteLine("Failed to initiate data for a Polygon.");
             }
         }
-        
+
         private async void InitiateDataForPolygonAnimals(string polygonName, Guid _id)
         {
-            try {
-            ParcelData parcelData = new ParcelData();
-        
-            HttpClient client = new HttpClient();
-                    
-            var response  = await client.GetAsync($"https://localhost:7088/api/AnimalParcelData/polygon/{_id}").ConfigureAwait(false);
+            try
+            {
+                ParcelData parcelData = new ParcelData();
 
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
-            
-            }
-                    
-            var json = await response.Content.ReadAsStringAsync();
-        
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
-            };
-            var AnimalParcelDataList = JsonSerializer.Deserialize<List<AnimalParcelDataDto>>(json, options);
+                HttpClient client = new HttpClient();
 
-        
-            if (AnimalParcelDataList != null && AnimalParcelDataList.Count > 0)
-            {
-                var firstParcel = AnimalParcelDataList[0]; // Ia primul element dacă e nevoie
-                parcelData.Option = "Animale";
-                parcelData.Field1 = polygonName;
-                parcelData.Field2 = firstParcel.AnimalType;
-                parcelData.Field3 = firstParcel.NumberOfAnimale.ToString();
-                parcelData.Field4 = firstParcel.FeedType;
-                parcelData.Field5 = firstParcel.WaterConsumption.ToString();
-                parcelData.Field6 = firstParcel.VeterinaryVisits.ToString();
-                parcelData.Field7 = firstParcel.WasteManagement;
-                parcelData.Field8 = "";
-                parcelData.Field9 = "";
+                var response = await client.GetAsync($"https://localhost:7088/api/AnimalParcelData/polygon/{_id}")
+                    .ConfigureAwait(false);
 
-                SelectedParcel2 = parcelData;
-            }
-            else
-            {
-                Console.WriteLine("No data found.");
-            }
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Failed to fetch data. Status code: {response.StatusCode}");
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull // Opțiune corectă
+                };
+                var AnimalParcelDataList = JsonSerializer.Deserialize<List<AnimalParcelDataDto>>(json, options);
+
+
+                if (AnimalParcelDataList != null && AnimalParcelDataList.Count > 0)
+                {
+                    var firstParcel = AnimalParcelDataList[0]; // Ia primul element dacă e nevoie
+                    parcelData.Option = "Animale";
+                    parcelData.Field1 = polygonName;
+                    parcelData.Field2 = firstParcel.AnimalType;
+                    parcelData.Field3 = firstParcel.NumberOfAnimale.ToString();
+                    parcelData.Field4 = firstParcel.FeedType;
+                    parcelData.Field5 = firstParcel.WaterConsumption.ToString();
+                    parcelData.Field6 = firstParcel.VeterinaryVisits.ToString();
+                    parcelData.Field7 = firstParcel.WasteManagement;
+                    parcelData.Field8 = "";
+                    parcelData.Field9 = "";
+
+                    SelectedParcel2 = parcelData;
+                }
+                else
+                {
+                    Console.WriteLine("No data found.");
+                }
             }
             catch
             {
                 Console.WriteLine("Failed to initiate data for a Polygon.");
             }
         }
-        
+
         private async Task InitiatePolygonsNameAndId()
         {
             _parcelNameAndIDs.Clear();
-    
+
             HttpClient client = new HttpClient();
             Console.WriteLine($"Current user ID: {_currentUserId}");
-    
+
             var response = await client.GetAsync($"https://localhost:7088/api/Polygons/names?userId={_currentUserId}");
-    
+
             if (!response.IsSuccessStatusCode)
             {
                 Console.WriteLine($"Failed to fetch polygons. Status code: {response.StatusCode}");
                 return;
             }
-    
+
             var polygonsJson = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"Răspuns server: {polygonsJson}"); // Verifică ce primești
-    
+
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
-    
+
             if (polygons == null || polygons.Count == 0)
             {
                 Console.WriteLine("Nu s-au găsit poligoane pentru acest utilizator.");
                 return;
             }
-    
+
             foreach (var polygon in polygons)
             {
                 try
@@ -851,7 +917,7 @@ namespace licenta.ViewModel
             }
         }
 
-        
+
         // Update text size based on zoom level
         private void UpdateTextScale(Button textBlock, ScaleTransform scaleTransform, int zoomLevel)
         {
@@ -933,7 +999,7 @@ namespace licenta.ViewModel
             Console.WriteLine($"Centroid: Lat = {centroidLat}, Lng = {centroidLng}");
             return new PointLatLng(centroidLat, centroidLng);
         }
-        
+
         private void DeleteLastMarker()
         {
             if (_markerCoordinates.Count == 0)
@@ -989,6 +1055,5 @@ namespace licenta.ViewModel
     {
         public PointLatLng Points { get; set; }
         public string Name { get; set; }
-        
     }
 }
