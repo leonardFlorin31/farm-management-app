@@ -67,7 +67,27 @@
     </UserControl.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <!-- Rândul pentru header -->
+            <RowDefinition Height="35" />
+            <!-- Rândul pentru harta și restul elementelor -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
+        <!-- Header-ul din MapView (ex: caption sau controale specifice hărții) -->
+        <Grid Grid.Row="0" Background="{StaticResource titleColor2}">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10">
+                <!-- De exemplu, un icon și un TextBlock -->
+                <TextBlock Text="Harta mea" 
+                           FontSize="16" 
+                           FontWeight="Bold" 
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+                <!-- Alte elemente specifice pentru header, dacă este cazul -->
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
         <!-- Harta -->
         <ContentControl Content="{Binding MapControl}" />
 
@@ -115,60 +135,136 @@
 
         </Grid>
 
-        <!-- Butonul de creare poligon, plasat în colțul din dreapta sus -->
-        <Button Content="Creaza parcela"
-                Command="{Binding CreatePolygonCommand}"
-                Width="100"
-                Height="30"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="10"
-                Padding="5"
-                Background="{StaticResource titleColor2}"
-                Foreground="White"
-                BorderBrush="Transparent"
-                FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Margin="0, 0, 0, 0">
+    <Button Content="Creaza parcela"
+            Command="{Binding CreatePolygonCommand}"
+            Width="100"
+            Height="30"
+            Padding="5"
+            Foreground="White"
+            BorderBrush="Transparent"
+            FontWeight="Bold"
+            Margin="10">
+        <Button.Style>
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+        <Button.Template>
+            <ControlTemplate TargetType="Button">
+                <Border Width="100" Height="30"
+                        CornerRadius="20"
+                        Background="{TemplateBinding Background}">
+                    <ContentPresenter VerticalAlignment="Center"
+                                      HorizontalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Button.Template>
+    </Button>
 
-        <Button Content="Sterge parcela"
-                Command="{Binding DeletePolygonCommand}"
-                Width="100"
-                Height="30"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="10,50,10,10"
-                Padding="5"
-                Background="{StaticResource color12}"
-                Foreground="White"
-                BorderBrush="Transparent"
-                FontWeight="Bold" />
+    <Button Content="Sterge parcela"
+            Command="{Binding DeletePolygonCommand}"
+            Width="100"
+            Height="30"
+            Padding="5"
+            Foreground="White"
+            BorderBrush="Transparent"
+            FontWeight="Bold"
+            Margin="10">
+        <Button.Style>
+            <Style TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Button.Style>
+        <Button.Template>
+            <ControlTemplate TargetType="Button">
+                <Border Width="100" Height="30"
+                        CornerRadius="20"
+                        Background="{TemplateBinding Background}">
+                    <ContentPresenter VerticalAlignment="Center"
+                                      HorizontalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Button.Template>
+    </Button>
 
-        <!--button for deleting the last marker -->
-        <Button Content="Sterge ultimul marker"
-                Command="{Binding DeleteLastMarkerCommand}"
-                Width="150"
-                Height="30"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="10,90,10,10"
-                Padding="5"
-                Background="{StaticResource color12}"
-                Foreground="White"
-                BorderBrush="Transparent"
-                FontWeight="Bold" />
+    <Button Content="Sterge ultimul marker"
+            Command="{Binding DeleteLastMarkerCommand}"
+            Width="150"
+            Height="30"
+            Padding="5"
+            Background="{StaticResource color12}"
+            Foreground="White"
+            BorderBrush="Transparent"
+            FontWeight="Bold"
+            Margin="0,0,0,0">
+    <Button.Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Button.Style>
+    <Button.Template>
+        <ControlTemplate TargetType="Button">
+            <Border Width="100" Height="30"
+                    CornerRadius="20"
+                    Background="{TemplateBinding Background}">
+                <ContentPresenter VerticalAlignment="Center"
+                                  HorizontalAlignment="Center" />
+            </Border>
+        </ControlTemplate>
+    </Button.Template>
+    </Button>
 
-        <!-- button for switching map provider -->
-        <Button Content="Schimba tipul hartii"
-                Command="{Binding ChangeMapTypeCommand}"
-                Width="150"
-                Height="30"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="10,130,10,10"
-                Padding="5"
-                Background="{StaticResource titleColor2}"
-                Foreground="White"
-                BorderBrush="Transparent"
-                FontWeight="Bold" />
+    <Button Content="Schimba tipul hartii"
+            Command="{Binding ChangeMapTypeCommand}"
+            Width="150"
+            Height="30"
+            Padding="5"
+            Background="{StaticResource titleColor2}"
+            Foreground="White"
+            BorderBrush="Transparent"
+            FontWeight="Bold"
+            Margin="0,0,0,0">
+    <Button.Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Button.Style>
+    <Button.Template>
+        <ControlTemplate TargetType="Button">
+            <Border Width="100" Height="30"
+                    CornerRadius="20"
+                    Background="{TemplateBinding Background}">
+                <ContentPresenter VerticalAlignment="Center"
+                                  HorizontalAlignment="Center" />
+            </Border>
+        </ControlTemplate>
+    </Button.Template>
+    </Button>
+</StackPanel>
 
         <Border Background="White"
                 BorderBrush="Black"
@@ -343,6 +439,6 @@
 
         </Border>
 
-
-    </Grid>
+<Grid/>
+    </Grid></Grid>
 </UserControl>
