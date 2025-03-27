@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using Clipper2Lib;
@@ -37,6 +38,10 @@ namespace licenta.ViewModel
         private CenterPointsAndName _selectedCenterPoint;
         private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
         private List<PolygonDto> _polygons = new List<PolygonDto>();
+        
+        private Visibility _parcelDetailsVisibility = Visibility.Collapsed;
+        private double _borderWidth = 300;
+        private double _borderHeight = 350; //dimensiunea inițială
 
         public ObservableCollection<string> CenterPointNames { get; } = new ObservableCollection<string>
         {
@@ -109,6 +114,36 @@ namespace licenta.ViewModel
                 // }
             }
         }
+        
+        public Visibility ParcelDetailsVisibility
+        {
+            get => _parcelDetailsVisibility;
+            set
+            {
+                _parcelDetailsVisibility = value;
+                OnPropertyChanged(nameof(ParcelDetailsVisibility));
+            }
+        }
+
+        public double BorderWidth
+        {
+            get => _borderWidth;
+            set
+            {
+                _borderWidth = value;
+                OnPropertyChanged(nameof(BorderWidth));
+            }
+        }
+
+        public double BorderHeight
+        {
+            get => _borderHeight;
+            set
+            {
+                _borderHeight = value;
+                OnPropertyChanged(nameof(BorderHeight));
+            }
+        }
 
         private string _selectedCenterPointName;
 
@@ -178,6 +213,11 @@ namespace licenta.ViewModel
         public ICommand ChangeMapTypeCommand { get; }
 
         public ICommand SelectionChangedCommand { get; }
+        
+        public ICommand ToggleParcelDetailsCommand { get; }
+        public ICommand ResizeHorizontalCommand { get; }
+        public ICommand ResizeVerticalCommand { get; }
+        public ICommand ResizeCornerCommand { get; }
 
         public MapViewModel()
         {
@@ -203,6 +243,12 @@ namespace licenta.ViewModel
             ChangeMapTypeCommand = new RelayCommand(ChangeMapType);
 
             SelectionChangedCommand = new RelayCommand(SelectionChanged);
+            
+            ToggleParcelDetailsCommand = new RelayCommand(ToggleParcelDetails);
+            
+            ResizeHorizontalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeHorizontal);
+            ResizeVerticalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeVertical);
+            ResizeCornerCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeCorner);
 
             MapControl = new GMapControl
             {
@@ -224,6 +270,32 @@ namespace licenta.ViewModel
 
             // Handle right-click events
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
+        }
+
+        private void OnResizeCorner(DragDeltaEventArgs e)
+        {
+            // Actualizează ambele dimensiuni
+            OnResizeHorizontal(e);
+            OnResizeVertical(e);
+        }
+
+        private void OnResizeVertical(DragDeltaEventArgs e)
+        {
+            double newHeight = BorderHeight + e.VerticalChange;
+            if (newHeight > 100)
+                BorderHeight = newHeight;
+        }
+
+        private void OnResizeHorizontal(DragDeltaEventArgs e)
+        {
+            double newWidth = BorderWidth + e.HorizontalChange;
+            if (newWidth > 150)
+                BorderWidth = newWidth;
+        }
+
+        private void ToggleParcelDetails()
+        {
+            ParcelDetailsVisibility = ParcelDetailsVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void SelectionChanged()
