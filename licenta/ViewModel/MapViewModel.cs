@@ -31,6 +31,9 @@ namespace licenta.ViewModel
         private int _zoomLevel = 13; // Initial zoom level
         private GMapProvider _mapProvider = GoogleSatelliteMapProvider.Instance;
         public int _mapTypeCounter = 0;
+        private GMapMarker _draggedMarker;
+        private PointLatLng _dragStartPoint;
+        private int _polygonMarkerCounter = 0;
 
         private ObservableCollection<CenterPointsAndName> _centerPoints =
             new ObservableCollection<CenterPointsAndName>();
@@ -270,6 +273,9 @@ namespace licenta.ViewModel
 
             // Handle right-click events
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
+            
+            MapControl.MouseMove += MapControl_MouseMove;
+            MapControl.MouseLeftButtonUp += MapControl_MouseLeftButtonUp;
         }
 
         private void OnResizeCorner(DragDeltaEventArgs e)
@@ -481,19 +487,66 @@ namespace licenta.ViewModel
 
         private void AddMarker(PointLatLng point)
         {
-            GMapMarker marker = new GMapMarker(point)
-            {
-                Shape = new System.Windows.Shapes.Ellipse
-                {
-                    Width = 10,
-                    Height = 10,
-                    Fill = Brushes.Red,
-                    Stroke = Brushes.Black,
-                    StrokeThickness = 1
-                }
-            };
-
+            GMapMarker marker = new GMapMarker(point);
+            marker.Shape = new System.Windows.Shapes.Ellipse { Width = 10, Height = 10, Fill = Brushes.Blue }; // Use a simple shape for now
+            marker.Offset = new Point(-5, -5);
             MapControl.Markers.Add(marker);
+            _polygonMarkerCounter++;
+            
+            if (marker.Shape != null) // Ensure the shape exists
+            {
+                marker.Shape.MouseLeftButtonDown += (sender, e) => MarkerShape_OnMouseLeftButtonDown(marker, e);
+            }
+        }
+        
+        private void MarkerShape_OnMouseLeftButtonDown(GMapMarker marker, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                _draggedMarker = marker;
+                System.Windows.Point mousePosition = e.GetPosition(MapControl);
+                _dragStartPoint = MapControl.FromLocalToLatLng((int)mousePosition.X, (int)mousePosition.Y);
+                Mouse.Capture(MapControl); // Capture mouse for the map
+                e.Handled = true;
+            }
+        }
+        
+        
+        
+        private void MapControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_draggedMarker != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point p = e.GetPosition(MapControl);
+                PointLatLng newLatLng = MapControl.FromLocalToLatLng((int)p.X, (int)p.Y);
+                _draggedMarker.Position = newLatLng;
+
+                int draggedMarkerIndexInAllMarkers = MapControl.Markers.IndexOf(_draggedMarker);
+
+                if (draggedMarkerIndexInAllMarkers >= MapControl.Markers.Count - _polygonMarkerCounter && _polygonMarkerCounter > 0)
+                {
+                    int relativeIndex = draggedMarkerIndexInAllMarkers - (MapControl.Markers.Count - _polygonMarkerCounter);
+
+                    if (relativeIndex >= 0 && relativeIndex < _markerCoordinates.Count)
+                    {
+                        // If _markerCoordinates stores PointLatLng:
+                        if (_markerCoordinates[relativeIndex] != null)
+                        {
+                            _markerCoordinates[relativeIndex] = newLatLng;
+                        }
+                    }
+                }
+            }
+        }
+        
+        private void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_draggedMarker != null)
+            {
+                _draggedMarker = null;
+                Mouse.Capture(null); // Eliberăm captura mouse-ului
+                e.Handled = true;
+            }
         }
 
         // Method to add a polygon to the map from a DTO
@@ -673,6 +726,7 @@ namespace licenta.ViewModel
         PolygonsUpdated?.Invoke();
         ClearMarkers();
         PolygonName = string.Empty;
+        _polygonMarkerCounter = 0;
     }
     catch (Exception ex)
     {
