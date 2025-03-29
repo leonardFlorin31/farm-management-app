@@ -34,6 +34,7 @@ namespace licenta.ViewModel
         private GMapMarker _draggedMarker;
         private PointLatLng _dragStartPoint;
         private int _polygonMarkerCounter = 0;
+        private GMapMarker _selectedMarker = null;
 
         private ObservableCollection<CenterPointsAndName> _centerPoints =
             new ObservableCollection<CenterPointsAndName>();
@@ -509,6 +510,8 @@ namespace licenta.ViewModel
                 Mouse.Capture(MapControl); // Capture mouse for the map
                 e.Handled = true;
             }
+            _selectedMarker = marker;
+            Console.WriteLine($"Marker selected at: {marker.Position.Lat}, {marker.Position.Lng}");
         }
         
         
@@ -537,6 +540,8 @@ namespace licenta.ViewModel
                     }
                 }
             }
+           
+            MapControl.InvalidateVisual();
         }
         
         private void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -779,6 +784,7 @@ namespace licenta.ViewModel
                 {
                     Console.WriteLine("Failed to delete polygon from the server.");
                 }
+                PolygonName = string.Empty;
             }
             catch (Exception ex)
             {
@@ -1132,18 +1138,34 @@ namespace licenta.ViewModel
 
         private void DeleteLastMarker()
         {
+            // Dacă există un marker selectat prin click stânga, șterge-l
+            if (_selectedMarker != null)
+            {
+                // Calculăm indexul relativ pentru a actualiza și _markerCoordinates
+                int draggedMarkerIndexInAllMarkers = MapControl.Markers.IndexOf(_selectedMarker);
+                int relativeIndex = draggedMarkerIndexInAllMarkers - (MapControl.Markers.Count - _polygonMarkerCounter);
+
+                if (relativeIndex >= 0 && relativeIndex < _markerCoordinates.Count)
+                {
+                    _markerCoordinates.RemoveAt(relativeIndex);
+                }
+
+                MapControl.Markers.Remove(_selectedMarker);
+                Console.WriteLine($"Removed selected marker at: {_selectedMarker.Position.Lat}, {_selectedMarker.Position.Lng}");
+                _selectedMarker = null; // Resetează selecția
+                return;
+            }
+
+            // Dacă nu există marker selectat, ștergem ultimul marker adăugat
             if (_markerCoordinates.Count == 0)
             {
                 Console.WriteLine("No markers to remove.");
                 return;
             }
 
-            // Get the last coordinate added
             var lastCoordinate = _markerCoordinates.Last();
             _markerCoordinates.RemoveAt(_markerCoordinates.Count - 1);
 
-            // Find the corresponding marker in the MapControl.Markers
-            // We look for a marker with an Ellipse shape whose position matches the last coordinate.
             var markerToRemove = MapControl.Markers
                 .OfType<GMapMarker>()
                 .LastOrDefault(m =>

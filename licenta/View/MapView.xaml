@@ -236,7 +236,7 @@
                 </Button>
 
                 <!-- Buton "Sterge ultimul marker" -->
-                <Button Content="Sterge ultimul marker"
+                <Button Content="Sterge markerul selectat"
                         Command="{Binding DeleteLastMarkerCommand}"
                         Width="150"
                         Height="30"
