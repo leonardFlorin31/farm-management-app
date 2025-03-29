@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net8.0-windows7.0": {
+      "Clipper2/1.4.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Clipper2Lib.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Clipper2Lib.dll": {}
+        }
+      },
       "EntityFramework/6.4.4": {
         "type": "package",
         "dependencies": {
@@ -459,6 +468,21 @@
     }
   },
   "libraries": {
+    "Clipper2/1.4.0": {
+      "sha512": "NmUzuJNhA6mTeILHj3hUO3skZH8i8dyUjK0b3bbCciP025T8I+hJLilII32qJ5Z/krHEh++PA/9WuvqfGd4QqQ==",
+      "type": "package",
+      "path": "clipper2/1.4.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "License.txt",
+        "README.md",
+        "clipper2.1.4.0.nupkg.sha512",
+        "clipper2.nuspec",
+        "icon.png",
+        "lib/netstandard2.0/Clipper2Lib.dll"
+      ]
+    },
     "EntityFramework/6.4.4": {
       "sha512": "yj1+/4tci7Panu3jKDHYizxwVm0Jvm7b7m057b5h4u8NUHGCR8WIWirBTw+8EptRffwftIWPBeIRGNKD1ewEMQ==",
       "type": "package",
@@ -1321,6 +1345,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
+      "Clipper2 >= 1.4.0",
       "FontAwesome.Sharp >= 6.6.0",
       "GMap.NET.Core >= 2.1.7",
       "GMap.NET.WinPresentation >= 2.1.7",
@@ -1382,6 +1407,10 @@
       "net8.0-windows7.0": {
         "targetAlias": "net8.0-windows",
         "dependencies": {
+          "Clipper2": {
+            "target": "Package",
+            "version": "[1.4.0, )"
+          },
           "FontAwesome.Sharp": {
             "target": "Package",
             "version": "[6.6.0, )"
