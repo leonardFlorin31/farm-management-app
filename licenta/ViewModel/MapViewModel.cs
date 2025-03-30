@@ -38,6 +38,11 @@ namespace licenta.ViewModel
         private GMapPolygon _editablePolygon = null;
         private List<GMapMarker> _controlMarkers = new List<GMapMarker>();
         private GMapMarker _draggedControlMarker = null;
+        private List<EditablePolygon> _allPolygons = new List<EditablePolygon>();
+        private EditablePolygon _currentEditablePolygon; // Poligonul editat în momentul curent
+// Poligonul selectat în momentul curent
+        private EditablePolygon _selectedPolygon;
+        
 
         private ObservableCollection<CenterPointsAndName> _centerPoints =
             new ObservableCollection<CenterPointsAndName>();
@@ -527,30 +532,34 @@ namespace licenta.ViewModel
                 Point p = e.GetPosition(MapControl);
                 PointLatLng newLatLng = MapControl.FromLocalToLatLng((int)p.X, (int)p.Y);
                 _draggedMarker.Position = newLatLng;
-        
-                // Încercăm întâi să vedem dacă markerul mutat este un marker de control
-                int controlIndex = _controlMarkers.IndexOf(_draggedMarker);
-                if (controlIndex != -1)
+
+                foreach (var polygon in _allPolygons)
                 {
-                    // Markerul face parte din lista de control; actualizăm direct coordonata
-                    if (controlIndex < _editingPolygonCoordinates.Count)
+                    int controlIndex = polygon.ControlMarkers.IndexOf(_draggedMarker);
+                    if (controlIndex != -1)
                     {
-                        _editingPolygonCoordinates[controlIndex] = newLatLng;
-                        UpdatePolygonShape();
-                    }
-                }
-                else
-                {
-                    // Markerul nu este în lista de control, folosim logica existentă
-                    int draggedMarkerIndexInAllMarkers = MapControl.Markers.IndexOf(_draggedMarker);
-                    if (draggedMarkerIndexInAllMarkers >= MapControl.Markers.Count - _polygonMarkerCounter && _polygonMarkerCounter > 0)
-                    {
-                        int relativeIndex = draggedMarkerIndexInAllMarkers - (MapControl.Markers.Count - _polygonMarkerCounter);
-                        if (relativeIndex >= 0 && relativeIndex < _markerCoordinates.Count)
+                        // Actualizează coordonatele poligonului
+                        polygon.Coordinates[controlIndex] = newLatLng;
+
+                        // Șterge vechiul poligon de pe hartă
+                        MapControl.Markers.Remove(polygon.Polygon);
+
+                        // Crează un poligon nou cu punctele actualizate
+                        polygon.Polygon = new GMapPolygon(polygon.Coordinates)
                         {
-                            _markerCoordinates[relativeIndex] = newLatLng;
-                            UpdatePolygonShape();
-                        }
+                            Shape = new System.Windows.Shapes.Polygon
+                            {
+                                Stroke = Brushes.Red,
+                                Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                                StrokeThickness = 2
+                            },
+                            Tag = polygon.Name
+                        };
+
+                        // Adaugă noul poligon pe hartă
+                        MapControl.Markers.Add(polygon.Polygon);
+                        MapControl.InvalidateVisual();
+                        break;
                     }
                 }
             }
@@ -559,21 +568,14 @@ namespace licenta.ViewModel
         
         private void UpdatePolygonShape()
         {
-            // Ștergem poligonul existent, dacă există
+            // Șterge poligonul vechi de pe hartă
             if (_editablePolygon != null)
             {
                 MapControl.Markers.Remove(_editablePolygon);
             }
 
-            // Construim o listă de puncte bazată pe pozițiile actuale ale markerilor de control
-            List<PointLatLng> polygonPoints = new List<PointLatLng>();
-            foreach (var controlMarker in _controlMarkers)
-            {
-                polygonPoints.Add(controlMarker.Position);
-            }
-
-            // Creăm un nou poligon cu aceste puncte
-            _editablePolygon = new GMapPolygon(polygonPoints)
+            // Crează un poligon nou cu punctele actualizate
+            _editablePolygon = new GMapPolygon(_editingPolygonCoordinates)
             {
                 Shape = new System.Windows.Shapes.Polygon
                 {
@@ -584,8 +586,9 @@ namespace licenta.ViewModel
                 Tag = "EditablePolygon"
             };
 
-            // Adăugăm noul poligon pe hartă
+            // Adaugă noul poligon pe hartă
             MapControl.Markers.Add(_editablePolygon);
+            MapControl.InvalidateVisual(); // Forțează actualizarea vizuală
         }
         
         private void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -595,6 +598,20 @@ namespace licenta.ViewModel
                 _draggedMarker = null;
                 Mouse.Capture(null); // Eliberăm captura mouse-ului
                 e.Handled = true;
+            }
+
+            // Obține poziția mouse-ului în coordonate geografice
+            var mousePosition = e.GetPosition(MapControl);
+            PointLatLng position = MapControl.FromLocalToLatLng((int)mousePosition.X, (int)mousePosition.Y);
+
+            // Verifică dacă poziția este în interiorul vreunui poligon
+            foreach (var polygon in _allPolygons)
+            {
+                if (IsPointInPolygon(position, polygon.Coordinates))
+                {
+                    _currentEditablePolygon = polygon; // Setează-l ca poligon curent
+                    break;
+                }
             }
         }
 
@@ -776,9 +793,16 @@ namespace licenta.ViewModel
         }
         
         // Adăugăm poligonul nou pe hartă și îl reținem ca poligon editabil
-        _editablePolygon = new GMapPolygon(
-            newPolygonPathDForDisplay.Select(p => new PointLatLng(p.y, p.x)).ToList()
-        )
+        // Crează un nou obiect EditablePolygon
+        var newPolygon = new EditablePolygon
+        {
+            Name = PolygonName,
+            Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
+        };
+        _allPolygons.Add(newPolygon);
+
+        // Adaugă poligonul pe hartă
+        newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
         {
             Shape = new System.Windows.Shapes.Polygon
             {
@@ -786,19 +810,21 @@ namespace licenta.ViewModel
                 Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
                 StrokeThickness = 2
             },
-            Tag = createdPolygon.Name
+            Tag = PolygonName
         };
-        MapControl.Markers.Add(_editablePolygon);
+        MapControl.Markers.Add(newPolygon.Polygon);
         
         // CREAREA PUNCTELOR DE CONTROL: pentru fiecare colț al poligonului, adăugăm un marker transparent
-       
+        // Salvează în lista globală
+        
+        _currentEditablePolygon = newPolygon; // Setează-l ca poligon curent
 
         // Adăugăm poligonul nou pe hartă
-        AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
+        //AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
         PolygonsUpdated?.Invoke();
         _editingPolygonCoordinates = new List<PointLatLng>(_markerCoordinates);
 
-        AddControlMarkersForPolygon();
+        AddControlMarkersForPolygon(newPolygon);
         ClearMarkers();
         PolygonName = string.Empty;
         _polygonMarkerCounter = 0;
@@ -810,30 +836,49 @@ namespace licenta.ViewModel
     }
 }
        
-private void AddControlMarkersForPolygon()
+private void AddControlMarkersForPolygon(EditablePolygon polygon)
 {
-    foreach (var point in _markerCoordinates)
+    foreach (var point in polygon.Coordinates)
     {
-        GMapMarker controlMarker = new GMapMarker(point);
-        controlMarker.Shape = new System.Windows.Shapes.Ellipse
+        GMapMarker controlMarker = new GMapMarker(point)
         {
-            Width = 10,
-            Height = 10,
-            Stroke = Brushes.Gold,
-            Fill = new SolidColorBrush(Color.FromArgb(50, 0, 0, 255)) // Semitransparent albastru
+            Shape = new System.Windows.Shapes.Ellipse
+            {
+                Width = 10,
+                Height = 10,
+                Stroke = Brushes.Gold,
+                Fill = Brushes.Transparent
+            },
+            Offset = new Point(-5, -5)
         };
 
-        controlMarker.Offset = new Point(-5, -5);
-        MapControl.Markers.Add(controlMarker);
-
-        // Adaugăm evenimente pentru mutare
-        if (controlMarker.Shape != null)
+        // Eveniment pentru drag (cu variabilele corecte)
+        controlMarker.Shape.MouseLeftButtonDown += (sender, e) =>
         {
-            controlMarker.Shape.MouseLeftButtonDown += (sender, e) => MarkerShape_OnMouseLeftButtonDown(controlMarker, e);
-        }
+            _draggedMarker = controlMarker;
+            _selectedPolygon = polygon; // Setează poligonul selectat
+            MarkerShape_OnMouseLeftButtonDown(controlMarker, e);
+        };
 
-        _controlMarkers.Add(controlMarker);
+        MapControl.Markers.Add(controlMarker);
+        polygon.ControlMarkers.Add(controlMarker);
     }
+}
+
+private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
+{
+    // Algoritm simplu pentru a verifica dacă un punct este în interiorul unui poligon
+    bool inside = false;
+    for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
+    {
+        if (((polygon[i].Lat > point.Lat) != (polygon[j].Lat > point.Lat) &&
+             (point.Lng < (polygon[j].Lng - polygon[i].Lng) * (point.Lat - polygon[i].Lat) / 
+                 (polygon[j].Lat - polygon[i].Lat) + polygon[i].Lng)))
+        {
+            inside = !inside;
+        }
+    }
+    return inside;
 }
 
 
@@ -1316,6 +1361,14 @@ private void AddControlMarkersForPolygon()
     public class CenterPointsAndName
     {
         public PointLatLng Points { get; set; }
+        public string Name { get; set; }
+    }
+    
+    public class EditablePolygon
+    {
+        public GMapPolygon Polygon { get; set; }
+        public List<GMapMarker> ControlMarkers { get; set; } = new List<GMapMarker>();
+        public List<PointLatLng> Coordinates { get; set; } = new List<PointLatLng>();
         public string Name { get; set; }
     }
 }
