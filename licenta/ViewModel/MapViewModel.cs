@@ -532,6 +532,13 @@ namespace licenta.ViewModel
                 Point p = e.GetPosition(MapControl);
                 PointLatLng newLatLng = MapControl.FromLocalToLatLng((int)p.X, (int)p.Y);
                 _draggedMarker.Position = newLatLng;
+                
+                int markerIndex = MapControl.Markers.IndexOf(_draggedMarker) - (MapControl.Markers.Count - _polygonMarkerCounter);
+
+                if (markerIndex >= 0 && markerIndex < _markerCoordinates.Count)
+                {
+                    _markerCoordinates[markerIndex] = newLatLng;
+                }
 
                 foreach (var polygon in _allPolygons)
                 {
@@ -676,6 +683,58 @@ namespace licenta.ViewModel
                 Console.WriteLine($"Error adding polygon to map: {ex.Message}");
             }
         }
+        
+        // Returnează true dacă există suprapunere.
+        private bool CheckPolygonIntersection(EditablePolygon polygon)
+        {
+            // Factorul de scalare folosit în operațiile Clipper
+            double scale = 1000000.0;
+    
+            // Construiți poligonul curent cu Clipper (Path64) pe baza coordonatelor scalate
+            var currentPathD = new PathD();
+            foreach (var pt in polygon.Coordinates)
+            {
+                currentPathD.Add(new PointD(pt.Lng * scale, pt.Lat * scale));
+            }
+            // Închidem poligonul, dacă nu este deja închis
+            if (currentPathD.First() != currentPathD.Last())
+            {
+                currentPathD.Add(currentPathD.First());
+            }
+            var currentPath64 = Clipper.Path64(currentPathD);
+
+            // Parcurgem toate celelalte poligoane (excludem poligonul curent)
+            foreach (var otherPolygon in _allPolygons)
+            {
+                if (otherPolygon == polygon)
+                    continue;
+
+                var otherPathD = new PathD();
+                foreach (var pt in otherPolygon.Coordinates)
+                {
+                    otherPathD.Add(new PointD(pt.Lng * scale, pt.Lat * scale));
+                }
+                if (otherPathD.First() != otherPathD.Last())
+                {
+                    otherPathD.Add(otherPathD.First());
+                }
+                var otherPath64 = Clipper.Path64(otherPathD);
+
+                // Realizăm operația de intersecție între poligonul curent și cel existent
+                Paths64 intersectionResult = Clipper.Intersect(
+                    new Paths64 { currentPath64 },
+                    new Paths64 { otherPath64 },
+                    FillRule.NonZero
+                );
+
+                // Dacă rezultatul intersecției nu este gol, înseamnă că există suprapunere
+                if (intersectionResult != null && intersectionResult.Any())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         // Modified CreatePolygon method to save to the server
        private async void CreatePolygon()
@@ -799,7 +858,17 @@ namespace licenta.ViewModel
             Name = PolygonName,
             Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
         };
+        
+        if (CheckPolygonIntersection(newPolygon))
+        {
+            // De exemplu, notificare pe interfață sau log
+            MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
+            return;
+        }
+        
         _allPolygons.Add(newPolygon);
+        //_polygons.Add(newPolygon);
+        
 
         // Adaugă poligonul pe hartă
         newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
