@@ -175,6 +175,7 @@ namespace licenta.ViewModel
 
         private string _PolygonName;
         private List<PointLatLng> _editingPolygonCoordinates;
+        private EditablePolygon _currentlyModifyingPolygon;
 
         public string PolygonName
         {
@@ -469,11 +470,20 @@ namespace licenta.ViewModel
             public string Name { get; set; }
             public List<PointRequest> Points { get; set; }
         }
+        
+        public class UpdatePolygonRequest
+        {
+            public Guid UserId { get; set; }
+            public Guid Id { get; set; }
+            public List<PointRequest> Points { get; set; }
+            public string Name { get; set; }
+        }
 
         public class PointRequest
         {
             public decimal Latitude { get; set; }
             public decimal Longitude { get; set; }
+            public int Order { get; set; }
         }
 
         private void MapControl_OnPositionChanged(PointLatLng point)
@@ -481,6 +491,7 @@ namespace licenta.ViewModel
             // Sync the ViewModel's ZoomLevel with the map's current zoom
             ZoomLevel = (int)MapControl.Zoom;
         }
+        
 
         private void MapControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -547,7 +558,10 @@ namespace licenta.ViewModel
                     {
                         // Actualizează coordonatele poligonului
                         polygon.Coordinates[controlIndex] = newLatLng;
-
+                        
+                        // Set the currently modifying polygon
+                        _currentlyModifyingPolygon = polygon; 
+                        
                         // Șterge vechiul poligon de pe hartă
                         MapControl.Markers.Remove(polygon.Polygon);
 
@@ -598,7 +612,7 @@ namespace licenta.ViewModel
             MapControl.InvalidateVisual(); // Forțează actualizarea vizuală
         }
         
-        private void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private async void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_draggedMarker != null)
             {
@@ -610,16 +624,73 @@ namespace licenta.ViewModel
             // Obține poziția mouse-ului în coordonate geografice
             var mousePosition = e.GetPosition(MapControl);
             PointLatLng position = MapControl.FromLocalToLatLng((int)mousePosition.X, (int)mousePosition.Y);
-
-            // Verifică dacă poziția este în interiorul vreunui poligon
-            foreach (var polygon in _allPolygons)
+            
+            if (_currentlyModifyingPolygon != null)
+    {
+        using (var client = new HttpClient())
+        {
+            // 1. Cerere GET pentru a obține id-ul poligonului după nume și _currentUserId
+            var getUrl = $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_currentlyModifyingPolygon.Name}&userId={_currentUserId}";
+            var getResponse = await client.GetAsync(getUrl);
+            if (getResponse.IsSuccessStatusCode)
             {
-                if (IsPointInPolygon(position, polygon.Coordinates))
+                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
+                // Presupunem că răspunsul este de forma: { "Id": "..." }
+                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
+                if (polygonIdResponse != null)
                 {
-                    _currentEditablePolygon = polygon; // Setează-l ca poligon curent
-                    break;
+                    Guid polygonId = polygonIdResponse.Id;
+
+                    // 2. Construim request-ul de update pentru poligon
+                    var updateRequest = new UpdatePolygonRequest
+                    {
+                        Name = _currentlyModifyingPolygon.Name,
+                        Points = _currentlyModifyingPolygon.Coordinates
+                            .Select((p, index) => new PointRequest
+                            {
+                                Latitude = (decimal)p.Lat,
+                                Longitude = (decimal)p.Lng,
+                                Order = index
+                            }).ToList()
+                    };
+
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8, "application/json");
+                    var putUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
+                    var putResponse = await client.PutAsync(putUrl, jsonContent);
+                    if (putResponse.IsSuccessStatusCode)
+                    {
+                        // Update reușit. Poți adăuga codul de notificare sau UI aici.
+                        Console.WriteLine($"Polygon {_currentlyModifyingPolygon.Name} was successfully updated.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Failed to update polygon.");
+                    }
+                }
+                else
+                {
+                   Console.WriteLine("failed to deserialize");
                 }
             }
+            else
+            {
+                Console.WriteLine("poligonul nu a fost gasit");
+            }
+        }
+
+        _currentlyModifyingPolygon = null; // Reset după trimitere
+    }
+
+
+            // Verifică dacă poziția este în interiorul vreunui poligon
+            // foreach (var polygon in _allPolygons)
+            // {
+            //     if (IsPointInPolygon(position, polygon.Coordinates))
+            //     {
+            //         _currentEditablePolygon = polygon; // Setează-l ca poligon curent
+            //         break;
+            //     }
+            // }
         }
 
         // Method to add a polygon to the map from a DTO
@@ -859,12 +930,12 @@ namespace licenta.ViewModel
             Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
         };
         
-        if (CheckPolygonIntersection(newPolygon))
-        {
-            // De exemplu, notificare pe interfață sau log
-            MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
-            return;
-        }
+        // if (CheckPolygonIntersection(newPolygon))
+        // {
+        //     // De exemplu, notificare pe interfață sau log
+        //     MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
+        //     return;
+        // }
         
         _allPolygons.Add(newPolygon);
         //_polygons.Add(newPolygon);
@@ -1425,6 +1496,12 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
                 Console.WriteLine($"ZoomOut: ZoomLevel = {ZoomLevel}");
             }
         }
+    }
+
+    public class PolygonIdResponse
+    {
+        [JsonPropertyName("id")]
+        public Guid Id { get; set; }
     }
 
     public class CenterPointsAndName
