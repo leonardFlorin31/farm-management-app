@@ -427,6 +427,7 @@ namespace licenta.ViewModel
         // Parcurgem fiecare polygon primit și îl transformăm într-un poligon editabil
         foreach (var dto in polygonDtos)
         {
+            _polygons.Add(dto);
             // Creăm obiectul EditablePolygon din DTO
             var editablePolygon = new EditablePolygon
             {
@@ -458,6 +459,7 @@ namespace licenta.ViewModel
 
             // Rețin poligonul editabil în lista de poligoane globale pentru modificări ulterioare
             _allPolygons.Add(editablePolygon);
+            
             _polygonNames.Add(editablePolygon.Name);
         }
     }
@@ -964,7 +966,7 @@ namespace licenta.ViewModel
         
         // if (CheckPolygonIntersection(newPolygon))
         // {
-        //     // De exemplu, notificare pe interfață sau log
+        //   
         //     MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
         //     return;
         // }
