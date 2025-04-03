@@ -45,10 +45,12 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <!--Navigation menu-->
-                <ColumnDefinition Width="250" />
+                <!--Navigation menu cu posibilitate de redimensionare-->
+                <ColumnDefinition x:Name="NavMenuColumn" Width="225" MinWidth="150" MaxWidth="300"/>
+                <!--Separator pentru redimensionare-->
+                <ColumnDefinition Width="5"/>
                 <!--Content section-->
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!--Navigation Menu-->
@@ -59,10 +61,8 @@
                         <GradientStop Color="{StaticResource winBorderColor2}" Offset="0.0" />
                         <GradientStop Color="{StaticResource winBorderColor3}" Offset="0.2" />
                         <GradientStop Color="{StaticResource winBorderColor4}" Offset="0.5" />
-                        <!-- <GradientStop Color="{StaticResource winBorderColor5}" Offset="0.7" /> -->
                         <GradientStop Color="{StaticResource winBorderColor3}" Offset="0.7" />
                         <GradientStop Color="{StaticResource winBorderColor4}" Offset="1.0" />
-
                     </LinearGradientBrush>
                 </Border.Background>
                 <StackPanel>
@@ -121,10 +121,29 @@
 
                 </StackPanel>
             </Border>
+            
+            <!--Resize Thumb-->
+            <Thumb x:Name="ResizeThumb" 
+                   Grid.Column="1" 
+                   Width="5" 
+                   Background="Transparent" 
+                   Cursor="SizeWE"
+                   DragDelta="ResizeThumb_DragDelta">
+                <Thumb.Style>
+                    <Style TargetType="Thumb">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#55777777"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Thumb.Style>
+            </Thumb>
 
             <!--Main Section-->
             <Border CornerRadius="0,10,10,0"
-        Grid.Column="1">
+        Grid.Column="2">
     <Border.Background>
         <SolidColorBrush Color="{StaticResource primaryBackColor3}" />
     </Border.Background>
