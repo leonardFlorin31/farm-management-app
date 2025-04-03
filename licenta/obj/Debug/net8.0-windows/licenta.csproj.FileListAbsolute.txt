@@ -121,3 +121,6 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\Pa
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\RegisterView.g.cs
 C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\RegisterView.baml
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\Clipper2Lib.dll
+C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\ControlzEx.dll
+C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps.Metro.dll
+C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\de\MahApps.Metro.resources.dll

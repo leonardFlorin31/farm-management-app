@@ -1,15 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "t+69o4L3z/Y=",
+  "dgSpecHash": "3PJEHQ316PQ=",
   "success": true,
   "projectFilePath": "C:\\Users\\leofl\\Documents\\GitHub\\licenta\\licenta\\licenta.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\leofl\\.nuget\\packages\\clipper2\\1.4.0\\clipper2.1.4.0.nupkg.sha512",
+    "C:\\Users\\leofl\\.nuget\\packages\\controlzex\\7.0.1-rc0014\\controlzex.7.0.1-rc0014.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\entityframework\\6.4.4\\entityframework.6.4.4.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\fontawesome.sharp\\6.6.0\\fontawesome.sharp.6.6.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\gmap.net.core\\2.1.7\\gmap.net.core.2.1.7.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\gmap.net.winpresentation\\2.1.7\\gmap.net.winpresentation.2.1.7.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\gmap.net.wpf\\1.0.0.1\\gmap.net.wpf.1.0.0.1.nupkg.sha512",
+    "C:\\Users\\leofl\\.nuget\\packages\\mahapps.metro\\3.0.0-rc0516\\mahapps.metro.3.0.0-rc0516.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\microsoft.win32.systemevents\\9.0.2\\microsoft.win32.systemevents.9.0.2.nupkg.sha512",
@@ -28,10 +30,12 @@
     "C:\\Users\\leofl\\.nuget\\packages\\system.data.sqlite.core\\1.0.119\\system.data.sqlite.core.1.0.119.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.data.sqlite.ef6\\1.0.119\\system.data.sqlite.ef6.1.0.119.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.drawing.common\\9.0.2\\system.drawing.common.9.0.2.nupkg.sha512",
+    "C:\\Users\\leofl\\.nuget\\packages\\system.memory\\4.6.2\\system.memory.4.6.2.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.security.accesscontrol\\4.7.0\\system.security.accesscontrol.4.7.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.7.0\\system.security.cryptography.protecteddata.4.7.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.security.permissions\\4.7.0\\system.security.permissions.4.7.0.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
+    "C:\\Users\\leofl\\.nuget\\packages\\system.text.json\\8.0.5\\system.text.json.8.0.5.nupkg.sha512",
     "C:\\Users\\leofl\\.nuget\\packages\\system.windows.extensions\\4.7.0\\system.windows.extensions.4.7.0.nupkg.sha512"
   ],
   "logs": [

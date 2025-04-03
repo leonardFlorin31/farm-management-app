@@ -3,66 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:licenta.View"
              xmlns:viewModel="clr-namespace:licenta.ViewModel"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
-
-    <UserControl.Resources>
-        <!-- Custom ToggleButton for ComboBox -->
-        <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton">
-            <Grid>
-                <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" />
-                <Grid>
-                    <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/>
-                    <Path Name="Arrow" Fill="Black"
-                          Data="M 0 0 L 4 4 L 8 0 Z"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Center"
-                          Margin="0,0,5,0"/>
-                </Grid>
-            </Grid>
-        </ControlTemplate>
-
-        <!-- Custom ComboBox Style -->
-        <Style TargetType="{x:Type ComboBox}">
-            <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" />
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="Black"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="BorderBrush" Value="Black"/>
-            <Setter Property="Padding" Value="4"/>
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton Name="DropDownToggle"
-                                          ClickMode="Press"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Template="{StaticResource CustomToggleButton}" />
-                            <ContentPresenter Name="ContentSite"
-                                              Content="{TemplateBinding SelectionBoxItem}"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Left"
-                                              Margin="5,0,0,0" />
-                            <Popup Name="Popup"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   Placement="Bottom"
-                                   AllowsTransparency="True"
-                                   PopupAnimation="Slide">
-                                <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White">
-                                    <ScrollViewer>
-                                        <ItemsPresenter />
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </UserControl.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -73,169 +18,202 @@
         <!-- Input Section -->
         <DockPanel Grid.Row="0" Margin="10">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                <StackPanel Margin="5, 5, 0, 5">
-                    <TextBlock Text="Tipul parcelei"/>
+                <StackPanel Margin="5,5,0,5">
+                    <TextBlock Text="Tipul parcelei" Margin="0,0,0,2"/>
                     <ComboBox Width="100"
                               ItemsSource="{Binding Options}"
-                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
-                              Style="{StaticResource {x:Type ComboBox}}"/>
+                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}" />
                 </StackPanel>
 
-                <!-- <StackPanel Margin="0, 5, 0, 5"> -->
-                <!--     <TextBlock Text="{Binding Label1}" /> -->
-                <!--     <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field1, UpdateSourceTrigger=PropertyChanged}" /> -->
-                <!-- </StackPanel> -->
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="Numele Parcelei"/>
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="Numele Parcelei" Margin="0,0,0,2"/>
                     <ComboBox Width="100"
                               ItemsSource="{Binding Parcels}"
-                              SelectedItem="{Binding SelectedParcel, Mode=TwoWay}"
-                              Style="{StaticResource {x:Type ComboBox}}"/>
+                              SelectedItem="{Binding SelectedParcel, Mode=TwoWay}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label2}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label2}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field2"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field2, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label3}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label3}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field3"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field3, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label4}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label4}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field4"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field4, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label5}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field5, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label5}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field5"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field5, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label6}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field6, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label6}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field6"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field6, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label7}" />
-                    <TextBox  Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field7, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label7}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field7"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field7, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label8}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field8, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label8}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field8"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field8, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
-                <StackPanel Margin="0, 5, 0, 5">
-                    <TextBlock Text="{Binding Label9}" />
-                    <TextBox Width="100" BorderThickness="2" BorderBrush="{StaticResource titleColor2}" Text="{Binding Field9, UpdateSourceTrigger=PropertyChanged}" />
+
+                <StackPanel Margin="0,5,0,5">
+                    <TextBlock Text="{Binding Label9}" Margin="0,0,0,2"/>
+                    <TextBox Width="100" 
+                             mah:TextBoxHelper.Watermark="Field9"
+                             BorderThickness="2" 
+                             BorderBrush="{StaticResource titleColor2}" 
+                             Text="{Binding Field9, UpdateSourceTrigger=PropertyChanged}" />
                 </StackPanel>
             </StackPanel>
 
+            <!-- Butoanele pentru Delete și Save -->
             <Button Content="Delete"
                     Width="80"
                     DockPanel.Dock="Right"
-                    Margin="10, 15, 10, 10" 
+                    Margin="10,15,10,10" 
                     Padding="5"
                     Background="{StaticResource color12}" 
                     Foreground="White" 
                     BorderBrush="Transparent" 
                     FontWeight="Bold"
                     Command="{Binding DeleteCommand}" />
-            
+
             <Button Content="Save"
                     Width="80"
                     DockPanel.Dock="Right"
-                    Margin="10, 15, 10, 10" 
+                    Margin="10,15,10,10" 
                     Padding="5"
                     Background="{StaticResource titleColor2}" 
                     Foreground="White" 
                     BorderBrush="Transparent" 
                     FontWeight="Bold"
                     Command="{Binding SaveCommand}" />
-            
         </DockPanel>
 
-        <!-- Rândul pentru Search Box -->
-<Grid Grid.Row="1" Margin="10,5,10,10">
-    <Grid.ColumnDefinitions>
-        <!-- 10 coloane, fiecare de 120 -->
-        <ColumnDefinition Width="123"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-        <ColumnDefinition Width="120"/>
-    </Grid.ColumnDefinitions>
+        <!-- Search Box Section -->
+        <Grid Grid.Row="1" Margin="10,5,10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="123"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
 
-    <!-- Coloana 0: Optiuni -->
-    <StackPanel Grid.Column="0" Margin="2,0,0,0">
-        <TextBlock Text="Optiuni" />
-        <TextBox Width="120"
-                 Text="{Binding SearchOption, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="0" Margin="2,0,0,0">
+                <TextBlock Text="Optiuni" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Optiuni"
+                         Text="{Binding SearchOption, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 1: Field1 -->
-    <StackPanel Grid.Column="1" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label1}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField1, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="1" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label1}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field1"
+                         Text="{Binding SearchField1, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 2: Field2 -->
-    <StackPanel Grid.Column="2" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label2}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField2, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="2" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label2}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field2"
+                         Text="{Binding SearchField2, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 3: Field3 -->
-    <StackPanel Grid.Column="3" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label3}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField3, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="3" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label3}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field3"
+                         Text="{Binding SearchField3, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 4: Field4 -->
-    <StackPanel Grid.Column="4" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label4}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField4, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="4" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label4}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field4"
+                         Text="{Binding SearchField4, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 5: Field5 -->
-    <StackPanel Grid.Column="5" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label5}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField5, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="5" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label5}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field5"
+                         Text="{Binding SearchField5, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 6: Field6 -->
-    <StackPanel Grid.Column="6" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label6}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField6, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="6" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label6}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field6"
+                         Text="{Binding SearchField6, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 7: Field7 -->
-    <StackPanel Grid.Column="7" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label7}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField7, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="7" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label7}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field7"
+                         Text="{Binding SearchField7, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 8: Field8 -->
-    <StackPanel Grid.Column="8" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label8}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField8, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
+            <StackPanel Grid.Column="8" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label8}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field8"
+                         Text="{Binding SearchField8, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
 
-    <!-- Coloana 9: Field9 -->
-    <StackPanel Grid.Column="9" Margin="0,0,0,0">
-        <TextBlock Text="{Binding Label9}" />
-        <TextBox Width="120"
-                 Text="{Binding SearchField9, UpdateSourceTrigger=PropertyChanged}" />
-    </StackPanel>
-</Grid>
+            <StackPanel Grid.Column="9" Margin="0,0,0,0">
+                <TextBlock Text="{Binding Label9}" Margin="0,0,0,2"/>
+                <TextBox Width="120"
+                         mah:TextBoxHelper.Watermark="Field9"
+                         Text="{Binding SearchField9, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Grid>
 
         <!-- List of Parcels -->
         <ListView Grid.Row="2"
@@ -243,11 +221,12 @@
                   Margin="10,0,30,10">
             <ListView.View>
                 <GridView>
+                    <!-- Coloana Optiuni -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Optiuni" FontWeight="Bold"/>
-                                <TextBlock Text="Animale" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Animale" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Grane" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -257,12 +236,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field1 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field1" FontWeight="Bold"/>
-                                <TextBlock Text="Denumire" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Denumire" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Denumire" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -272,12 +252,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field2 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field2" FontWeight="Bold"/>
-                                <TextBlock Text="Tip Animale" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Tip Animale" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Tip Cultură" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -288,11 +269,12 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
+                    <!-- Coloana Field3 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field3" FontWeight="Bold"/>
-                                <TextBlock Text="Număr Animale" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Număr Animale" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Suprafață (ha)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -302,12 +284,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field4 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field4" FontWeight="Bold"/>
-                                <TextBlock Text="Tip Mâncare" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Tip Mâncare" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Tip Irigare" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -317,12 +300,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field5 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field5" FontWeight="Bold"/>
-                                <TextBlock Text="Consum Apă" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Consum Apă" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Îngrășământ (kg)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -332,12 +316,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field6 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field6" FontWeight="Bold"/>
-                                <TextBlock Text="Vizite Veterinar" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Vizite Veterinar" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Pesticide (L)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -347,12 +332,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field7 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field7" FontWeight="Bold"/>
-                                <TextBlock Text="Eliminare deșeuri" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="Eliminare deșeuri" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Producție (kg)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -362,12 +348,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field8 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field8" FontWeight="Bold"/>
-                                <TextBlock Text="" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Tip Sol" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -377,12 +364,13 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    
+
+                    <!-- Coloana Field9 -->
                     <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <StackPanel>
                                 <TextBlock Text="Field9" FontWeight="Bold"/>
-                                <TextBlock Text="" FontSize="12" Margin="0,5, 0, 5"/>
+                                <TextBlock Text="" FontSize="12" Margin="0,5,0,5"/>
                                 <TextBlock Text="Consum Apă (m³)" FontSize="12"/>
                             </StackPanel>
                         </GridViewColumn.Header>
@@ -397,72 +385,3 @@
         </ListView>
     </Grid>
 </UserControl>
-
-<!-- <UserControl.Resources> -->
-<!--         ~1~ Custom ToggleButton for ComboBox @1@ -->
-<!--         <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton"> -->
-<!--             <Grid> -->
-<!--                 <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" /> -->
-<!--          -->
-<!--                 ~1~ StackPanel for Content and Arrow @1@ -->
-<!--                 <Grid> -->
-<!--                     ~1~ ContentPresenter to display the selected item @1@ -->
-<!--                     <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center"/> -->
-<!--              -->
-<!--                     ~1~ Arrow on the right @1@ -->
-<!--                     <Path Name="Arrow" Fill="Black" -->
-<!--                           Data="M 0 0 L 4 4 L 8 0 Z" -->
-<!--                           HorizontalAlignment="Right" -->
-<!--                           VerticalAlignment="Center" -->
-<!--                           Margin="0,0,5,0"/> -->
-<!--                 </Grid> -->
-<!--             </Grid> -->
-<!--         </ControlTemplate> -->
-<!-- -->
-<!--         ~1~ Custom ComboBox Style @1@ -->
-<!--         <Style TargetType="{x:Type ComboBox}"> -->
-<!--             <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" /> -->
-<!--             <Setter Property="Background" Value="White"/> -->
-<!--             <Setter Property="Foreground" Value="Black"/> -->
-<!--             <Setter Property="FontSize" Value="16"/> -->
-<!--             <Setter Property="BorderBrush" Value="Black"/> -->
-<!--             <Setter Property="Padding" Value="4"/> -->
-<!--             <Setter Property="Control.Template"> -->
-<!--                 <Setter.Value> -->
-<!--                     <ControlTemplate TargetType="ComboBox"> -->
-<!--                         <Grid> -->
-<!--                             ~1~ ToggleButton controls dropdown opening @1@ -->
-<!--                             <ToggleButton Name="DropDownToggle" -->
-<!--                                           ClickMode="Press" -->
-<!--                                           IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" -->
-<!--                                           Template="{StaticResource CustomToggleButton}" /> -->
-<!--                              -->
-<!--                             ~1~ Displays Selected Item @1@ -->
-<!--                             <ContentPresenter Name="ContentSite" -->
-<!--                                               Content="{TemplateBinding SelectionBoxItem}" -->
-<!--                                               VerticalAlignment="Center" -->
-<!--                                               HorizontalAlignment="Left" -->
-<!--                                               Margin="5,0,0,0" /> -->
-<!--                              -->
-<!--                             ~1~ Popup Dropdown @1@ -->
-<!--                             <Popup Name="Popup" -->
-<!--                                    IsOpen="{TemplateBinding IsDropDownOpen}" -->
-<!--                                    Placement="Bottom" -->
-<!--                                    AllowsTransparency="True" -->
-<!--                                    PopupAnimation="Slide"> -->
-<!--                                 <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White"> -->
-<!--                                     <ScrollViewer> -->
-<!--                                         <ItemsPresenter /> -->
-<!--                                     </ScrollViewer> -->
-<!--                                 </Border> -->
-<!--                             </Popup> -->
-<!--                         </Grid> -->
-<!--                     </ControlTemplate> -->
-<!--                 </Setter.Value> -->
-<!--             </Setter> -->
-<!--         </Style> -->
-<!--     </UserControl.Resources> -->
-<!-- -->
-<!-- -->
-
-<!-- </StackPanel> -->

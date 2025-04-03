@@ -20,5 +20,6 @@
     <PkgEntityFramework Condition=" '$(PkgEntityFramework)' == '' ">C:\Users\leofl\.nuget\packages\entityframework\6.4.4</PkgEntityFramework>
     <PkgSystem_Data_SQLite_EF6 Condition=" '$(PkgSystem_Data_SQLite_EF6)' == '' ">C:\Users\leofl\.nuget\packages\system.data.sqlite.ef6\1.0.119</PkgSystem_Data_SQLite_EF6>
     <PkgMicrosoft_Xaml_Behaviors_Wpf Condition=" '$(PkgMicrosoft_Xaml_Behaviors_Wpf)' == '' ">C:\Users\leofl\.nuget\packages\microsoft.xaml.behaviors.wpf\1.1.135</PkgMicrosoft_Xaml_Behaviors_Wpf>
+    <PkgMahApps_Metro Condition=" '$(PkgMahApps_Metro)' == '' ">C:\Users\leofl\.nuget\packages\mahapps.metro\3.0.0-rc0516</PkgMahApps_Metro>
   </PropertyGroup>
 </Project>

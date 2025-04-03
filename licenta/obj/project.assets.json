@@ -11,6 +11,26 @@
           "lib/netstandard2.0/Clipper2Lib.dll": {}
         }
       },
+      "ControlzEx/7.0.1-rc0014": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Xaml.Behaviors.Wpf": "1.1.77",
+          "System.Text.Json": "8.0.5"
+        },
+        "compile": {
+          "lib/net8.0-windows7.0/ControlzEx.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/ControlzEx.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ]
+      },
       "EntityFramework/6.4.4": {
         "type": "package",
         "dependencies": {
@@ -102,6 +122,31 @@
           "lib/GMap.NET.Core.dll": {},
           "lib/GMap.NET.WindowsPresentation.dll": {},
           "lib/System.Data.SQLite.dll": {}
+        }
+      },
+      "MahApps.Metro/3.0.0-rc0516": {
+        "type": "package",
+        "dependencies": {
+          "ControlzEx": "7.0.1-rc0014",
+          "System.Memory": "4.6.2"
+        },
+        "compile": {
+          "lib/net8.0-windows7.0/MahApps.Metro.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/MahApps.Metro.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ],
+        "resource": {
+          "lib/net8.0-windows7.0/de/MahApps.Metro.resources.dll": {
+            "locale": "de"
+          }
         }
       },
       "Microsoft.CSharp/4.7.0": {
@@ -361,6 +406,15 @@
           "buildTransitive/net8.0/_._": {}
         }
       },
+      "System.Memory/4.6.2": {
+        "type": "package",
+        "compile": {
+          "lib/netcoreapp2.1/_._": {}
+        },
+        "runtime": {
+          "lib/netcoreapp2.1/_._": {}
+        }
+      },
       "System.Security.AccessControl/4.7.0": {
         "type": "package",
         "dependencies": {
@@ -443,6 +497,22 @@
           }
         }
       },
+      "System.Text.Json/8.0.5": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/System.Text.Json.targets": {}
+        }
+      },
       "System.Windows.Extensions/4.7.0": {
         "type": "package",
         "dependencies": {
@@ -481,6 +551,24 @@
         "clipper2.nuspec",
         "icon.png",
         "lib/netstandard2.0/Clipper2Lib.dll"
+      ]
+    },
+    "ControlzEx/7.0.1-rc0014": {
+      "sha512": "WBkPWGfDcjPRZSGJ1Sd91Cb7Y8BqSPePkqLjQPk1cUWkruJJMMXpFZZYA14zVdM4cx7Chx0IcOWOaktxo9OtOA==",
+      "type": "package",
+      "path": "controlzex/7.0.1-rc0014",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "controlzex.7.0.1-rc0014.nupkg.sha512",
+        "controlzex.nuspec",
+        "lib/net462/ControlzEx.dll",
+        "lib/net462/ControlzEx.xml",
+        "lib/net6.0-windows7.0/ControlzEx.dll",
+        "lib/net6.0-windows7.0/ControlzEx.xml",
+        "lib/net8.0-windows7.0/ControlzEx.dll",
+        "lib/net8.0-windows7.0/ControlzEx.xml",
+        "logo-mini.png"
       ]
     },
     "EntityFramework/6.4.4": {
@@ -623,6 +711,29 @@
         "lib/GMap.NET.Core.dll",
         "lib/GMap.NET.WindowsPresentation.dll",
         "lib/System.Data.SQLite.dll"
+      ]
+    },
+    "MahApps.Metro/3.0.0-rc0516": {
+      "sha512": "CAGS2U638m366pniOyJZhVEgT4cGtvGixz5i7gl5P+IoGFHacPFoQRh+sp+SnbAihVzZ5yctiwbpSFMdTY2pnQ==",
+      "type": "package",
+      "path": "mahapps.metro/3.0.0-rc0516",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/MahApps.Metro.dll",
+        "lib/net462/MahApps.Metro.xml",
+        "lib/net462/de/MahApps.Metro.resources.dll",
+        "lib/net6.0-windows7.0/MahApps.Metro.dll",
+        "lib/net6.0-windows7.0/MahApps.Metro.xml",
+        "lib/net6.0-windows7.0/de/MahApps.Metro.resources.dll",
+        "lib/net8.0-windows7.0/MahApps.Metro.dll",
+        "lib/net8.0-windows7.0/MahApps.Metro.xml",
+        "lib/net8.0-windows7.0/de/MahApps.Metro.resources.dll",
+        "mahapps.metro.3.0.0-rc0516.nupkg.sha512",
+        "mahapps.metro.logo.png",
+        "mahapps.metro.nuspec",
+        "tools/VisualStudioToolsManifest.xml"
       ]
     },
     "Microsoft.CSharp/4.7.0": {
@@ -1148,6 +1259,27 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "System.Memory/4.6.2": {
+      "sha512": "Eq99oXEjWicekXb8AaqwYA6p+am0XrUMenq5RB6OYIL7oYY5gUzRas9+i2zcNsRNB75MpDhFsYX+uV6y89a0Eg==",
+      "type": "package",
+      "path": "system.memory/4.6.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "buildTransitive/net461/System.Memory.targets",
+        "buildTransitive/net462/_._",
+        "lib/net462/System.Memory.dll",
+        "lib/net462/System.Memory.xml",
+        "lib/netcoreapp2.1/_._",
+        "lib/netstandard2.0/System.Memory.dll",
+        "lib/netstandard2.0/System.Memory.xml",
+        "lib/netstandard2.1/_._",
+        "system.memory.4.6.2.nupkg.sha512",
+        "system.memory.nuspec"
+      ]
+    },
     "System.Security.AccessControl/4.7.0": {
       "sha512": "JECvTt5aFF3WT3gHpfofL2MNNP6v84sxtXxpqhLBCcDRzqsPBmHhQ6shv4DwwN2tRlzsUxtb3G9M3763rbXKDg==",
       "type": "package",
@@ -1321,6 +1453,79 @@
         "version.txt"
       ]
     },
+    "System.Text.Json/8.0.5": {
+      "sha512": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg==",
+      "type": "package",
+      "path": "system.text.json/8.0.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "analyzers/dotnet/roslyn3.11/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn3.11/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.0/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.4/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "buildTransitive/net461/System.Text.Json.targets",
+        "buildTransitive/net462/System.Text.Json.targets",
+        "buildTransitive/net6.0/System.Text.Json.targets",
+        "buildTransitive/netcoreapp2.0/System.Text.Json.targets",
+        "buildTransitive/netstandard2.0/System.Text.Json.targets",
+        "lib/net462/System.Text.Json.dll",
+        "lib/net462/System.Text.Json.xml",
+        "lib/net6.0/System.Text.Json.dll",
+        "lib/net6.0/System.Text.Json.xml",
+        "lib/net7.0/System.Text.Json.dll",
+        "lib/net7.0/System.Text.Json.xml",
+        "lib/net8.0/System.Text.Json.dll",
+        "lib/net8.0/System.Text.Json.xml",
+        "lib/netstandard2.0/System.Text.Json.dll",
+        "lib/netstandard2.0/System.Text.Json.xml",
+        "system.text.json.8.0.5.nupkg.sha512",
+        "system.text.json.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
     "System.Windows.Extensions/4.7.0": {
       "sha512": "CeWTdRNfRaSh0pm2gDTJFwVaXfTq6Xwv/sA887iwPTneW7oMtMlpvDIO+U60+3GWTB7Aom6oQwv5VZVUhQRdPQ==",
       "type": "package",
@@ -1346,10 +1551,12 @@
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
       "Clipper2 >= 1.4.0",
+      "ControlzEx >= 7.0.1-rc0014",
       "FontAwesome.Sharp >= 6.6.0",
       "GMap.NET.Core >= 2.1.7",
       "GMap.NET.WinPresentation >= 2.1.7",
       "GMap.Net.WPF >= 1.0.0.1",
+      "MahApps.Metro >= 3.0.0-rc0516",
       "Microsoft.Xaml.Behaviors.Wpf >= 1.1.135",
       "Newtonsoft.Json >= 13.0.3",
       "System.Data.SQLite >= 1.0.119",
@@ -1411,6 +1618,10 @@
             "target": "Package",
             "version": "[1.4.0, )"
           },
+          "ControlzEx": {
+            "target": "Package",
+            "version": "[7.0.1-rc0014, )"
+          },
           "FontAwesome.Sharp": {
             "target": "Package",
             "version": "[6.6.0, )"
@@ -1426,6 +1637,10 @@
           "GMap.Net.WPF": {
             "target": "Package",
             "version": "[1.0.0.1, )"
+          },
+          "MahApps.Metro": {
+            "target": "Package",
+            "version": "[3.0.0-rc0516, )"
           },
           "Microsoft.Xaml.Behaviors.Wpf": {
             "target": "Package",

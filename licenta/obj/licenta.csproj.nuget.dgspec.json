@@ -54,6 +54,10 @@
               "target": "Package",
               "version": "[1.4.0, )"
             },
+            "ControlzEx": {
+              "target": "Package",
+              "version": "[7.0.1-rc0014, )"
+            },
             "FontAwesome.Sharp": {
               "target": "Package",
               "version": "[6.6.0, )"
@@ -69,6 +73,10 @@
             "GMap.Net.WPF": {
               "target": "Package",
               "version": "[1.0.0.1, )"
+            },
+            "MahApps.Metro": {
+              "target": "Package",
+              "version": "[3.0.0-rc0516, )"
             },
             "Microsoft.Xaml.Behaviors.Wpf": {
               "target": "Package",

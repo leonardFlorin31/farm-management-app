@@ -9,10 +9,12 @@
       "licenta/1.0.0": {
         "dependencies": {
           "Clipper2": "1.4.0",
+          "ControlzEx": "7.0.1-rc0014",
           "FontAwesome.Sharp": "6.6.0",
           "GMap.NET.Core": "2.1.7",
           "GMap.NET.WinPresentation": "2.1.7",
           "GMap.Net.WPF": "1.0.0.1",
+          "MahApps.Metro": "3.0.0-rc0516",
           "Microsoft.Xaml.Behaviors.Wpf": "1.1.135",
           "Newtonsoft.Json": "13.0.3",
           "System.Data.SQLite": "1.0.119",
@@ -28,6 +30,18 @@
           "lib/netstandard2.0/Clipper2Lib.dll": {
             "assemblyVersion": "1.4.0.0",
             "fileVersion": "1.4.0.0"
+          }
+        }
+      },
+      "ControlzEx/7.0.1-rc0014": {
+        "dependencies": {
+          "Microsoft.Xaml.Behaviors.Wpf": "1.1.135",
+          "System.Text.Json": "8.0.5"
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/ControlzEx.dll": {
+            "assemblyVersion": "7.0.0.0",
+            "fileVersion": "7.0.1.14"
           }
         }
       },
@@ -84,6 +98,23 @@
         }
       },
       "GMap.Net.WPF/1.0.0.1": {},
+      "MahApps.Metro/3.0.0-rc0516": {
+        "dependencies": {
+          "ControlzEx": "7.0.1-rc0014",
+          "System.Memory": "4.6.2"
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/MahApps.Metro.dll": {
+            "assemblyVersion": "3.0.0.0",
+            "fileVersion": "3.0.0.516"
+          }
+        },
+        "resources": {
+          "lib/net8.0-windows7.0/de/MahApps.Metro.resources.dll": {
+            "locale": "de"
+          }
+        }
+      },
       "Microsoft.CSharp/4.7.0": {},
       "Microsoft.NETCore.Platforms/3.1.0": {},
       "Microsoft.Win32.SystemEvents/9.0.2": {
@@ -252,6 +283,7 @@
           }
         }
       },
+      "System.Memory/4.6.2": {},
       "System.Security.AccessControl/4.7.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
@@ -266,6 +298,7 @@
         }
       },
       "System.Security.Principal.Windows/5.0.0": {},
+      "System.Text.Json/8.0.5": {},
       "System.Windows.Extensions/4.7.0": {
         "dependencies": {
           "System.Drawing.Common": "9.0.2"
@@ -285,6 +318,13 @@
       "sha512": "sha512-NmUzuJNhA6mTeILHj3hUO3skZH8i8dyUjK0b3bbCciP025T8I+hJLilII32qJ5Z/krHEh++PA/9WuvqfGd4QqQ==",
       "path": "clipper2/1.4.0",
       "hashPath": "clipper2.1.4.0.nupkg.sha512"
+    },
+    "ControlzEx/7.0.1-rc0014": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-WBkPWGfDcjPRZSGJ1Sd91Cb7Y8BqSPePkqLjQPk1cUWkruJJMMXpFZZYA14zVdM4cx7Chx0IcOWOaktxo9OtOA==",
+      "path": "controlzex/7.0.1-rc0014",
+      "hashPath": "controlzex.7.0.1-rc0014.nupkg.sha512"
     },
     "EntityFramework/6.4.4": {
       "type": "package",
@@ -320,6 +360,13 @@
       "sha512": "sha512-Hvn+Uans1U2GwM/iq/luExbIktw7XcVkaPdbmgCe/UNBHM+a/cmi0mXbRXC1eyBDS/VJy2zNnMKM0pIerAqZAA==",
       "path": "gmap.net.wpf/1.0.0.1",
       "hashPath": "gmap.net.wpf.1.0.0.1.nupkg.sha512"
+    },
+    "MahApps.Metro/3.0.0-rc0516": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-CAGS2U638m366pniOyJZhVEgT4cGtvGixz5i7gl5P+IoGFHacPFoQRh+sp+SnbAihVzZ5yctiwbpSFMdTY2pnQ==",
+      "path": "mahapps.metro/3.0.0-rc0516",
+      "hashPath": "mahapps.metro.3.0.0-rc0516.nupkg.sha512"
     },
     "Microsoft.CSharp/4.7.0": {
       "type": "package",
@@ -447,6 +494,13 @@
       "path": "system.drawing.common/9.0.2",
       "hashPath": "system.drawing.common.9.0.2.nupkg.sha512"
     },
+    "System.Memory/4.6.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Eq99oXEjWicekXb8AaqwYA6p+am0XrUMenq5RB6OYIL7oYY5gUzRas9+i2zcNsRNB75MpDhFsYX+uV6y89a0Eg==",
+      "path": "system.memory/4.6.2",
+      "hashPath": "system.memory.4.6.2.nupkg.sha512"
+    },
     "System.Security.AccessControl/4.7.0": {
       "type": "package",
       "serviceable": true,
@@ -474,6 +528,13 @@
       "sha512": "sha512-t0MGLukB5WAVU9bO3MGzvlGnyJPgUlcwerXn1kzBRjwLKixT96XV0Uza41W49gVd8zEMFu9vQEFlv0IOrytICA==",
       "path": "system.security.principal.windows/5.0.0",
       "hashPath": "system.security.principal.windows.5.0.0.nupkg.sha512"
+    },
+    "System.Text.Json/8.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg==",
+      "path": "system.text.json/8.0.5",
+      "hashPath": "system.text.json.8.0.5.nupkg.sha512"
     },
     "System.Windows.Extensions/4.7.0": {
       "type": "package",

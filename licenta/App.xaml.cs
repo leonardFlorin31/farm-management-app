@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using ControlzEx.Theming;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using licenta.View;
@@ -10,6 +11,7 @@ public partial class App : Application
 {
     private void ApplicationStart(object sender, StartupEventArgs e)
     {
+        
         var loginView = new LoginView();
         loginView.Show();
 
