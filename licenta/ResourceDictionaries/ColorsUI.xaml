@@ -12,6 +12,8 @@
     <Color x:Key="winBorderColor1">#4CAF50</Color> <!-- Vibrant green -->
     <Color x:Key="winBorderColor2">#388E3C</Color> <!-- Dark green -->
     <Color x:Key="winBorderColor3">#66BB6A</Color> <!-- Light green -->
+    <Color x:Key="winBorderColor4">#2E7D32</Color> <!-- Dark green -->
+    <Color x:Key="winBorderColor5">#1B5E20</Color> <!-- Light green -->
 
     <!--Color Palette-->
     <SolidColorBrush x:Key="color1" Color="#8BC34A"/> <!-- Light green -->

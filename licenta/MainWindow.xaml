@@ -56,8 +56,13 @@
                     Grid.Column="0">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,0.7">
-                        <GradientStop Color="{StaticResource secondaryBackColor1}" Offset="0" />
-                        <GradientStop Color="{StaticResource secondaryBackColor2}" Offset="1" />
+                        <GradientStop Color="{StaticResource winBorderColor2}" Offset="0.0" />
+                        <GradientStop Color="{StaticResource winBorderColor3}" Offset="0.2" />
+                        <GradientStop Color="{StaticResource winBorderColor4}" Offset="0.5" />
+                        <!-- <GradientStop Color="{StaticResource winBorderColor5}" Offset="0.7" /> -->
+                        <GradientStop Color="{StaticResource winBorderColor3}" Offset="0.7" />
+                        <GradientStop Color="{StaticResource winBorderColor4}" Offset="1.0" />
+
                     </LinearGradientBrush>
                 </Border.Background>
                 <StackPanel>
@@ -69,7 +74,7 @@
 
                         <Image Source="/Images/logo.png" Height="30" />
                         <TextBlock Text="licenta"
-                                   Foreground="{StaticResource titleColor2}"
+                                   Foreground="White"
                                    FontSize="20"
                                    FontFamily="Montserrat"
                                    FontWeight="Medium"
