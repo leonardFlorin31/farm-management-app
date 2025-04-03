@@ -1551,7 +1551,6 @@
   "projectFileDependencyGroups": {
     "net8.0-windows7.0": [
       "Clipper2 >= 1.4.0",
-      "ControlzEx >= 7.0.1-rc0014",
       "FontAwesome.Sharp >= 6.6.0",
       "GMap.NET.Core >= 2.1.7",
       "GMap.NET.WinPresentation >= 2.1.7",
@@ -1617,10 +1616,6 @@
           "Clipper2": {
             "target": "Package",
             "version": "[1.4.0, )"
-          },
-          "ControlzEx": {
-            "target": "Package",
-            "version": "[7.0.1-rc0014, )"
           },
           "FontAwesome.Sharp": {
             "target": "Package",

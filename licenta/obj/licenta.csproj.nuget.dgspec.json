@@ -54,10 +54,6 @@
               "target": "Package",
               "version": "[1.4.0, )"
             },
-            "ControlzEx": {
-              "target": "Package",
-              "version": "[7.0.1-rc0014, )"
-            },
             "FontAwesome.Sharp": {
               "target": "Package",
               "version": "[6.6.0, )"

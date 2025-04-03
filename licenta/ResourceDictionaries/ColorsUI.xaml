@@ -28,6 +28,8 @@
     <SolidColorBrush x:Key="color10" Color="#FF5722"/> <!-- Deep orange (for accents) -->
     <SolidColorBrush x:Key="color11" Color="Red"/> 
     <SolidColorBrush x:Key="color12" Color="DarkRed"/> 
+    <SolidColorBrush x:Key="color13" Color="#388E3C"/> 
+    <SolidColorBrush x:Key="color14" Color="#D61B1B"/> 
     
     <!--Font Colors-->
     <SolidColorBrush x:Key="titleColor1" Color="#2E7D32"/> <!-- Dark green -->

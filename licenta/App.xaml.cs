@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using ControlzEx.Theming;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using licenta.View;

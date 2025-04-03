@@ -8,6 +8,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using ControlzEx.Theming;
 using licenta.ViewModel;
 
 namespace licenta.View
@@ -21,6 +22,11 @@ namespace licenta.View
         {
             InitializeComponent();
             Console.WriteLine("AnimalView initialized");
+            
+            var currentTheme = ThemeManager.Current.DetectTheme(Application.Current);
+            
+            // Schimbă tema aplicației la Light.Blue
+            ThemeManager.Current.ChangeTheme(Application.Current, "Light.Green");
             
             Loaded += MapView_Loaded;
         }

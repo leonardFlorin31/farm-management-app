@@ -10,132 +10,110 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:behavior="clr-namespace:licenta.Behavior"
              xmlns:viewModel="clr-namespace:licenta.ViewModel"
-             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp">
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls">
     <UserControl.Resources>
         <!-- Custom ToggleButton pentru ComboBox -->
-        <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton">
-            <Grid>
-                <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" />
-                <Grid>
-                    <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center" />
-                    <Path Name="Arrow" Fill="Black"
-                          Data="M 0 0 L 4 4 L 8 0 Z"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Center"
-                          Margin="0,0,5,0" />
-                </Grid>
-            </Grid>
-        </ControlTemplate>
-
-        <!-- Custom ComboBox Style -->
-        <Style TargetType="{x:Type ComboBox}">
-            <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="Black" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="BorderBrush" Value="Black" />
-            <Setter Property="Padding" Value="4" />
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton Name="DropDownToggle"
-                                          ClickMode="Press"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          Template="{StaticResource CustomToggleButton}" />
-                            <ContentPresenter Name="ContentSite"
-                                              Content="{TemplateBinding SelectionBoxItem}"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Left"
-                                              Margin="5,0,0,0" />
-                            <Popup Name="Popup"
-                                   IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   Placement="Bottom"
-                                   AllowsTransparency="True"
-                                   PopupAnimation="Slide">
-                                <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White">
-                                    <ScrollViewer>
-                                        <ItemsPresenter />
-                                    </ScrollViewer>
-                                </Border>
-                            </Popup>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- <ControlTemplate x:Key="CustomToggleButton" TargetType="ToggleButton"> -->
+        <!--     <Grid> -->
+        <!--         <Border Name="Border" Background="White" BorderBrush="Black" BorderThickness="1" /> -->
+        <!--         <Grid> -->
+        <!--             <ContentPresenter HorizontalAlignment="Left" Margin="5,0,25,0" VerticalAlignment="Center" /> -->
+        <!--             <Path Name="Arrow" Fill="Black" -->
+        <!--                   Data="M 0 0 L 4 4 L 8 0 Z" -->
+        <!--                   HorizontalAlignment="Right" -->
+        <!--                   VerticalAlignment="Center" -->
+        <!--                   Margin="0,0,5,0" /> -->
+        <!--         </Grid> -->
+        <!--     </Grid> -->
+        <!-- </ControlTemplate> -->
+        <!-- -->
+        <!-- ~1~ Custom ComboBox Style @1@ -->
+        <!-- <Style TargetType="{x:Type ComboBox}"> -->
+        <!--     <Setter Property="FrameworkElement.OverridesDefaultStyle" Value="True" /> -->
+        <!--     <Setter Property="Background" Value="White" /> -->
+        <!--     <Setter Property="Foreground" Value="Black" /> -->
+        <!--     <Setter Property="FontSize" Value="15" /> -->
+        <!--     <Setter Property="BorderBrush" Value="Black" /> -->
+        <!--     <Setter Property="Padding" Value="4" /> -->
+        <!--     <Setter Property="Control.Template"> -->
+        <!--         <Setter.Value> -->
+        <!--             <ControlTemplate TargetType="ComboBox"> -->
+        <!--                 <Grid> -->
+        <!--                     <ToggleButton Name="DropDownToggle" -->
+        <!--                                   ClickMode="Press" -->
+        <!--                                   IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" -->
+        <!--                                   Template="{StaticResource CustomToggleButton}" /> -->
+        <!--                     <ContentPresenter Name="ContentSite" -->
+        <!--                                       Content="{TemplateBinding SelectionBoxItem}" -->
+        <!--                                       VerticalAlignment="Center" -->
+        <!--                                       HorizontalAlignment="Left" -->
+        <!--                                       Margin="5,0,0,0" /> -->
+        <!--                     <Popup Name="Popup" -->
+        <!--                            IsOpen="{TemplateBinding IsDropDownOpen}" -->
+        <!--                            Placement="Bottom" -->
+        <!--                            AllowsTransparency="True" -->
+        <!--                            PopupAnimation="Slide"> -->
+        <!--                         <Border BorderBrush="{TemplateBinding BorderBrush}" Background="White"> -->
+        <!--                             <ScrollViewer> -->
+        <!--                                 <ItemsPresenter /> -->
+        <!--                             </ScrollViewer> -->
+        <!--                         </Border> -->
+        <!--                     </Popup> -->
+        <!--                 </Grid> -->
+        <!--             </ControlTemplate> -->
+        <!--         </Setter.Value> -->
+        <!--     </Setter> -->
+        <!-- </Style> -->
     </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <!-- Header -->
-            <RowDefinition Height="50" />
-            <!-- Harta și restul elementelor -->
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+   <Grid>
+  <Grid.RowDefinitions>
+    <RowDefinition Height="50" />
+    <RowDefinition Height="*" />
+  </Grid.RowDefinitions>
 
-        <!-- Header-ul cu controale -->
-        <Grid Grid.Row="0" Background="WhiteSmoke">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+  <!-- Header cu controale -->
+  <Grid Grid.Row="0" Background="{DynamicResource MahApps.Brushes.WhiteSmoke}">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="Auto" />
+    </Grid.ColumnDefinitions>
 
-            <!-- Coloana stângă: Iconiță și titlu -->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0">
-                <fa:IconImage Icon="Map" Style="{StaticResource menuButtonIcon}" Foreground="{StaticResource titleColor2}" Margin="10, 0 ,5 ,0" />
-                <TextBlock Text="Harta" 
-                           FontSize="16" 
-                           FontWeight="Bold" 
-                           Foreground="{StaticResource titleColor2}"
-                           VerticalAlignment="Center" 
-                           Margin="0,0,0,0"/>
-            </StackPanel>
+    <!-- Coloana stângă: Iconiță și titlu -->
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
+      <!-- Icon-ul poate folosi stilul și culoarea din resurse -->
+      <fa:IconImage Icon="Map" Style="{StaticResource menuButtonIcon}" 
+                    Foreground="{DynamicResource AccentColorBrush}" 
+                    Margin="10,0,5,0" />
+      <TextBlock Text="Harta" 
+                 FontSize="16" 
+                 FontWeight="Bold" 
+                 Foreground="Black"
+                 VerticalAlignment="Center"/>
+    </StackPanel>
 
-            <!-- Coloana mijloc: Caseta de text și ComboBox -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0" >
-                <!-- Caseta de introducere a numelui parcelei cu placeholder -->
-                <Grid Width="220" Height="30">
-                    <TextBox x:Name="InputTextBox"
-                             Text="{Binding PolygonName, UpdateSourceTrigger=PropertyChanged}"
-                             Background="White"
-                             Padding="5"
-                             Width="180" Height="30"
-                             BorderThickness="0"
-                             HorizontalContentAlignment="Left"
-                             VerticalContentAlignment="Center"/>
-                    <TextBlock Text="Introduceti numele parcelei..."
-                               Foreground="Gray"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Center"
-                               IsHitTestVisible="False"
-                               Margin="5,0,5,0">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Visibility" Value="Visible" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPlaceholderVisible}" Value="False">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </Grid>
-                <!-- ComboBox -->
-                <ComboBox x:Name="comboBox"
-                          Width="120"
-                          ItemsSource="{Binding CenterPointNames}"
-                          SelectedItem="{Binding SelectedCenterPointName, Mode=TwoWay}"
-                          Style="{StaticResource {x:Type ComboBox}}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SelectionChanged">
-                            <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </ComboBox>
-            </StackPanel>
+    <!-- Coloana mijloc: Caseta de text și ComboBox -->
+    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10,0">
+      <!-- TextBox cu Watermark (placeholder) -->
+      <Grid Width="220" Height="30">
+        <TextBox x:Name="InputTextBox"
+                 Text="{Binding PolygonName, UpdateSourceTrigger=PropertyChanged}"
+                 Background="White"
+                 Padding="5"
+                 Width="180" Height="30"
+                 BorderThickness="0"
+                 HorizontalContentAlignment="Left"
+                 VerticalContentAlignment="Center"
+                 mah:TextBoxHelper.Watermark="Introduceti numele parcelei..." />
+      </Grid>
+      <!-- ComboBox folosind stilurile MahApps implicite -->
+      <ComboBox x:Name="comboBox"
+                Width="120"
+                ItemsSource="{Binding CenterPointNames}"
+                SelectedItem="{Binding SelectedCenterPointName, Mode=TwoWay}" />
+    </StackPanel>
 
             <!-- Coloana dreaptă: Butoane -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0" >
@@ -151,10 +129,10 @@
                         Margin="0,0,5,0">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                            <Setter Property="Background" Value="{StaticResource color13}" />
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                                    <Setter Property="Background" Value="{StaticResource titleColor2}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -183,10 +161,10 @@
                         Margin="5,0,5,0">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                            <Setter Property="Background" Value="{StaticResource color13}" />
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource titleColor3}" />
+                                    <Setter Property="Background" Value="{StaticResource titleColor2}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -215,10 +193,10 @@
                         Margin="5,0,5,0">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Background" Value="{StaticResource color12}" />
+                            <Setter Property="Background" Value="{StaticResource color14}" />
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource color11}" />
+                                    <Setter Property="Background" Value="{StaticResource color12}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
@@ -247,10 +225,10 @@
                         Margin="5,0,5,0">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Background" Value="{StaticResource color12}" />
+                            <Setter Property="Background" Value="{StaticResource color14}" />
                             <Style.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource color11}" />
+                                    <Setter Property="Background" Value="{StaticResource color12}" />
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
