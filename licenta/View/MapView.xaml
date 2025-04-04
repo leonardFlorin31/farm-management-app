@@ -112,7 +112,14 @@
       <ComboBox x:Name="comboBox"
                 Width="120"
                 ItemsSource="{Binding CenterPointNames}"
-                SelectedItem="{Binding SelectedCenterPointName, Mode=TwoWay}" />
+                SelectedItem="{Binding SelectedCenterPointName, Mode=TwoWay}"
+                Style="{StaticResource {x:Type ComboBox}}">
+          <i:Interaction.Triggers>
+              <i:EventTrigger EventName="SelectionChanged">
+                  <i:InvokeCommandAction Command="{Binding SelectionChangedCommand}" />
+              </i:EventTrigger>
+          </i:Interaction.Triggers>
+      </ComboBox>
     </StackPanel>
 
             <!-- Coloana dreaptă: Butoane -->
