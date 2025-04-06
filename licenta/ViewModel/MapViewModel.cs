@@ -75,7 +75,7 @@ namespace licenta.ViewModel
         // Fields for server interaction
         private readonly HttpClient _httpClient = new HttpClient();
         private string _apiBaseUrl = "https://localhost:7088/api";
-        private Guid _currentUserId; // Will be set after login
+        public Guid _currentUserId; // Will be set after login
         private string _currentUsername = LoginViewModel.UsernameForUse.Username;
         private List<string> _polygonNames = new List<string> { };
 
@@ -1266,7 +1266,7 @@ namespace licenta.ViewModel
                     }
 
                     // Create and execute the delete command
-                    var deleteCommand = new DeletePolygonCommand(pName, _allPolygons, MapControl, _polygonNames);
+                    var deleteCommand = new DeletePolygonCommand(pName, _allPolygons, MapControl, _polygonNames, AddControlMarkersForPolygon, _currentUserId);
                     deleteCommand.Execute();
                     _undoStack.Push(deleteCommand);
                     _redoStack.Clear(); // Clear redo stack as a new action occurred
@@ -1877,224 +1877,235 @@ namespace licenta.ViewModel
     }
 
     public class DeletePolygonCommand : IUndoableCommand
+{
+    private EditablePolygon _polygonToDelete;
+    private readonly List<EditablePolygon> _allPolygons;
+    private readonly GMapControl _mapControl;
+    private readonly List<string> _polygonNames;
+    private readonly string _polygonName;
+    private int _polygonIndexInAllPolygons = -1;
+    private int _polygonNameIndex = -1;
+    private List<PointLatLng> _controlPointCoordinates = new List<PointLatLng>(); // Store control point coordinates for undo
+    private GMapPolygon _polygonMarker;
+    private GMapMarker _textMarker;
+    private readonly Action<EditablePolygon> _addControlMarkersForPolygon; // Reference to the method
+    private Guid _currentUserId;
+
+    public DeletePolygonCommand(string polygonName, List<EditablePolygon> allPolygons, GMapControl mapControl, List<string> polygonNames, Action<EditablePolygon> addControlMarkersForPolygon, Guid currentUserId)
     {
-        private EditablePolygon _polygonToDelete;
-        private readonly List<EditablePolygon> _allPolygons;
-        private readonly GMapControl _mapControl;
-        private readonly List<string> _polygonNames;
-        private readonly string _polygonName;
-        private int _polygonIndexInAllPolygons = -1;
-        private int _polygonNameIndex = -1;
+        _polygonName = polygonName;
+        _allPolygons = allPolygons;
+        _mapControl = mapControl;
+        _polygonNames = polygonNames;
+        _addControlMarkersForPolygon = addControlMarkersForPolygon;
+        _currentUserId = currentUserId;
 
-        private List<PointLatLng>
-            _controlPointCoordinates = new List<PointLatLng>(); // Store control point coordinates for undo
-
-        private GMapPolygon _polygonMarker;
-        private GMapMarker _textMarker;
-
-        public DeletePolygonCommand(string polygonName, List<EditablePolygon> allPolygons, GMapControl mapControl,
-            List<string> polygonNames)
+        _polygonToDelete = _allPolygons.FirstOrDefault(p => p.Name == polygonName);
+        if (_polygonToDelete != null)
         {
-            _polygonName = polygonName;
-            _allPolygons = allPolygons;
-            _mapControl = mapControl;
-            _polygonNames = polygonNames;
+            _polygonIndexInAllPolygons = _allPolygons.IndexOf(_polygonToDelete);
+            _polygonMarker = _polygonToDelete.Polygon;
+            _controlPointCoordinates.AddRange(_polygonToDelete.Coordinates); // Store coordinates for undo
+        }
+        _polygonNameIndex = _polygonNames.IndexOf(polygonName);
 
-            _polygonToDelete = _allPolygons.FirstOrDefault(p => p.Name == polygonName);
-            if (_polygonToDelete != null)
+        // Find the text marker
+        _textMarker = _mapControl.Markers.FirstOrDefault(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName);
+    }
+
+    public void Execute()
+    {
+        Console.WriteLine($"Executing DeletePolygonCommand for: {_polygonName}");
+        if (_polygonToDelete != null)
+        {
+            Console.WriteLine($"Removing polygon marker: {_polygonMarker?.Tag} from map (Contains: {_mapControl.Markers.Contains(_polygonMarker)}).");
+            // Remove polygon marker from map
+            if (_polygonMarker != null && _mapControl.Markers.Contains(_polygonMarker))
             {
-                _polygonIndexInAllPolygons = _allPolygons.IndexOf(_polygonToDelete);
-                _polygonMarker = _polygonToDelete.Polygon;
-                _controlPointCoordinates.AddRange(_polygonToDelete.Coordinates); // Store coordinates for undo
+                _mapControl.Markers.Remove(_polygonMarker);
             }
 
-            _polygonNameIndex = _polygonNames.IndexOf(polygonName);
+            // Remove control markers directly from MapControl
+            var controlMarkersToRemove = _mapControl.Markers
+                .Where(m => m.Shape is System.Windows.Shapes.Ellipse &&
+                            _polygonToDelete.Coordinates.Any(coord => coord.Lat == m.Position.Lat && coord.Lng == m.Position.Lng))
+                .ToList();
 
-            // Find the text marker
-            _textMarker =
-                _mapControl.Markers.FirstOrDefault(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName);
-        }
-
-        public void Execute()
-        {
-            Console.WriteLine($"Executing DeletePolygonCommand for: {_polygonName}");
-            if (_polygonToDelete != null)
+            Console.WriteLine($"Found {controlMarkersToRemove.Count} control markers on the map to remove.");
+            foreach (var marker in controlMarkersToRemove)
             {
-                Console.WriteLine(
-                    $"Removing polygon marker: {_polygonMarker?.Tag} from map (Contains: {_mapControl.Markers.Contains(_polygonMarker)}).");
-                // Remove polygon marker from map
-                if (_polygonMarker != null && _mapControl.Markers.Contains(_polygonMarker))
+                Console.WriteLine($"Removing control marker with Tag: {marker.Tag} at: {marker.Position} (Contains: {_mapControl.Markers.Contains(marker)}).");
+                if (_mapControl.Markers.Contains(marker))
                 {
-                    _mapControl.Markers.Remove(_polygonMarker);
+                    _mapControl.Markers.Remove(marker);
                 }
+            }
+            _polygonToDelete.ControlMarkers.Clear(); // Clear the potentially outdated list
 
-                // Remove control markers directly from MapControl
-                var controlMarkersToRemove = _mapControl.Markers
-                    .Where(m => m.Shape is System.Windows.Shapes.Ellipse &&
-                                _polygonToDelete.Coordinates.Any(coord =>
-                                    coord.Lat == m.Position.Lat && coord.Lng == m.Position.Lng))
-                    .ToList();
-
-                Console.WriteLine($"Found {controlMarkersToRemove.Count} control markers on the map to remove.");
-                foreach (var marker in controlMarkersToRemove)
-                {
-                    Console.WriteLine(
-                        $"Removing control marker with Tag: {marker.Tag} at: {marker.Position} (Contains: {_mapControl.Markers.Contains(marker)}).");
-                    if (_mapControl.Markers.Contains(marker))
-                    {
-                        _mapControl.Markers.Remove(marker);
-                    }
-                }
-
-                _polygonToDelete.ControlMarkers.Clear(); // Clear the potentially outdated list
-
-                // Remove polygon from collections
-                Console.WriteLine(
-                    $"Removing polygon '{_polygonName}' from _allPolygons (Contains: {_allPolygons.Contains(_polygonToDelete)}).");
-                if (_polygonIndexInAllPolygons != -1 && _allPolygons.Contains(_polygonToDelete))
-                {
-                    _allPolygons.RemoveAt(_polygonIndexInAllPolygons);
-                    _polygonToDelete = null; // Set to null after removal
-                }
-                else
-                {
-                    Console.WriteLine(
-                        $"Warning: Index of polygon '{_polygonName}' not found in _allPolygons or polygon not present.");
-                }
-
-                Console.WriteLine(
-                    $"Removing polygon name '{_polygonName}' from _polygonNames (Contains: {_polygonNames.Contains(_polygonName)}).");
-                if (_polygonNameIndex != -1 && _polygonNames.Contains(_polygonName))
-                {
-                    _polygonNames.RemoveAt(_polygonNameIndex);
-                }
-                else
-                {
-                    Console.WriteLine(
-                        $"Warning: Index of polygon name '{_polygonName}' not found in _polygonNames or name not present.");
-                }
-
-                // Remove text marker
-                Console.WriteLine(
-                    $"Removing text marker for '{_polygonName}' (Contains: {_mapControl.Markers.Contains(_textMarker)}).");
-                if (_textMarker != null && _mapControl.Markers.Contains(_textMarker))
-                {
-                    _mapControl.Markers.Remove(_textMarker);
-                }
-
-                // Force map refresh
-                _mapControl.InvalidateVisual();
+            // Remove polygon from collections
+            Console.WriteLine($"Removing polygon '{_polygonName}' from _allPolygons (Contains: {_allPolygons.Contains(_polygonToDelete)}).");
+            if (_polygonIndexInAllPolygons != -1 && _allPolygons.Contains(_polygonToDelete))
+            {
+                _allPolygons.RemoveAt(_polygonIndexInAllPolygons);
+                _polygonToDelete = null; // Set to null after removal
             }
             else
             {
-                Console.WriteLine($"Error: _polygonToDelete is null for '{_polygonName}'.");
+                Console.WriteLine($"Warning: Index of polygon '{_polygonName}' not found in _allPolygons or polygon not present.");
             }
-        }
 
-        public void Unexecute()
-        {
-            Console.WriteLine($"Unexecuting DeletePolygonCommand for: {_polygonName}");
-            if (_polygonToDelete == null)
+            Console.WriteLine($"Removing polygon name '{_polygonName}' from _polygonNames (Contains: {_polygonNames.Contains(_polygonName)}).");
+            if (_polygonNameIndex != -1 && _polygonNames.Contains(_polygonName))
             {
-                // Recreate the EditablePolygon object
-                _polygonToDelete = new EditablePolygon
-                {
-                    Name = _polygonName,
-                    Coordinates = new List<PointLatLng>(_controlPointCoordinates),
-                    Polygon = new GMapPolygon(_controlPointCoordinates)
-                    {
-                        Shape = new System.Windows.Shapes.Polygon
-                        {
-                            Stroke = Brushes.Red,
-                            Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
-                            StrokeThickness = 2
-                        },
-                        Tag = _polygonName
-                    },
-                    ControlMarkers = new List<GMapMarker>()
-                };
+                _polygonNames.RemoveAt(_polygonNameIndex);
             }
-
-            // Add polygon back to collections
-            if (_polygonIndexInAllPolygons != -1 && !_allPolygons.Contains(_polygonToDelete))
+            else
             {
-                Console.WriteLine(
-                    $"Inserting '{_polygonName}' back into _allPolygons at index {_polygonIndexInAllPolygons}.");
-                _allPolygons.Insert(_polygonIndexInAllPolygons, _polygonToDelete);
+                Console.WriteLine($"Warning: Index of polygon name '{_polygonName}' not found in _polygonNames or name not present.");
             }
 
-            if (_polygonNameIndex != -1 && !_polygonNames.Contains(_polygonName))
+            // Remove text marker
+            Console.WriteLine($"Removing text marker for '{_polygonName}' (Contains: {_mapControl.Markers.Contains(_textMarker)}).");
+            if (_textMarker != null && _mapControl.Markers.Contains(_textMarker))
             {
-                Console.WriteLine($"Inserting '{_polygonName}' back into _polygonNames at index {_polygonNameIndex}.");
-                _polygonNames.Insert(_polygonNameIndex, _polygonName);
+                _mapControl.Markers.Remove(_textMarker);
             }
 
-            // Add polygon marker back to map
-            if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
-            {
-                Console.WriteLine($"Adding polygon marker '{_polygonMarker.Tag}' back to map.");
-                _mapControl.Markers.Add(_polygonMarker);
-            }
-            else if (_polygonMarker == null)
-            {
-                Console.WriteLine($"Warning: _polygonMarker is null in Unexecute.");
-                _polygonMarker = _polygonToDelete.Polygon; // Ensure polygon marker is set
-                if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
-                {
-                    Console.WriteLine(
-                        $"Trying to add reconstructed polygon marker '{_polygonMarker.Tag}' back to map.");
-                    _mapControl.Markers.Add(_polygonMarker);
-                }
-            }
-
-            // Add control markers back to map
-            Console.WriteLine($"Adding back {_controlPointCoordinates.Count} control markers.");
-            foreach (var point in _controlPointCoordinates)
-            {
-                // GMapMarker controlMarker = new GMapMarker(point)
-                // {
-                //     Shape = new System.Windows.Shapes.Ellipse(),
-                //     Width = 10,
-                //     Height = 10,
-                //     Stroke = Brushes.Gold,
-                //     Fill = Brushes.Transparent
-                // },
-                // Offset = new Point(-5, -5),
-                // Tag = Guid.NewGuid() // Assign a new tag on restore
-
-                GMapMarker controlMarker = new GMapMarker(point)
-                {
-                    Shape = new System.Windows.Shapes.Ellipse
-                    {
-                        Width = 10,
-                        Height = 10,
-                        Stroke = Brushes.Gold,
-                        Fill = Brushes.Transparent
-                    },
-                    Offset = new Point(-5, -5),
-                    Tag = Guid.NewGuid()
-                };
-
-                Console.WriteLine(
-                    $"Adding control marker at {controlMarker.Position} with Tag {controlMarker.Tag} to map and _polygonToDelete.ControlMarkers.");
-                _mapControl.Markers.Add(controlMarker);
-                _polygonToDelete.ControlMarkers.Add(controlMarker); // Restore the list
-            }
-
-            ;
-            // Add text marker back to map
-            if (_textMarker != null && !_mapControl.Markers.Contains(_textMarker))
-            {
-                Console.WriteLine($"Adding text marker for '{_polygonName}' back to map.");
-                _mapControl.Markers.Add(_textMarker);
-            }
-            else if (_textMarker == null)
-            {
-                Console.WriteLine($"Warning: _textMarker is null in Unexecute.");
-                // Potentially try to find and recreate the text marker if needed
-            }
-
+            // Force map refresh
             _mapControl.InvalidateVisual();
         }
+        else
+        {
+            Console.WriteLine($"Error: _polygonToDelete is null for '{_polygonName}'.");
+        }
     }
+
+    public async void Unexecute()
+    {
+        Console.WriteLine($"Unexecuting DeletePolygonCommand for: {_polygonName}");
+        if (_polygonToDelete == null)
+        {
+            // Recreate the EditablePolygon object
+            _polygonToDelete = new EditablePolygon
+            {
+                Name = _polygonName,
+                Coordinates = new List<PointLatLng>(_controlPointCoordinates),
+                Polygon = new GMapPolygon(_controlPointCoordinates)
+                {
+                    Shape = new System.Windows.Shapes.Polygon
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                        StrokeThickness = 2
+                    },
+                    Tag = _polygonName
+                },
+                ControlMarkers = new List<GMapMarker>()
+            };
+            
+            using (var client = new HttpClient())
+            {
+                var createRequest = new CreatePolygonRequest
+                {
+                    Name = _polygonToDelete.Name,
+                    UserId = _currentUserId,
+                    Points = _polygonToDelete.Coordinates
+                        .Select((p, index) => new PointRequest
+                        {
+                            Latitude = (decimal)p.Lat,
+                            Longitude = (decimal)p.Lng,
+                            Order = index
+                        }).ToList()
+                };
+
+                var jsonContent = new StringContent(JsonSerializer.Serialize(createRequest), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("https://localhost:7088/api/Polygons", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Polygon '{_polygonName}' was successfully re-created on the server.");
+                    // Optionally, you might need to fetch the new ID if needed
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to re-create polygon '{_polygonName}' on the server. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+        // Add polygon back to collections
+        if (_polygonIndexInAllPolygons != -1 && !_allPolygons.Contains(_polygonToDelete))
+        {
+            Console.WriteLine($"Inserting '{_polygonName}' back into _allPolygons at index {_polygonIndexInAllPolygons}.");
+            _allPolygons.Insert(_polygonIndexInAllPolygons, _polygonToDelete);
+        }
+        if (_polygonNameIndex != -1 && !_polygonNames.Contains(_polygonName))
+        {
+            Console.WriteLine($"Inserting '{_polygonName}' back into _polygonNames at index {_polygonNameIndex}.");
+            _polygonNames.Insert(_polygonNameIndex, _polygonName);
+        }
+
+        // Add polygon marker back to map
+        if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
+        {
+            Console.WriteLine($"Adding polygon marker '{_polygonMarker.Tag}' back to map.");
+            _mapControl.Markers.Add(_polygonMarker);
+        }
+        else if (_polygonMarker == null)
+        {
+            Console.WriteLine($"Warning: _polygonMarker is null in Unexecute.");
+            _polygonMarker = _polygonToDelete.Polygon; // Ensure polygon marker is set
+            if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
+            {
+                Console.WriteLine($"Trying to add reconstructed polygon marker '{_polygonMarker.Tag}' back to map.");
+                _mapControl.Markers.Add(_polygonMarker);
+            }
+        }
+        
+        // Găsește poligonul vizual pe hartă (poate fi redundant, dar încercăm)
+        var existingPolygonMarker = _mapControl.Markers.OfType<GMapPolygon>().FirstOrDefault(p => p.Tag?.ToString() == _polygonName);
+
+        // Dacă există deja un poligon vizual cu acest nume, înlătură-l (pentru a evita duplicate)
+        if (existingPolygonMarker != null)
+        {
+            Console.WriteLine($"Removing existing polygon marker '{_polygonName}' before re-adding in Unexecute.");
+            _mapControl.Markers.Remove(existingPolygonMarker);
+        }
+
+        // Crează un nou poligon vizual cu coordonatele restaurate
+        var restoredPolygonMarker = new GMapPolygon(_polygonToDelete.Coordinates)
+        {
+            Shape = new System.Windows.Shapes.Polygon
+            {
+                Stroke = Brushes.Red,
+                Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                StrokeThickness = 2
+            },
+            Tag = _polygonToDelete.Name
+        };
+        _polygonToDelete.Polygon = restoredPolygonMarker; // Actualizează referința
+
+        // Adaugă noul poligon vizual pe hartă
+        Console.WriteLine($"Adding restored polygon marker '{_polygonToDelete.Name}' back to map in Unexecute.");
+        _mapControl.Markers.Add(restoredPolygonMarker);
+
+        // Re-add control markers using the provided method
+        Console.WriteLine($"Re-adding control markers for '{_polygonName}' to ensure interactivity.");
+        _addControlMarkersForPolygon(_polygonToDelete);
+
+        // Add text marker back to map
+        if (_textMarker != null && !_mapControl.Markers.Contains(_textMarker))
+        {
+            Console.WriteLine($"Adding text marker for '{_polygonName}' back to map.");
+            _mapControl.Markers.Add(_textMarker);
+        }
+        else if (_textMarker == null)
+        {
+            Console.WriteLine($"Warning: _textMarker is null in Unexecute.");
+            // Potentially try to find and recreate the text marker if needed
+        }
+
+        _mapControl.InvalidateVisual();
+    }
+}
 }
