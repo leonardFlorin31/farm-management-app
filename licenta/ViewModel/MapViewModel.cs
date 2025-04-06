@@ -635,6 +635,22 @@ namespace licenta.ViewModel
                 {
                     _markerCoordinates[markerIndex] = newLatLng;
                 }
+                
+                bool isEditingMarker = false;
+                foreach (var polygon in _allPolygons)
+                {
+                    if (polygon.ControlMarkers.Contains(_draggedMarker))
+                    {
+                        isEditingMarker = true;
+                        break;
+                    }
+                }
+
+                // Actualizează _markerCoordinates doar dacă nu editezi un marker existent
+                if (!isEditingMarker && markerIndex >= 0 && markerIndex < _markerCoordinates.Count)
+                {
+                    _markerCoordinates[markerIndex] = newLatLng;
+                }
 
                 foreach (var polygon in _allPolygons)
                 {
@@ -720,8 +736,14 @@ namespace licenta.ViewModel
                 
                 if (changed)
                 {
-                    // Creează și stochează comanda de mișcare pentru undo/redo
-                    var moveCommand = new MovePolygonCommand(_currentlyModifyingPolygon, _initialPolygonCoordinates, newCoordinates, MapControl);
+                    // Actualizează markerii de control înainte de a salva starea
+                    for (int i = 0; i < _currentlyModifyingPolygon.ControlMarkers.Count; i++)
+                    {
+                        _currentlyModifyingPolygon.ControlMarkers[i].Position = newCoordinates[i];
+                    }
+
+                    var moveCommand = new MovePolygonCommand(_currentlyModifyingPolygon, 
+                        _initialPolygonCoordinates, newCoordinates, MapControl);
                     _undoStack.Push(moveCommand);
                     _redoStack.Clear();
                 }
@@ -1083,7 +1105,7 @@ namespace licenta.ViewModel
                     },
                     Tag = PolygonName
                 };
-                MapControl.Markers.Add(newPolygon.Polygon);
+                //MapControl.Markers.Add(newPolygon.Polygon);
 
                 // CREAREA PUNCTELOR DE CONTROL: pentru fiecare colț al poligonului, adăugăm un marker transparent
                 // Salvează în lista globală
@@ -1121,6 +1143,13 @@ namespace licenta.ViewModel
 
         private void AddControlMarkersForPolygon(EditablePolygon polygon)
         {
+            // Șterge markerii existenți (dacă există)
+            foreach (var marker in polygon.ControlMarkers)
+            {
+                MapControl.Markers.Remove(marker);
+            }
+            polygon.ControlMarkers.Clear();
+            
             foreach (var point in polygon.Coordinates)
             {
                 GMapMarker controlMarker = new GMapMarker(point)
@@ -1716,7 +1745,7 @@ namespace licenta.ViewModel
         {
             _allPolygons.Add(_polygon);
             _polygonNames.Add(_polygon.Name);
-            //_mapControl.Markers.Add(_polygon.Polygon);
+            _mapControl.Markers.Add(_polygon.Polygon);
             // Dacă poligonul are și markere de control, le poți adăuga aici
             foreach (var marker in _polygon.ControlMarkers)
             {
@@ -1729,7 +1758,7 @@ namespace licenta.ViewModel
         {
             _allPolygons.Remove(_polygon);
             _polygonNames.Remove(_polygon.Name);
-            //_mapControl.Markers.Remove(_polygon.Polygon);
+            _mapControl.Markers.Remove(_polygon.Polygon);
             foreach (var marker in _polygon.ControlMarkers)
             {
                 _mapControl.Markers.Remove(marker);
@@ -1764,13 +1793,19 @@ namespace licenta.ViewModel
 
         private void ApplyCoordinates(List<PointLatLng> coordinates)
         {
-            // Actualizează lista de coordonate a poligonului
+            // Actualizează coordonatele poligonului
             _polygon.Coordinates = new List<PointLatLng>(coordinates);
 
-            // Înlătură forma veche a poligonului de pe hartă
+            // Actualizează pozițiile markerelor de control
+            for (int i = 0; i < _polygon.ControlMarkers.Count; i++)
+            {
+                _polygon.ControlMarkers[i].Position = coordinates[i];
+            }
+
+            // Înlătură vechiul poligon de pe hartă
             _mapControl.Markers.Remove(_polygon.Polygon);
 
-            // Creează o nouă formă cu coordonatele actualizate
+            // Crează un nou poligon cu coordonatele actualizate
             _polygon.Polygon = new GMapPolygon(_polygon.Coordinates)
             {
                 Shape = new System.Windows.Shapes.Polygon
@@ -1782,11 +1817,9 @@ namespace licenta.ViewModel
                 Tag = _polygon.Name
             };
 
-            // Adaugă noua formă pe hartă
+            // Adaugă noul poligon pe hartă
             _mapControl.Markers.Add(_polygon.Polygon);
-
-            // Dacă poligonul are și markere de control, actualizează-le (opțional)
-            // De exemplu, actualizează poziția markerelor din polygon.ControlMarkers în funcție de noile coordonate.
+            _mapControl.InvalidateVisual();
         }
     }
 
