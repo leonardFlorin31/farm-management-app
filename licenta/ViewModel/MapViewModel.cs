@@ -744,7 +744,7 @@ namespace licenta.ViewModel
                     }
 
                     var moveCommand = new MovePolygonCommand(_currentlyModifyingPolygon,
-                        _initialPolygonCoordinates, newCoordinates, MapControl);
+                        _initialPolygonCoordinates, newCoordinates, MapControl, AddTextToPolygon, _currentUserId);
                     _undoStack.Push(moveCommand);
                     _redoStack.Clear();
                 }
@@ -1772,6 +1772,14 @@ namespace licenta.ViewModel
         void Execute();
         void Unexecute();
     }
+    
+    public class UpdatePolygonRequest
+    {
+        public Guid UserId { get; set; }
+        public Guid Id { get; set; }
+        public List<PointRequest> Points { get; set; }
+        public string Name { get; set; }
+    }
 
     public class UndoRedoPolygonCommand : IUndoableCommand
     {
@@ -1820,18 +1828,24 @@ namespace licenta.ViewModel
 
     public class MovePolygonCommand : IUndoableCommand
     {
+    
         private readonly EditablePolygon _polygon;
         private readonly List<PointLatLng> _oldCoordinates;
         private readonly List<PointLatLng> _newCoordinates;
         private readonly GMapControl _mapControl;
+        private readonly Action<GMapPolygon , string > _addTextToPolygon; // Reference to the method
+        private Guid _currentUserId;
+        
 
         public MovePolygonCommand(EditablePolygon polygon, List<PointLatLng> oldCoordinates,
-            List<PointLatLng> newCoordinates, GMapControl mapControl)
+            List<PointLatLng> newCoordinates, GMapControl mapControl,  Action<GMapPolygon , string> addTextToPolygonn, Guid currentUserId)
         {
             _polygon = polygon;
             _oldCoordinates = new List<PointLatLng>(oldCoordinates);
             _newCoordinates = new List<PointLatLng>(newCoordinates);
             _mapControl = mapControl;
+            _addTextToPolygon = addTextToPolygonn;
+            _currentUserId = currentUserId;
         }
 
         public void Execute()
@@ -1844,7 +1858,7 @@ namespace licenta.ViewModel
             ApplyCoordinates(_oldCoordinates);
         }
 
-        private void ApplyCoordinates(List<PointLatLng> coordinates)
+        private async void ApplyCoordinates(List<PointLatLng> coordinates)
         {
             // Actualizează coordonatele poligonului
             _polygon.Coordinates = new List<PointLatLng>(coordinates);
@@ -1872,6 +1886,62 @@ namespace licenta.ViewModel
 
             // Adaugă noul poligon pe hartă
             _mapControl.Markers.Add(_polygon.Polygon);
+            
+             // Actualizează poligonul pe server
+        using (var client = new HttpClient())
+        {
+            var getUrl =
+                $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_polygon.Name}&userId={_currentUserId}";
+            var getResponse = await client.GetAsync(getUrl);
+            if (getResponse.IsSuccessStatusCode)
+            {
+                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
+                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
+                if (polygonIdResponse != null)
+                {
+                    Guid polygonId = polygonIdResponse.Id;
+
+                    var updateRequest = new UpdatePolygonRequest
+                    {
+                        Name = _polygon.Name,
+                        Points = _polygon.Coordinates
+                            .Select((p, index) => new PointRequest
+                            {
+                                Latitude = (decimal)p.Lat,
+                                Longitude = (decimal)p.Lng,
+                                Order = index
+                            }).ToList()
+                    };
+
+                    _addTextToPolygon(new GMapPolygon(_polygon.Coordinates),
+                        _polygon.Name);
+
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8,
+                        "application/json");
+                    var putUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
+                    var putResponse = await client.PutAsync(putUrl, jsonContent);
+                    if (putResponse.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine(
+                            $"Polygon {_polygon.Name} was successfully updated on the server.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to update polygon {_polygon.Name} on the server.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Failed to deserialize polygon ID response.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Failed to get polygon ID for {_polygon.Name} from the server.");
+            }
+        }
+
+            
             _mapControl.InvalidateVisual();
         }
     }
