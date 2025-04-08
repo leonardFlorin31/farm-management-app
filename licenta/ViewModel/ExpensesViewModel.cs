@@ -4,6 +4,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Wpf;
+using System.Collections.Generic;
 
 namespace licenta.ViewModel;
 
@@ -19,69 +20,91 @@ public class ExpensesViewModel : ViewModelBase
         _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         LoadDemoData();
     }
-    
-     private void LoadDemoData()
+
+    private void LoadDemoData()
     {
         // Date Demo - Profit/Pierdere pe Lună
-        var monthlyValues = new List<double> 
-        { 
-            15000, -5000, 20000, 3000, -2000, 18000, 
-            9000, -3000, 12000, 7000, -4000, 25000 
+        var monthlyValues = new List<double>
+        {
+            15000, -5000, 20000, 3000, -2000, 18000,
+            9000, -3000, 12000, 7000, -4000, 25000
         };
 
-        var columnSeries = new ColumnSeries
-        {
-            Title = "Profit/Pierdere",
-            Values = new ChartValues<double>(monthlyValues),
-            Fill = Brushes.Transparent,
-            StrokeThickness = 2,
-            DataLabels = true
-        };
+        var positiveValues = new ChartValues<double>();
+        var negativeValues = new ChartValues<double>();
 
-        // Setare culori dinamice
-        foreach (var value in monthlyValues)
+        for (int i = 0; i < monthlyValues.Count; i++)
         {
-            columnSeries.Fill = value >= 0 
-                ? new SolidColorBrush(Color.FromRgb(76, 175, 80)) // Verde
-                : new SolidColorBrush(Color.FromRgb(244, 67, 54)); // Roșu
+            if (monthlyValues[i] >= 0)
+            {
+                positiveValues.Add(monthlyValues[i]);
+            }
+            else
+            {
+                negativeValues.Add(monthlyValues[i]);
+            }
         }
 
-        MonthlyProfitLoss = new SeriesCollection { columnSeries };
+        MonthlyProfitLoss = new SeriesCollection
+        {
+            new ColumnSeries
+            {
+                Title = "Profit",
+                Values = positiveValues,
+                Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
+                StrokeThickness = 2,
+                DataLabels = true,
+                LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+            },
+            new ColumnSeries
+            {
+                Title = "Pierdere",
+                Values = negativeValues,
+                Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Roșu
+                StrokeThickness = 2,
+                DataLabels = true,
+                LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+            }
+        };
 
-        // Date Demo - Procente Cheltuieli
+        // Date Demo - Procente Cheltuieli (rămâne neschimbat)
         ExpensePercentages = new SeriesCollection
         {
             new PieSeries
             {
                 Title = "Semințe",
-                Values = new ChartValues<decimal> { 40 },
+                Values = new ChartValues<double> { 40 },
                 Fill = Brushes.DodgerBlue,
-                DataLabels = true
+                DataLabels = true,
+                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
             },
             new PieSeries
             {
                 Title = "Îngrășăminte",
-                Values = new ChartValues<decimal> { 25 },
+                Values = new ChartValues<double> { 25 },
                 Fill = Brushes.Orange,
-                DataLabels = true
+                DataLabels = true,
+                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
             },
             new PieSeries
             {
                 Title = "Lucrări",
-                Values = new ChartValues<decimal> { 20 },
+                Values = new ChartValues<double> { 20 },
                 Fill = Brushes.LightGreen,
-                DataLabels = true
+                DataLabels = true,
+                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
             },
             new PieSeries
             {
                 Title = "Altele",
-                Values = new ChartValues<decimal> { 15 },
+                Values = new ChartValues<double> { 15 },
                 Fill = Brushes.Violet,
-                DataLabels = true
+                DataLabels = true,
+                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
             }
         };
     }
-    
+
 
     public event PropertyChangedEventHandler PropertyChanged;
     protected virtual void OnPropertyChanged(string propertyName = null)

@@ -7,11 +7,7 @@ public class ChartLabelConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        if (value is decimal val)
-        {
-            return $"{val:N0}%";
-        }
-        return value;
+        return $"{value:P}"; // Formatează ca procent
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

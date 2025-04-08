@@ -9,15 +9,15 @@
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
         <local:ProfitLossColorConverter x:Key="ProfitLossColorConverter"/>
-        
+
         <Style TargetType="Border" x:Key="ChartContainerStyle">
             <Setter Property="Background" Value="#FFFFFFFF"/>
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="15" 
-                                    ShadowDepth="3" 
+                    <DropShadowEffect BlurRadius="15"
+                                    ShadowDepth="3"
                                     Opacity="0.1"/>
                 </Setter.Value>
             </Setter>
@@ -30,34 +30,29 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Top Section: Charts -->
         <Grid Grid.Row="0" Margin="0 0 0 20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Monthly Profit/Loss Chart -->
-            <Border Grid.Column="0" 
-                    Margin="0 0 10 0" 
-                    Style="{StaticResource ChartContainerStyle}"
+            <Border Grid.Column="0"
+                    Margin="0 0 10 -10" Style="{StaticResource ChartContainerStyle}"
                     Padding="15">
-                <wpf:CartesianChart Series="{Binding MonthlyProfitLoss}" 
+                <wpf:CartesianChart Series="{Binding MonthlyProfitLoss}"
                                    AnimationsSpeed="0:0:0.3"
                                    Hoverable="True"
                                    >
-                    
+
                     <wpf:CartesianChart.SeriesColors>
                         <wpf:ColorsCollection>
-                            <Color>#FF4CAF50</Color> <!-- Verde -->
-                            <Color>#FFE57373</Color> <!-- Roșu -->
-                        </wpf:ColorsCollection>
+                            <Color>#FF4CAF50</Color> <Color>#FFE57373</Color> </wpf:ColorsCollection>
                     </wpf:CartesianChart.SeriesColors>
-                    
+
                     <wpf:CartesianChart.AxisX>
-                        <wpf:Axis Title="Luni" 
+                        <wpf:Axis Title="Luni"
                                 Labels="{Binding Months}"
-                                
+
                                 FontSize="12"
                                 LabelsRotation="-45">
                             <wpf:Axis.Separator>
@@ -65,9 +60,9 @@
                             </wpf:Axis.Separator>
                         </wpf:Axis>
                     </wpf:CartesianChart.AxisX>
-                    
+
                     <wpf:CartesianChart.AxisY>
-                        <wpf:Axis Title="Suma (RON)" 
+                        <wpf:Axis Title="Suma (RON)"
                                 LabelFormatter="{Binding AmountFormatter}"
                                 FontSize="12">
                             <wpf:Axis.Separator>
@@ -75,10 +70,10 @@
                             </wpf:Axis.Separator>
                         </wpf:Axis>
                     </wpf:CartesianChart.AxisY>
-                    
+
                     <wpf:CartesianChart.DataTooltip>
-                        <wpf:DefaultTooltip BulletSize="10" 
-                                          ShowTitle="False" 
+                        <wpf:DefaultTooltip BulletSize="10"
+                                          ShowTitle="False"
                                           CornerRadius="4"
                                           Background="#FFF"
                                           BorderBrush="#EEE"/>
@@ -86,44 +81,40 @@
                 </wpf:CartesianChart>
             </Border>
 
-            <!-- Expense Distribution Chart -->
-            <Border Grid.Column="1" 
-                    Style="{StaticResource ChartContainerStyle}"
+            <Border Grid.Column="1"
+                    Margin="0 0 0 -10" Style="{StaticResource ChartContainerStyle}"
                     Padding="15">
-                <wpf:PieChart Series="{Binding ExpensePercentages}" 
-                            LegendLocation="None"
-                            InnerRadius="50"
+                <wpf:PieChart Series="{Binding ExpensePercentages}"
+                            LegendLocation="Right"
+                            InnerRadius="30"
                             Hoverable="True"
                             AnimationsSpeed="0:0:0.5">
-                    
+
                     <wpf:PieChart.ChartLegend>
-                        <wpf:DefaultLegend BulletSize="15" 
+                        <wpf:DefaultLegend BulletSize="12"
                                           FontWeight="SemiBold"
                                           Foreground="#444"/>
                     </wpf:PieChart.ChartLegend>
-                    
+
                     <wpf:PieChart.DataTooltip>
-                        <wpf:DefaultTooltip BulletSize="12" 
+                        <wpf:DefaultTooltip BulletSize="12"
                                           ShowTitle="False"
-                                          />
+                                         />
                     </wpf:PieChart.DataTooltip>
-                    
-                    <wpf:PieChart.DataContext>
-                        <local:ChartLabelConverter/>
-                    </wpf:PieChart.DataContext>
-                    
+
                     <wpf:PieChart.Resources>
                         <Style TargetType="wpf:PieSeries">
                             <Setter Property="Stroke" Value="#FFF"/>
                             <Setter Property="StrokeThickness" Value="2"/>
+                            <Setter Property="DataLabels" Value="True"/>
+                            <Setter Property="LabelPosition" Value="InsideSlice"/>
                         </Style>
                     </wpf:PieChart.Resources>
                 </wpf:PieChart>
             </Border>
         </Grid>
 
-        <!-- Bottom Section: Placeholder -->
-        <Border Grid.Row="1" 
+        <Border Grid.Row="1"
                 Style="{StaticResource ChartContainerStyle}"
                 Padding="20">
             <Grid>
