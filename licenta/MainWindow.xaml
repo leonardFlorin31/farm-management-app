@@ -7,6 +7,7 @@
         xmlns:viewModel="clr-namespace:licenta.ViewModel"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         xmlns:view="clr-namespace:licenta.View"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
         Title="MainWindowView" Height="700" Width="1300"
         WindowStartupLocation="CenterScreen"
@@ -199,9 +200,41 @@
         </StackPanel>
         
         <!-- Content section / Child views (acum fără header) -->
-        <ContentControl Content="{Binding CurrentChildView}"
-                        Grid.Row="1"
-                        Margin="0"/>
+        <!-- <mah:TransitioningContentControl Transition="Right" -->
+        <!--                                  Content="{Binding CurrentChildView}" -->
+        <!--                                  Grid.Row="1" -->
+        <!--                                  Margin="0"/> -->
+        
+        <mah:TransitioningContentControl x:Name="customTransitioning"
+                                         Content="{Binding CurrentChildView}"
+                                         CustomVisualStatesName="CustomTransition"
+                                         Transition="Custom"
+                                         Grid.Row="1"
+                                         Margin="0">
+            <mah:TransitioningContentControl.CustomVisualStates>
+                <VisualState x:Name="CustomTransition">
+                    <Storyboard>
+                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                       Storyboard.TargetName="CurrentContentPresentationSite"
+                                                       Storyboard.TargetProperty="(UIElement.Opacity)">
+                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="0" />
+                            <SplineDoubleKeyFrame KeyTime="00:00:00.5" Value="0" />
+                            <EasingDoubleKeyFrame KeyTime="00:00:01" Value="1">
+                                <EasingDoubleKeyFrame.EasingFunction>
+                                    <SineEase />
+                                </EasingDoubleKeyFrame.EasingFunction>
+                            </EasingDoubleKeyFrame>
+                        </DoubleAnimationUsingKeyFrames>
+                        <DoubleAnimationUsingKeyFrames BeginTime="00:00:00"
+                                                       Storyboard.TargetName="PreviousContentPresentationSite"
+                                                       Storyboard.TargetProperty="(UIElement.Opacity)">
+                            <SplineDoubleKeyFrame KeyTime="00:00:00" Value="1" />
+                            <SplineDoubleKeyFrame KeyTime="00:00:00.5" Value="0" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+            </mah:TransitioningContentControl.CustomVisualStates>
+        </mah:TransitioningContentControl>
     </Grid>
 </Border>
         </Grid>
