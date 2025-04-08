@@ -19,7 +19,7 @@
     <SolidColorBrush x:Key="color1" Color="#8BC34A"/> <!-- Light green -->
     <SolidColorBrush x:Key="color2" Color="Black"/> <!-- Green -->
     <SolidColorBrush x:Key="color3" Color="Yellow"/> <!-- Lime green -->
-    <SolidColorBrush x:Key="color4" Color="#795548"/> <!-- Amber (for accents) -->
+    <SolidColorBrush x:Key="color4" Color="#c26830"/> <!-- Amber (for accents) -->
     <SolidColorBrush x:Key="color5" Color="#FF9800"/> <!-- Orange (for accents) -->
     <SolidColorBrush x:Key="color6" Color="#FFC107"/> <!-- Brown (earthy tone) -->
     <SolidColorBrush x:Key="color7" Color="#607D8B"/> <!-- Gray-blue (neutral) -->

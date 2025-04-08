@@ -34,6 +34,8 @@ public class PointRequest
 {
     public decimal Latitude { get; set; }
     public decimal Longitude { get; set; }
+    
+    public int Order { get; set; }
 }
 
 public class PolygonResponseDto

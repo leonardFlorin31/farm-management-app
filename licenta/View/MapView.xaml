@@ -260,6 +260,49 @@
         <Grid Grid.Row="1">
     <!-- Harta -->
     <ContentControl Content="{Binding MapControl}" />
+    
+    <StackPanel Orientation="Horizontal"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="10">
+        <Button Content="Undo"
+                Command="{Binding UndoCommand}"
+                Width="80"
+                Height="30"
+                Margin="0,0,5,0">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="{StaticResource color13}" />
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Padding" Value="5"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <Button Content="Redo"
+                Command="{Binding RedoCommand}"
+                Width="80"
+                Height="30">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="{StaticResource color13}" />
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Padding" Value="5"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{StaticResource titleColor2}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+    </StackPanel>
 
     <!-- Border-ul cu detalii despre parcelă -->
     <Border x:Name="ParcelDetailsBorder"

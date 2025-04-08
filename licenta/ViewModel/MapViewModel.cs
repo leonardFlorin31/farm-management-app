@@ -39,10 +39,13 @@ namespace licenta.ViewModel
         private List<GMapMarker> _controlMarkers = new List<GMapMarker>();
         private GMapMarker _draggedControlMarker = null;
         private List<EditablePolygon> _allPolygons = new List<EditablePolygon>();
+
         private EditablePolygon _currentEditablePolygon; // Poligonul editat în momentul curent
+        private List<PointLatLng> _initialPolygonCoordinates;
+
 // Poligonul selectat în momentul curent
         private EditablePolygon _selectedPolygon;
-        
+
 
         private ObservableCollection<CenterPointsAndName> _centerPoints =
             new ObservableCollection<CenterPointsAndName>();
@@ -50,7 +53,7 @@ namespace licenta.ViewModel
         private CenterPointsAndName _selectedCenterPoint;
         private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
         private List<PolygonDto> _polygons = new List<PolygonDto>();
-        
+
         private Visibility _parcelDetailsVisibility = Visibility.Collapsed;
         private double _borderWidth = 300;
         private double _borderHeight = 350; //dimensiunea inițială
@@ -72,9 +75,12 @@ namespace licenta.ViewModel
         // Fields for server interaction
         private readonly HttpClient _httpClient = new HttpClient();
         private string _apiBaseUrl = "https://localhost:7088/api";
-        private Guid _currentUserId; // Will be set after login
+        public Guid _currentUserId; // Will be set after login
         private string _currentUsername = LoginViewModel.UsernameForUse.Username;
         private List<string> _polygonNames = new List<string> { };
+
+        private Stack<IUndoableCommand> _undoStack = new Stack<IUndoableCommand>();
+        private Stack<IUndoableCommand> _redoStack = new Stack<IUndoableCommand>();
 
         public GMapControl MapControl { get; set; }
 
@@ -126,7 +132,7 @@ namespace licenta.ViewModel
                 // }
             }
         }
-        
+
         public Visibility ParcelDetailsVisibility
         {
             get => _parcelDetailsVisibility;
@@ -227,11 +233,15 @@ namespace licenta.ViewModel
         public ICommand ChangeMapTypeCommand { get; }
 
         public ICommand SelectionChangedCommand { get; }
-        
+
         public ICommand ToggleParcelDetailsCommand { get; }
         public ICommand ResizeHorizontalCommand { get; }
         public ICommand ResizeVerticalCommand { get; }
         public ICommand ResizeCornerCommand { get; }
+
+        public ICommand UndoCommand { get; }
+
+        public ICommand RedoCommand { get; }
 
         public MapViewModel()
         {
@@ -249,20 +259,21 @@ namespace licenta.ViewModel
 
             // Command to create a polygon
             CreatePolygonCommand = new RelayCommand(CreatePolygon);
-
             DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
-
             DeletePolygonCommand = new RelayCommand(DeletePolygon);
 
             ChangeMapTypeCommand = new RelayCommand(ChangeMapType);
 
             SelectionChangedCommand = new RelayCommand(SelectionChanged);
-            
+
             ToggleParcelDetailsCommand = new RelayCommand(ToggleParcelDetails);
-            
+
             ResizeHorizontalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeHorizontal);
             ResizeVerticalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeVertical);
             ResizeCornerCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeCorner);
+
+            RedoCommand = new RelayCommand(Redo);
+            UndoCommand = new RelayCommand(Undo);
 
             MapControl = new GMapControl
             {
@@ -284,7 +295,7 @@ namespace licenta.ViewModel
 
             // Handle right-click events
             MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
-            
+
             MapControl.MouseMove += MapControl_MouseMove;
             MapControl.MouseLeftButtonUp += MapControl_MouseLeftButtonUp;
         }
@@ -294,6 +305,34 @@ namespace licenta.ViewModel
             // Actualizează ambele dimensiuni
             OnResizeHorizontal(e);
             OnResizeVertical(e);
+        }
+
+        public void Undo()
+        {
+            if (_undoStack.Any())
+            {
+                var command = _undoStack.Pop();
+                command.Unexecute();
+                _redoStack.Push(command);
+            }
+            else
+            {
+                MessageBox.Show("Nu mai există acțiuni de revenit.");
+            }
+        }
+
+        public void Redo()
+        {
+            if (_redoStack.Any())
+            {
+                var command = _redoStack.Pop();
+                command.Execute();
+                _undoStack.Push(command);
+            }
+            else
+            {
+                MessageBox.Show("Nu mai există acțiuni pentru redo.");
+            }
         }
 
         private void OnResizeVertical(DragDeltaEventArgs e)
@@ -312,7 +351,9 @@ namespace licenta.ViewModel
 
         private void ToggleParcelDetails()
         {
-            ParcelDetailsVisibility = ParcelDetailsVisibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ParcelDetailsVisibility = ParcelDetailsVisibility == Visibility.Visible
+                ? Visibility.Collapsed
+                : Visibility.Visible;
         }
 
         private void SelectionChanged()
@@ -392,82 +433,82 @@ namespace licenta.ViewModel
         }
 
         private async void LoadPolygonsFromServer()
-{
-    try
-    {
-        // Verifică dacă _currentUserId este setat
-        if (_currentUserId == Guid.Empty)
         {
-            MessageBox.Show("User ID is not available.");
-            return;
-        }
-
-        var client = new HttpClient();
-        // Preluăm poligoanele pentru utilizatorul curent
-        var response = await client.GetAsync($"http://localhost:5035/api/Polygons?userId={_currentUserId}");
-
-        if (!response.IsSuccessStatusCode)
-        {
-            MessageBox.Show($"Failed to fetch polygons. Status code: {response.StatusCode}");
-            return;
-        }
-
-        var polygonsJson = await response.Content.ReadAsStringAsync();
-
-        // Opțiuni pentru deserializare fără probleme de casing
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var polygonDtos = JsonSerializer.Deserialize<List<PolygonDto>>(polygonsJson, options);
-
-        if (polygonDtos == null || polygonDtos.Count == 0)
-        {
-            Console.WriteLine("No polygons found for the current user.");
-            return;
-        }
-
-        // Parcurgem fiecare polygon primit și îl transformăm într-un poligon editabil
-        foreach (var dto in polygonDtos)
-        {
-            _polygons.Add(dto);
-            // Creăm obiectul EditablePolygon din DTO
-            var editablePolygon = new EditablePolygon
+            try
             {
-                Name = dto.Name,
-                Coordinates = dto.Points
-                                .OrderBy(p => p.Order)
-                                .Select(p => new PointLatLng((double)p.Latitude, (double)p.Longitude))
-                                .ToList()
-            };
-
-            // Creăm forma poligonului (GMapPolygon) pentru afișare pe hartă
-            editablePolygon.Polygon = new GMapPolygon(editablePolygon.Coordinates)
-            {
-                Shape = new System.Windows.Shapes.Polygon
+                // Verifică dacă _currentUserId este setat
+                if (_currentUserId == Guid.Empty)
                 {
-                    Stroke = Brushes.Red,
-                    Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
-                    StrokeThickness = 2
-                },
-                Tag = editablePolygon.Name  // Utilizat ulterior pentru identificare
-            };
+                    MessageBox.Show("User ID is not available.");
+                    return;
+                }
 
-            // Adăugăm poligonul pe hartă
-            MapControl.Markers.Add(editablePolygon.Polygon);
+                var client = new HttpClient();
+                // Preluăm poligoanele pentru utilizatorul curent
+                var response = await client.GetAsync($"http://localhost:5035/api/Polygons?userId={_currentUserId}");
 
-            // Adăugăm markerele de control pentru fiecare punct (pentru a permite editarea)
-            AddControlMarkersForPolygon(editablePolygon);
-            AddTextToPolygon(editablePolygon.Polygon, editablePolygon.Name);
+                if (!response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show($"Failed to fetch polygons. Status code: {response.StatusCode}");
+                    return;
+                }
 
-            // Rețin poligonul editabil în lista de poligoane globale pentru modificări ulterioare
-            _allPolygons.Add(editablePolygon);
-            
-            _polygonNames.Add(editablePolygon.Name);
+                var polygonsJson = await response.Content.ReadAsStringAsync();
+
+                // Opțiuni pentru deserializare fără probleme de casing
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var polygonDtos = JsonSerializer.Deserialize<List<PolygonDto>>(polygonsJson, options);
+
+                if (polygonDtos == null || polygonDtos.Count == 0)
+                {
+                    Console.WriteLine("No polygons found for the current user.");
+                    return;
+                }
+
+                // Parcurgem fiecare polygon primit și îl transformăm într-un poligon editabil
+                foreach (var dto in polygonDtos)
+                {
+                    _polygons.Add(dto);
+                    // Creăm obiectul EditablePolygon din DTO
+                    var editablePolygon = new EditablePolygon
+                    {
+                        Name = dto.Name,
+                        Coordinates = dto.Points
+                            .OrderBy(p => p.Order)
+                            .Select(p => new PointLatLng((double)p.Latitude, (double)p.Longitude))
+                            .ToList()
+                    };
+
+                    // Creăm forma poligonului (GMapPolygon) pentru afișare pe hartă
+                    editablePolygon.Polygon = new GMapPolygon(editablePolygon.Coordinates)
+                    {
+                        Shape = new System.Windows.Shapes.Polygon
+                        {
+                            Stroke = Brushes.Red,
+                            Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                            StrokeThickness = 2
+                        },
+                        Tag = editablePolygon.Name // Utilizat ulterior pentru identificare
+                    };
+
+                    // Adăugăm poligonul pe hartă
+                    MapControl.Markers.Add(editablePolygon.Polygon);
+
+                    // Adăugăm markerele de control pentru fiecare punct (pentru a permite editarea)
+                    AddControlMarkersForPolygon(editablePolygon);
+                    AddTextToPolygon(editablePolygon.Polygon, editablePolygon.Name);
+
+                    // Rețin poligonul editabil în lista de poligoane globale pentru modificări ulterioare
+                    _allPolygons.Add(editablePolygon);
+
+                    _polygonNames.Add(editablePolygon.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading polygons: {ex.Message}");
+            }
         }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error loading polygons: {ex.Message}");
-    }
-}
 
         // Updated DTO classes with JSON property mapping
         public class PolygonDto
@@ -493,7 +534,7 @@ namespace licenta.ViewModel
 
             [JsonPropertyName("order")] public int Order { get; set; }
         }
-        
+
 
         public class CreatePolygonRequest
         {
@@ -501,7 +542,7 @@ namespace licenta.ViewModel
             public string Name { get; set; }
             public List<PointRequest> Points { get; set; }
         }
-        
+
         public class UpdatePolygonRequest
         {
             public Guid UserId { get; set; }
@@ -522,7 +563,7 @@ namespace licenta.ViewModel
             // Sync the ViewModel's ZoomLevel with the map's current zoom
             ZoomLevel = (int)MapControl.Zoom;
         }
-        
+
 
         private void MapControl_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -540,17 +581,18 @@ namespace licenta.ViewModel
         private void AddMarker(PointLatLng point)
         {
             GMapMarker marker = new GMapMarker(point);
-            marker.Shape = new System.Windows.Shapes.Ellipse { Width = 10, Height = 10, Fill = Brushes.Blue }; // Use a simple shape for now
+            marker.Shape = new System.Windows.Shapes.Ellipse
+                { Width = 10, Height = 10, Fill = Brushes.Blue }; // Use a simple shape for now
             marker.Offset = new Point(-5, -5);
             MapControl.Markers.Add(marker);
             _polygonMarkerCounter++;
-            
+
             if (marker.Shape != null) // Ensure the shape exists
             {
                 marker.Shape.MouseLeftButtonDown += (sender, e) => MarkerShape_OnMouseLeftButtonDown(marker, e);
             }
         }
-        
+
         private void MarkerShape_OnMouseLeftButtonDown(GMapMarker marker, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -561,12 +603,24 @@ namespace licenta.ViewModel
                 Mouse.Capture(MapControl); // Capture mouse for the map
                 e.Handled = true;
             }
+
             _selectedMarker = marker;
+
+            // Dacă markerul aparține unui poligon, salvează coordonatele inițiale
+            foreach (var polygon in _allPolygons)
+            {
+                if (polygon.ControlMarkers.Contains(marker))
+                {
+                    _initialPolygonCoordinates = new List<PointLatLng>(polygon.Coordinates);
+                    _currentlyModifyingPolygon = polygon; // Setează poligonul curent de modificat
+                    break;
+                }
+            }
+
             Console.WriteLine($"Marker selected at: {marker.Position.Lat}, {marker.Position.Lng}");
         }
-        
-        
-        
+
+
         private void MapControl_MouseMove(object sender, MouseEventArgs e)
         {
             if (_draggedMarker != null && e.LeftButton == MouseButtonState.Pressed)
@@ -574,10 +628,27 @@ namespace licenta.ViewModel
                 Point p = e.GetPosition(MapControl);
                 PointLatLng newLatLng = MapControl.FromLocalToLatLng((int)p.X, (int)p.Y);
                 _draggedMarker.Position = newLatLng;
-                
-                int markerIndex = MapControl.Markers.IndexOf(_draggedMarker) - (MapControl.Markers.Count - _polygonMarkerCounter);
+
+                int markerIndex = MapControl.Markers.IndexOf(_draggedMarker) -
+                                  (MapControl.Markers.Count - _polygonMarkerCounter);
 
                 if (markerIndex >= 0 && markerIndex < _markerCoordinates.Count)
+                {
+                    _markerCoordinates[markerIndex] = newLatLng;
+                }
+
+                bool isEditingMarker = false;
+                foreach (var polygon in _allPolygons)
+                {
+                    if (polygon.ControlMarkers.Contains(_draggedMarker))
+                    {
+                        isEditingMarker = true;
+                        break;
+                    }
+                }
+
+                // Actualizează _markerCoordinates doar dacă nu editezi un marker existent
+                if (!isEditingMarker && markerIndex >= 0 && markerIndex < _markerCoordinates.Count)
                 {
                     _markerCoordinates[markerIndex] = newLatLng;
                 }
@@ -589,10 +660,10 @@ namespace licenta.ViewModel
                     {
                         // Actualizează coordonatele poligonului
                         polygon.Coordinates[controlIndex] = newLatLng;
-                        
+
                         // Set the currently modifying polygon
-                        _currentlyModifyingPolygon = polygon; 
-                        
+                        _currentlyModifyingPolygon = polygon;
+
                         // Șterge vechiul poligon de pe hartă
                         MapControl.Markers.Remove(polygon.Polygon);
 
@@ -607,7 +678,7 @@ namespace licenta.ViewModel
                             },
                             Tag = polygon.Name
                         };
-                        
+
 
                         // Adaugă noul poligon pe hartă
                         MapControl.Markers.Add(polygon.Polygon);
@@ -616,9 +687,10 @@ namespace licenta.ViewModel
                     }
                 }
             }
+
             MapControl.InvalidateVisual();
         }
-        
+
         private void UpdatePolygonShape()
         {
             // Șterge poligonul vechi de pe hartă
@@ -643,7 +715,7 @@ namespace licenta.ViewModel
             MapControl.Markers.Add(_editablePolygon);
             MapControl.InvalidateVisual(); // Forțează actualizarea vizuală
         }
-        
+
         private async void MapControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (_draggedMarker != null)
@@ -656,64 +728,86 @@ namespace licenta.ViewModel
             // Obține poziția mouse-ului în coordonate geografice
             var mousePosition = e.GetPosition(MapControl);
             PointLatLng position = MapControl.FromLocalToLatLng((int)mousePosition.X, (int)mousePosition.Y);
-            
+
             if (_currentlyModifyingPolygon != null)
-    {
-        using (var client = new HttpClient())
-        {
-            // 1. Cerere GET pentru a obține id-ul poligonului după nume și _currentUserId
-            var getUrl = $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_currentlyModifyingPolygon.Name}&userId={_currentUserId}";
-            var getResponse = await client.GetAsync(getUrl);
-            if (getResponse.IsSuccessStatusCode)
             {
-                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
-                // Presupunem că răspunsul este de forma: { "Id": "..." }
-                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
-                if (polygonIdResponse != null)
+                var newCoordinates = new List<PointLatLng>(_currentlyModifyingPolygon.Coordinates);
+                bool changed = !Enumerable.SequenceEqual(_initialPolygonCoordinates, newCoordinates,
+                    new PointLatLngComparer());
+
+                if (changed)
                 {
-                    Guid polygonId = polygonIdResponse.Id;
-
-                    // 2. Construim request-ul de update pentru poligon
-                    var updateRequest = new UpdatePolygonRequest
+                    // Actualizează markerii de control înainte de a salva starea
+                    for (int i = 0; i < _currentlyModifyingPolygon.ControlMarkers.Count; i++)
                     {
-                        Name = _currentlyModifyingPolygon.Name,
-                        Points = _currentlyModifyingPolygon.Coordinates
-                            .Select((p, index) => new PointRequest
+                        _currentlyModifyingPolygon.ControlMarkers[i].Position = newCoordinates[i];
+                    }
+
+                    var moveCommand = new MovePolygonCommand(_currentlyModifyingPolygon,
+                        _initialPolygonCoordinates, newCoordinates, MapControl, AddTextToPolygon, _currentUserId);
+                    _undoStack.Push(moveCommand);
+                    _redoStack.Clear();
+                }
+
+                using (var client = new HttpClient())
+                {
+                    // 1. Cerere GET pentru a obține id-ul poligonului după nume și _currentUserId
+                    var getUrl =
+                        $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_currentlyModifyingPolygon.Name}&userId={_currentUserId}";
+                    var getResponse = await client.GetAsync(getUrl);
+                    if (getResponse.IsSuccessStatusCode)
+                    {
+                        var jsonResponse = await getResponse.Content.ReadAsStringAsync();
+                        // Presupunem că răspunsul este de forma: { "Id": "..." }
+                        var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
+                        if (polygonIdResponse != null)
+                        {
+                            Guid polygonId = polygonIdResponse.Id;
+
+                            // 2. Construim request-ul de update pentru poligon
+                            var updateRequest = new UpdatePolygonRequest
                             {
-                                Latitude = (decimal)p.Lat,
-                                Longitude = (decimal)p.Lng,
-                                Order = index
-                            }).ToList()
-                    };
-                    
-                    AddTextToPolygon(new GMapPolygon(_currentlyModifyingPolygon.Coordinates), _currentlyModifyingPolygon.Name);
+                                Name = _currentlyModifyingPolygon.Name,
+                                Points = _currentlyModifyingPolygon.Coordinates
+                                    .Select((p, index) => new PointRequest
+                                    {
+                                        Latitude = (decimal)p.Lat,
+                                        Longitude = (decimal)p.Lng,
+                                        Order = index
+                                    }).ToList()
+                            };
 
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8, "application/json");
-                    var putUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
-                    var putResponse = await client.PutAsync(putUrl, jsonContent);
-                    if (putResponse.IsSuccessStatusCode)
-                    {
-                        // Update reușit. Poți adăuga codul de notificare sau UI aici.
-                        Console.WriteLine($"Polygon {_currentlyModifyingPolygon.Name} was successfully updated.");
+                            AddTextToPolygon(new GMapPolygon(_currentlyModifyingPolygon.Coordinates),
+                                _currentlyModifyingPolygon.Name);
+
+                            var jsonContent = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8,
+                                "application/json");
+                            var putUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
+                            var putResponse = await client.PutAsync(putUrl, jsonContent);
+                            if (putResponse.IsSuccessStatusCode)
+                            {
+                                // Update reușit. Poți adăuga codul de notificare sau UI aici.
+                                Console.WriteLine(
+                                    $"Polygon {_currentlyModifyingPolygon.Name} was successfully updated.");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Failed to update polygon.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("failed to deserialize");
+                        }
                     }
                     else
                     {
-                        Console.WriteLine("Failed to update polygon.");
+                        Console.WriteLine("poligonul nu a fost gasit");
                     }
                 }
-                else
-                {
-                   Console.WriteLine("failed to deserialize");
-                }
-            }
-            else
-            {
-                Console.WriteLine("poligonul nu a fost gasit");
-            }
-        }
 
-        _currentlyModifyingPolygon = null; // Reset după trimitere
-    }
+                _currentlyModifyingPolygon = null; // Reset după trimitere
+            }
 
 
             // Verifică dacă poziția este în interiorul vreunui poligon
@@ -788,24 +882,26 @@ namespace licenta.ViewModel
                 Console.WriteLine($"Error adding polygon to map: {ex.Message}");
             }
         }
-        
+
         // Returnează true dacă există suprapunere.
         private bool CheckPolygonIntersection(EditablePolygon polygon)
         {
             // Factorul de scalare folosit în operațiile Clipper
             double scale = 1000000.0;
-    
+
             // Construiți poligonul curent cu Clipper (Path64) pe baza coordonatelor scalate
             var currentPathD = new PathD();
             foreach (var pt in polygon.Coordinates)
             {
                 currentPathD.Add(new PointD(pt.Lng * scale, pt.Lat * scale));
             }
+
             // Închidem poligonul, dacă nu este deja închis
             if (currentPathD.First() != currentPathD.Last())
             {
                 currentPathD.Add(currentPathD.First());
             }
+
             var currentPath64 = Clipper.Path64(currentPathD);
 
             // Parcurgem toate celelalte poligoane (excludem poligonul curent)
@@ -819,10 +915,12 @@ namespace licenta.ViewModel
                 {
                     otherPathD.Add(new PointD(pt.Lng * scale, pt.Lat * scale));
                 }
+
                 if (otherPathD.First() != otherPathD.Last())
                 {
                     otherPathD.Add(otherPathD.First());
                 }
+
                 var otherPath64 = Clipper.Path64(otherPathD);
 
                 // Realizăm operația de intersecție între poligonul curent și cel existent
@@ -838,232 +936,276 @@ namespace licenta.ViewModel
                     return true;
                 }
             }
+
             return false;
         }
 
-        // Modified CreatePolygon method to save to the server
-       private async void CreatePolygon()
-{
-    if (_markerCoordinates.Count < 3)
-    {
-        Console.WriteLine("Trebuie să ai cel puțin 3 puncte pentru a crea un poligon.");
-        return;
-    }
-
-    foreach (var polygonName in _polygonNames)
-    {
-        if (polygonName == PolygonName)
+        public class PointLatLngComparer : IEqualityComparer<PointLatLng>
         {
-            MessageBox.Show("Numele poligonului există deja.");
-            return;
-        }
-    }
+            private const double Tolerance = 1e-6;
 
-    try
-    {
-        if (_currentUserId == Guid.Empty)
-        {
-            Console.WriteLine("User ID nu este disponibil.");
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(PolygonName))
-        {
-            MessageBox.Show("Te rog să introduci un nume pentru poligon.");
-            return;
-        }
-
-        // Factor de scalare pentru a mări precizia coordonatelor
-        double scale = 1000000.0;
-
-        // Convertim markerCoordinates într-un PathD pentru noul poligon (aplicăm scalare)
-        var newPolygonPathD = new PathD();
-        foreach (var marker in _markerCoordinates)
-        {
-            newPolygonPathD.Add(new PointD(marker.Lng * scale, marker.Lat * scale));
-        }
-        // Convertim noul poligon în Path64 (valorile scalate)
-        var newPolygonPath64 = Clipper.Path64(newPolygonPathD);
-
-        // Verificăm suprapunerea cu fiecare poligon existent din listă
-        foreach (var existingPolygonDto in _polygons)
-        {
-            // Convertim poligonul existent (PolygonDto) într-un PathD (aplicăm scalare)
-            var existingPolygonPathD = new PathD();
-            foreach (var pt in existingPolygonDto.Points.OrderBy(p => p.Order))
+            public bool Equals(PointLatLng a, PointLatLng b)
             {
-                // Folosim Longitude pentru x și Latitude pentru y
-                existingPolygonPathD.Add(new PointD((double)pt.Longitude * scale, (double)pt.Latitude * scale));
+                if (a == null && b == null) return true;
+                if (a == null || b == null) return false;
+                return Math.Abs(a.Lat - b.Lat) < Tolerance && Math.Abs(a.Lng - b.Lng) < Tolerance;
             }
-            // Convertim în Path64
-            var existingPolygonPath64 = Clipper.Path64(existingPolygonPathD);
 
-            // Efectuăm operația de intersecție între noul poligon și cel existent
-            Paths64 intersectionResult = Clipper.Intersect(
-                new Paths64 { newPolygonPath64 },
-                new Paths64 { existingPolygonPath64 },
-                FillRule.NonZero
-            );
-
-            // Dacă rezultatul intersecției nu este gol, există suprapunere
-            if (intersectionResult != null && intersectionResult.Any())
+            public int GetHashCode(PointLatLng obj)
             {
-                MessageBox.Show("Noul poligon se suprapune peste un poligon existent!");
+                return obj.Lat.GetHashCode() ^ obj.Lng.GetHashCode();
+            }
+        }
+
+        // Modified CreatePolygon method to save to the server
+        private async void CreatePolygon()
+        {
+            if (_markerCoordinates.Count < 3)
+            {
+                Console.WriteLine("Trebuie să ai cel puțin 3 puncte pentru a crea un poligon.");
                 return;
             }
-        }
 
-        // Nu a fost detectată nicio suprapunere, deci continuăm cu trimiterea către server
-        var client = new HttpClient();
-        var request = new CreatePolygonRequest
-        {
-            UserId = _currentUserId,
-            Name = PolygonName,
-            Points = _markerCoordinates.ConvertAll(p => new PointRequest
+            foreach (var polygonName in _polygonNames)
             {
-                Latitude = (decimal)p.Lat,
-                Longitude = (decimal)p.Lng
-            })
-        };
+                if (polygonName == PolygonName)
+                {
+                    MessageBox.Show("Numele poligonului există deja.");
+                    return;
+                }
+            }
 
-        _polygonNames.Add(request.Name);
-
-        var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}", jsonContent);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
-            return;
-        }
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
-
-        if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
-        {
-            Console.WriteLine("Crearea poligonului pe server a eșuat.");
-            return;
-        }
-
-        // Dacă dorești să afișezi poligonul la coordonate reale, poți scala invers (opțional)
-        // Aici folosim newPolygonPathD, dar fără scalare inversă arată coordonatele scalate
-        // Pentru afișare, este recomandat să refaci conversia la coordonate reale:
-        var newPolygonPathDForDisplay = new PathD();
-        foreach (var pt in newPolygonPathD)
-        {
-            newPolygonPathDForDisplay.Add(new PointD(pt.x / scale, pt.y / scale));
-        }
-        
-        // Adăugăm poligonul nou pe hartă și îl reținem ca poligon editabil
-        // Crează un nou obiect EditablePolygon
-        var newPolygon = new EditablePolygon
-        {
-            Name = PolygonName,
-            Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
-        };
-        
-        // if (CheckPolygonIntersection(newPolygon))
-        // {
-        //   
-        //     MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
-        //     return;
-        // }
-        
-        _allPolygons.Add(newPolygon);
-        //_polygons.Add(newPolygon);
-        
-
-        // Adaugă poligonul pe hartă
-        newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
-        {
-            Shape = new System.Windows.Shapes.Polygon
+            try
             {
-                Stroke = Brushes.Red,
-                Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
-                StrokeThickness = 2
-            },
-            Tag = PolygonName
-        };
-        MapControl.Markers.Add(newPolygon.Polygon);
-        
-        // CREAREA PUNCTELOR DE CONTROL: pentru fiecare colț al poligonului, adăugăm un marker transparent
-        // Salvează în lista globală
-        
-        _currentEditablePolygon = newPolygon; // Setează-l ca poligon curent
+                if (_currentUserId == Guid.Empty)
+                {
+                    Console.WriteLine("User ID nu este disponibil.");
+                    return;
+                }
 
-        // Adăugăm poligonul nou pe hartă
-        //AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
-        PolygonsUpdated?.Invoke();
-        _editingPolygonCoordinates = new List<PointLatLng>(_markerCoordinates);
+                if (string.IsNullOrWhiteSpace(PolygonName))
+                {
+                    MessageBox.Show("Te rog să introduci un nume pentru poligon.");
+                    return;
+                }
 
-        AddControlMarkersForPolygon(newPolygon);
-        ClearMarkers();
-        PolygonName = string.Empty;
-        _polygonMarkerCounter = 0;
-        
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
-    }
-}
-       
-private void AddControlMarkersForPolygon(EditablePolygon polygon)
-{
-    foreach (var point in polygon.Coordinates)
-    {
-        GMapMarker controlMarker = new GMapMarker(point)
-        {
-            Shape = new System.Windows.Shapes.Ellipse
+                // Factor de scalare pentru a mări precizia coordonatelor
+                double scale = 1000000.0;
+
+                // Convertim markerCoordinates într-un PathD pentru noul poligon (aplicăm scalare)
+                var newPolygonPathD = new PathD();
+                foreach (var marker in _markerCoordinates)
+                {
+                    newPolygonPathD.Add(new PointD(marker.Lng * scale, marker.Lat * scale));
+                }
+
+                // Convertim noul poligon în Path64 (valorile scalate)
+                var newPolygonPath64 = Clipper.Path64(newPolygonPathD);
+
+                // Verificăm suprapunerea cu fiecare poligon existent din listă
+                foreach (var existingPolygonDto in _polygons)
+                {
+                    // Convertim poligonul existent (PolygonDto) într-un PathD (aplicăm scalare)
+                    var existingPolygonPathD = new PathD();
+                    foreach (var pt in existingPolygonDto.Points.OrderBy(p => p.Order))
+                    {
+                        // Folosim Longitude pentru x și Latitude pentru y
+                        existingPolygonPathD.Add(new PointD((double)pt.Longitude * scale, (double)pt.Latitude * scale));
+                    }
+
+                    // Convertim în Path64
+                    var existingPolygonPath64 = Clipper.Path64(existingPolygonPathD);
+
+                    // Efectuăm operația de intersecție între noul poligon și cel existent
+                    Paths64 intersectionResult = Clipper.Intersect(
+                        new Paths64 { newPolygonPath64 },
+                        new Paths64 { existingPolygonPath64 },
+                        FillRule.NonZero
+                    );
+
+                    // Dacă rezultatul intersecției nu este gol, există suprapunere
+                    if (intersectionResult != null && intersectionResult.Any())
+                    {
+                        MessageBox.Show("Noul poligon se suprapune peste un poligon existent!");
+                        return;
+                    }
+                }
+
+                // Nu a fost detectată nicio suprapunere, deci continuăm cu trimiterea către server
+                var client = new HttpClient();
+                var request = new CreatePolygonRequest
+                {
+                    UserId = _currentUserId,
+                    Name = PolygonName,
+                    Points = _markerCoordinates.ConvertAll(p => new PointRequest
+                    {
+                        Latitude = (decimal)p.Lat,
+                        Longitude = (decimal)p.Lng
+                    })
+                };
+
+                _polygonNames.Add(request.Name);
+
+                var jsonContent =
+                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}",
+                    jsonContent);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
+                    return;
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
+
+                if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
+                {
+                    Console.WriteLine("Crearea poligonului pe server a eșuat.");
+                    return;
+                }
+
+                // Dacă dorești să afișezi poligonul la coordonate reale, poți scala invers (opțional)
+                // Aici folosim newPolygonPathD, dar fără scalare inversă arată coordonatele scalate
+                // Pentru afișare, este recomandat să refaci conversia la coordonate reale:
+                var newPolygonPathDForDisplay = new PathD();
+                foreach (var pt in newPolygonPathD)
+                {
+                    newPolygonPathDForDisplay.Add(new PointD(pt.x / scale, pt.y / scale));
+                }
+
+                // Adăugăm poligonul nou pe hartă și îl reținem ca poligon editabil
+                // Crează un nou obiect EditablePolygon
+                var newPolygon = new EditablePolygon
+                {
+                    Name = PolygonName,
+                    Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
+                };
+
+                // if (CheckPolygonIntersection(newPolygon))
+                // {
+                //   
+                //     MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
+                //     return;
+                // }
+
+                _allPolygons.Add(newPolygon);
+                //_polygons.Add(newPolygon);
+
+
+                // Adaugă poligonul pe hartă
+                newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
+                {
+                    Shape = new System.Windows.Shapes.Polygon
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                        StrokeThickness = 2
+                    },
+                    Tag = PolygonName
+                };
+                //MapControl.Markers.Add(newPolygon.Polygon);
+
+                // CREAREA PUNCTELOR DE CONTROL: pentru fiecare colț al poligonului, adăugăm un marker transparent
+                // Salvează în lista globală
+
+                _currentEditablePolygon = newPolygon; // Setează-l ca poligon curent
+
+                // Adăugăm poligonul nou pe hartă
+                //AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
+
+                _editingPolygonCoordinates = new List<PointLatLng>(_markerCoordinates);
+
+                AddControlMarkersForPolygon(newPolygon);
+                AddTextToPolygon(newPolygon.Polygon, newPolygon.Name);
+
+                // Creăm comanda pentru adăugarea poligonului
+                var command = new UndoRedoPolygonCommand(newPolygon, _allPolygons, MapControl, _polygonNames, _currentUserId);
+                // Executăm comanda
+                command.Execute();
+                // Adăugăm comanda în stiva de undo
+                _undoStack.Push(command);
+                // Ștergem redoStack-ul deoarece s-a efectuat o acțiune nouă
+                _redoStack.Clear();
+
+                ClearMarkers();
+                PolygonName = string.Empty;
+                _polygonMarkerCounter = 0;
+
+                PolygonsUpdated?.Invoke();
+            }
+            catch (Exception ex)
             {
-                Width = 10,
-                Height = 10,
-                Stroke = Brushes.Gold,
-                Fill = Brushes.Transparent
-            },
-            Offset = new Point(-5, -5)
-        };
-
-        // Eveniment pentru drag (cu variabilele corecte)
-        controlMarker.Shape.MouseLeftButtonDown += (sender, e) =>
-        {
-            _draggedMarker = controlMarker;
-            _selectedPolygon = polygon; // Setează poligonul selectat
-            MarkerShape_OnMouseLeftButtonDown(controlMarker, e);
-        };
-
-        MapControl.Markers.Add(controlMarker);
-        polygon.ControlMarkers.Add(controlMarker);
-    }
-}
-
-private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
-{
-    // Algoritm simplu pentru a verifica dacă un punct este în interiorul unui poligon
-    bool inside = false;
-    for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
-    {
-        if (((polygon[i].Lat > point.Lat) != (polygon[j].Lat > point.Lat) &&
-             (point.Lng < (polygon[j].Lng - polygon[i].Lng) * (point.Lat - polygon[i].Lat) / 
-                 (polygon[j].Lat - polygon[i].Lat) + polygon[i].Lng)))
-        {
-            inside = !inside;
+                Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
+            }
         }
-    }
-    return inside;
-}
+
+        private void AddControlMarkersForPolygon(EditablePolygon polygon)
+        {
+            // Șterge markerii existenți (dacă există)
+            foreach (var marker in polygon.ControlMarkers)
+            {
+                MapControl.Markers.Remove(marker);
+            }
+
+            polygon.ControlMarkers.Clear();
+
+            foreach (var point in polygon.Coordinates)
+            {
+                GMapMarker controlMarker = new GMapMarker(point)
+                {
+                    Shape = new System.Windows.Shapes.Ellipse
+                    {
+                        Width = 10,
+                        Height = 10,
+                        Stroke = Brushes.Gold,
+                        Fill = Brushes.Transparent
+                    },
+                    Offset = new Point(-5, -5),
+                    Tag = Guid.NewGuid()
+                };
+
+                // Eveniment pentru drag (cu variabilele corecte)
+                controlMarker.Shape.MouseLeftButtonDown += (sender, e) =>
+                {
+                    _draggedMarker = controlMarker;
+                    _selectedPolygon = polygon; // Setează poligonul selectat
+                    MarkerShape_OnMouseLeftButtonDown(controlMarker, e);
+                };
+
+                MapControl.Markers.Add(controlMarker);
+                polygon.ControlMarkers.Add(controlMarker);
+            }
+        }
+
+        private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
+        {
+            // Algoritm simplu pentru a verifica dacă un punct este în interiorul unui poligon
+            bool inside = false;
+            for (int i = 0, j = polygon.Count - 1; i < polygon.Count; j = i++)
+            {
+                if (((polygon[i].Lat > point.Lat) != (polygon[j].Lat > point.Lat) &&
+                     (point.Lng < (polygon[j].Lng - polygon[i].Lng) * (point.Lat - polygon[i].Lat) /
+                         (polygon[j].Lat - polygon[i].Lat) + polygon[i].Lng)))
+                {
+                    inside = !inside;
+                }
+            }
+
+            return inside;
+        }
 
 
         private void AddClipperPolygonToMap(PathD clipperPolygon, string polygonName)
         {
             // Convertește PathD la o listă de PointLatLng (asigură-te că ordinea coordonatelor e corectă)
             var points = clipperPolygon
-                .Select(p => new PointLatLng((double)p.y, (double)p.x)) // reține: în Clipper2, de obicei se folosește (X, Y)
+                .Select(p =>
+                    new PointLatLng((double)p.y, (double)p.x)) // reține: în Clipper2, de obicei se folosește (X, Y)
                 .ToList();
-            
-            
+
 
             var gmapPolygon = new GMapPolygon(points)
             {
@@ -1077,11 +1219,11 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
             };
 
             MapControl.Markers.Add(gmapPolygon);
-            
-            
+
+
             AddTextToPolygon(gmapPolygon, polygonName);
-            
-            
+
+
             // foreach (var point in points)
             // {
             //     AddMarker(point);
@@ -1097,19 +1239,54 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
                 var pName = PolygonName;
                 var client = new HttpClient();
 
-                // var encodedName = Uri.EscapeDataString(PolygonName);
                 var response =
                     await client.DeleteAsync($"https://localhost:7088/api/Polygons/{pName}?userId={_currentUserId}");
 
                 if (response.IsSuccessStatusCode)
                 {
                     PolygonsUpdated?.Invoke();
-                    RemovePolygonFromMap(pName);
+
+                    // Debugging: Get control markers before deletion
+                    var controlMarkersBeforeDeletion = new List<GMapMarker>();
+                    var polygonToDelete = _allPolygons.FirstOrDefault(p => p.Name == pName);
+                    if (polygonToDelete != null)
+                    {
+                        foreach (var marker in MapControl.Markers.Where(m =>
+                                     polygonToDelete.Coordinates.Any(coord =>
+                                         coord.Lat == m.Position.Lat && coord.Lng == m.Position.Lng)))
+                        {
+                            // Further check if it's a control marker (Ellipse shape)
+                            if (marker.Shape is System.Windows.Shapes.Ellipse)
+                            {
+                                controlMarkersBeforeDeletion.Add(marker);
+                                Console.WriteLine(
+                                    $"Before Deletion - Found Control Marker at: {marker.Position}, Tag: {marker.Tag}");
+                            }
+                        }
+                    }
+
+                    // Create and execute the delete command
+                    var deleteCommand = new DeletePolygonCommand(pName, _allPolygons, MapControl, _polygonNames, AddControlMarkersForPolygon, _currentUserId);
+                    deleteCommand.Execute();
+                    _undoStack.Push(deleteCommand);
+                    _redoStack.Clear(); // Clear redo stack as a new action occurred
+
+                    // Debugging: Check control markers after deletion
+                    Console.WriteLine("After Deletion - Checking for remaining control markers:");
+                    foreach (var markerBefore in controlMarkersBeforeDeletion)
+                    {
+                        if (MapControl.Markers.Contains(markerBefore))
+                        {
+                            Console.WriteLine(
+                                $"After Deletion - Control Marker STILL PRESENT at: {markerBefore.Position}, Tag: {markerBefore.Tag}");
+                        }
+                    }
                 }
                 else
                 {
                     Console.WriteLine("Failed to delete polygon from the server.");
                 }
+
                 PolygonName = string.Empty;
             }
             catch (Exception ex)
@@ -1135,9 +1312,24 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
                 .Where(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName)
                 .ToList();
 
-            foreach (var marker in textMarkers)
+            // Remove the control markers
+            // Trebuie să găsim poligonul editabil corespunzător
+            var editablePolygonToRemove = _allPolygons.FirstOrDefault(p => p.Name == polygonName);
+
+            if (editablePolygonToRemove != null)
             {
-                MapControl.Markers.Remove(marker);
+                // Iterăm prin lista de markere de control a poligonului și le eliminăm de pe hartă
+                foreach (var controlMarker in
+                         editablePolygonToRemove.ControlMarkers
+                             .ToList()) // Folosim ToList() pentru a evita erori de modificare a colecției în timpul iterării
+                {
+                    MapControl.Markers.Remove(controlMarker);
+                }
+
+                editablePolygonToRemove.ControlMarkers
+                    .Clear(); // Optional: Clear the list of control markers from the EditablePolygon object
+                _allPolygons.Remove(
+                    editablePolygonToRemove); // Optional: Remove the EditablePolygon object if it's no longer needed
             }
 
             CenterPointNames.Remove(polygonName);
@@ -1157,7 +1349,7 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
             {
                 MapControl.Markers.Remove(marker);
             }
-            
+
             var pointsToRemove = _centerPoints.Where(cp => cp.Name == text).ToList();
 
             foreach (var centerPoint in pointsToRemove)
@@ -1168,7 +1360,7 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
                     CenterPointNames.Remove(text);
                 });
             }
-            
+
             PointLatLng centroid = CalculateCentroid(polygon.Points, text);
 
             CenterPointsAndName _centroidPointsAndName = new CenterPointsAndName();
@@ -1503,7 +1695,8 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
                 }
 
                 MapControl.Markers.Remove(_selectedMarker);
-                Console.WriteLine($"Removed selected marker at: {_selectedMarker.Position.Lat}, {_selectedMarker.Position.Lng}");
+                Console.WriteLine(
+                    $"Removed selected marker at: {_selectedMarker.Position.Lat}, {_selectedMarker.Position.Lng}");
                 _selectedMarker = null; // Resetează selecția
                 return;
             }
@@ -1557,8 +1750,7 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
 
     public class PolygonIdResponse
     {
-        [JsonPropertyName("id")]
-        public Guid Id { get; set; }
+        [JsonPropertyName("id")] public Guid Id { get; set; }
     }
 
     public class CenterPointsAndName
@@ -1566,7 +1758,7 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
         public PointLatLng Points { get; set; }
         public string Name { get; set; }
     }
-    
+
     public class EditablePolygon
     {
         public GMapPolygon Polygon { get; set; }
@@ -1574,4 +1766,467 @@ private bool IsPointInPolygon(PointLatLng point, List<PointLatLng> polygon)
         public List<PointLatLng> Coordinates { get; set; } = new List<PointLatLng>();
         public string Name { get; set; }
     }
+
+    public interface IUndoableCommand
+    {
+        void Execute();
+        void Unexecute();
+    }
+    
+    public class UpdatePolygonRequest
+    {
+        public Guid UserId { get; set; }
+        public Guid Id { get; set; }
+        public List<PointRequest> Points { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class UndoRedoPolygonCommand : IUndoableCommand
+{
+    private readonly EditablePolygon _polygon;
+    private readonly List<EditablePolygon> _allPolygons;
+    private readonly GMapControl _mapControl;
+    private readonly List<string> _polygonNames;
+    private readonly Guid _currentUserId;
+
+    public UndoRedoPolygonCommand(
+        EditablePolygon polygon,
+        List<EditablePolygon> allPolygons,
+        GMapControl mapControl,
+        List<string> polygonNames,
+        Guid currentUserId)
+    {
+        _polygon = polygon;
+        _allPolygons = allPolygons;
+        _mapControl = mapControl;
+        _polygonNames = polygonNames;
+        _currentUserId = currentUserId;
+    }
+
+    // Adaugă poligonul în colecție și pe hartă
+    public void Execute()
+    {
+        _allPolygons.Add(_polygon);
+        _polygonNames.Add(_polygon.Name);
+        _mapControl.Markers.Add(_polygon.Polygon);
+        foreach (var marker in _polygon.ControlMarkers)
+        {
+            _mapControl.Markers.Add(marker);
+        }
+    }
+
+    // Șterge poligonul din colecție și de pe hartă, și îl șterge de pe server
+    public async void Unexecute()
+    {
+        _allPolygons.Remove(_polygon);
+        _polygonNames.Remove(_polygon.Name);
+        _mapControl.Markers.Remove(_polygon.Polygon);
+        foreach (var marker in _polygon.ControlMarkers)
+        {
+            _mapControl.Markers.Remove(marker);
+        }
+
+        // Șterge poligonul de pe server (deoarece a fost creat în CreatePolygon)
+        using (var client = new HttpClient())
+        {
+            var getUrl =
+                $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_polygon.Name}&userId={_currentUserId}";
+            var getResponse = await client.GetAsync(getUrl);
+            if (getResponse.IsSuccessStatusCode)
+            {
+                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
+                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
+                if (polygonIdResponse != null)
+                {
+                    Guid polygonId = polygonIdResponse.Id;
+                    var deleteUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
+                    var deleteResponse = await client.DeleteAsync(deleteUrl);
+                    if (deleteResponse.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"Poligonul '{_polygon.Name}' a fost șters de pe server în Unexecute.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Ștergerea poligonului '{_polygon.Name}' de pe server a eșuat în Unexecute. Status code: {deleteResponse.StatusCode}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Deserializarea răspunsului cu ID-ul poligonului a eșuat în Unexecute.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Obținerea ID-ului poligonului '{_polygon.Name}' de pe server a eșuat în Unexecute.");
+            }
+        }
+    }
+}
+
+    public class MovePolygonCommand : IUndoableCommand
+    {
+    
+        private readonly EditablePolygon _polygon;
+        private readonly List<PointLatLng> _oldCoordinates;
+        private readonly List<PointLatLng> _newCoordinates;
+        private readonly GMapControl _mapControl;
+        private readonly Action<GMapPolygon , string > _addTextToPolygon; // Reference to the method
+        private Guid _currentUserId;
+        
+
+        public MovePolygonCommand(EditablePolygon polygon, List<PointLatLng> oldCoordinates,
+            List<PointLatLng> newCoordinates, GMapControl mapControl,  Action<GMapPolygon , string> addTextToPolygonn, Guid currentUserId)
+        {
+            _polygon = polygon;
+            _oldCoordinates = new List<PointLatLng>(oldCoordinates);
+            _newCoordinates = new List<PointLatLng>(newCoordinates);
+            _mapControl = mapControl;
+            _addTextToPolygon = addTextToPolygonn;
+            _currentUserId = currentUserId;
+        }
+
+        public void Execute()
+        {
+            ApplyCoordinates(_newCoordinates);
+        }
+
+        public void Unexecute()
+        {
+            ApplyCoordinates(_oldCoordinates);
+        }
+
+        private async void ApplyCoordinates(List<PointLatLng> coordinates)
+        {
+            // Actualizează coordonatele poligonului
+            _polygon.Coordinates = new List<PointLatLng>(coordinates);
+
+            // Actualizează pozițiile markerelor de control
+            for (int i = 0; i < _polygon.ControlMarkers.Count; i++)
+            {
+                _polygon.ControlMarkers[i].Position = coordinates[i];
+            }
+
+            // Înlătură vechiul poligon de pe hartă
+            _mapControl.Markers.Remove(_polygon.Polygon);
+
+            // Crează un nou poligon cu coordonatele actualizate
+            _polygon.Polygon = new GMapPolygon(_polygon.Coordinates)
+            {
+                Shape = new System.Windows.Shapes.Polygon
+                {
+                    Stroke = Brushes.Red,
+                    Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                    StrokeThickness = 2
+                },
+                Tag = _polygon.Name
+            };
+
+            // Adaugă noul poligon pe hartă
+            _mapControl.Markers.Add(_polygon.Polygon);
+            
+             // Actualizează poligonul pe server
+        using (var client = new HttpClient())
+        {
+            var getUrl =
+                $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_polygon.Name}&userId={_currentUserId}";
+            var getResponse = await client.GetAsync(getUrl);
+            if (getResponse.IsSuccessStatusCode)
+            {
+                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
+                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
+                if (polygonIdResponse != null)
+                {
+                    Guid polygonId = polygonIdResponse.Id;
+
+                    var updateRequest = new UpdatePolygonRequest
+                    {
+                        Name = _polygon.Name,
+                        Points = _polygon.Coordinates
+                            .Select((p, index) => new PointRequest
+                            {
+                                Latitude = (decimal)p.Lat,
+                                Longitude = (decimal)p.Lng,
+                                Order = index
+                            }).ToList()
+                    };
+
+                    _addTextToPolygon(new GMapPolygon(_polygon.Coordinates),
+                        _polygon.Name);
+
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(updateRequest), Encoding.UTF8,
+                        "application/json");
+                    var putUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
+                    var putResponse = await client.PutAsync(putUrl, jsonContent);
+                    if (putResponse.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine(
+                            $"Polygon {_polygon.Name} was successfully updated on the server.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to update polygon {_polygon.Name} on the server.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Failed to deserialize polygon ID response.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Failed to get polygon ID for {_polygon.Name} from the server.");
+            }
+        }
+
+            
+            _mapControl.InvalidateVisual();
+        }
+    }
+
+   public class DeletePolygonCommand : IUndoableCommand
+{
+    private EditablePolygon _polygonToDelete;
+    private readonly List<EditablePolygon> _allPolygons;
+    private readonly GMapControl _mapControl;
+    private readonly List<string> _polygonNames;
+    private readonly string _polygonName;
+    private int _polygonIndexInAllPolygons = -1;
+    private int _polygonNameIndex = -1;
+    private List<PointLatLng> _controlPointCoordinates = new List<PointLatLng>(); // Store control point coordinates for undo
+    private GMapPolygon _polygonMarker;
+    private GMapMarker _textMarker;
+    private readonly Action<EditablePolygon> _addControlMarkersForPolygon; // Reference to the method
+    private Guid _currentUserId;
+    private List<GMapMarker> _controlMarkersToRemove = new List<GMapMarker>(); // Stocăm markerii de control
+
+    public DeletePolygonCommand(string polygonName, List<EditablePolygon> allPolygons, GMapControl mapControl, List<string> polygonNames, Action<EditablePolygon> addControlMarkersForPolygon, Guid currentUserId)
+    {
+        _polygonName = polygonName;
+        _allPolygons = allPolygons;
+        _mapControl = mapControl;
+        _polygonNames = polygonNames;
+        _addControlMarkersForPolygon = addControlMarkersForPolygon;
+        _currentUserId = currentUserId;
+
+        _polygonToDelete = _allPolygons.FirstOrDefault(p => p.Name == polygonName);
+        if (_polygonToDelete != null)
+        {
+            _polygonIndexInAllPolygons = _allPolygons.IndexOf(_polygonToDelete);
+            _polygonMarker = _polygonToDelete.Polygon;
+            _controlPointCoordinates.AddRange(_polygonToDelete.Coordinates); // Store coordinates for undo
+            _controlMarkersToRemove.AddRange(_polygonToDelete.ControlMarkers); // Stocăm markerii de control
+        }
+        _polygonNameIndex = _polygonNames.IndexOf(polygonName);
+
+        // Find the text marker
+        _textMarker = _mapControl.Markers.FirstOrDefault(m => m.Shape is Button tb && tb.Content?.ToString() == polygonName);
+    }
+
+    public void Execute()
+{
+    Console.WriteLine($"Executing DeletePolygonCommand for: {_polygonName}");
+
+    // Find the polygon marker on the map using its tag
+    var polygonMarkerToRemove = _mapControl.Markers.OfType<GMapPolygon>().FirstOrDefault(p => p.Tag?.ToString() == _polygonName);
+
+    if (polygonMarkerToRemove != null)
+    {
+        Console.WriteLine($"Removing polygon marker: {polygonMarkerToRemove.Tag} from map (Contains: {_mapControl.Markers.Contains(polygonMarkerToRemove)}).");
+        // Remove polygon marker from map
+        if (_mapControl.Markers.Contains(polygonMarkerToRemove))
+        {
+            _mapControl.Markers.Remove(polygonMarkerToRemove);
+        }
+    }
+    else
+    {
+        Console.WriteLine($"Warning: Polygon marker '{_polygonName}' not found on the map during Redo.");
+    }
+
+    // Identify and remove control markers for this polygon
+    var controlMarkersToRemove = _mapControl.Markers
+        .Where(m => m.Shape is System.Windows.Shapes.Ellipse &&
+                    _polygonToDelete.Coordinates.Any(coord => Math.Abs(coord.Lat - m.Position.Lat) < 1e-7 && Math.Abs(coord.Lng - m.Position.Lng) < 1e-7))
+        .ToList();
+
+    Console.WriteLine($"Found {controlMarkersToRemove.Count} control markers on the map to remove.");
+    foreach (var marker in controlMarkersToRemove)
+    {
+        Console.WriteLine($"Removing control marker with Tag: {marker.Tag} at: {marker.Position} (Contains: {_mapControl.Markers.Contains(marker)}).");
+        if (_mapControl.Markers.Contains(marker))
+        {
+            _mapControl.Markers.Remove(marker);
+        }
+    }
+    _polygonToDelete.ControlMarkers.Clear(); // Clear the potentially outdated list
+
+    // Remove polygon from collections
+    Console.WriteLine($"Removing polygon '{_polygonName}' from _allPolygons (Contains: {_allPolygons.Contains(_polygonToDelete)}).");
+    if (_polygonIndexInAllPolygons != -1 && _allPolygons.Contains(_polygonToDelete))
+    {
+        _allPolygons.RemoveAt(_polygonIndexInAllPolygons);
+        _polygonToDelete = null; // Set to null after removal
+    }
+    else
+    {
+        Console.WriteLine($"Warning: Index of polygon '{_polygonName}' not found in _allPolygons or polygon not present.");
+    }
+
+    Console.WriteLine($"Removing polygon name '{_polygonName}' from _polygonNames (Contains: {_polygonNames.Contains(_polygonName)}).");
+    if (_polygonNameIndex != -1 && _polygonNames.Contains(_polygonName))
+    {
+        _polygonNames.RemoveAt(_polygonNameIndex);
+    }
+    else
+    {
+        Console.WriteLine($"Warning: Index of polygon name '{_polygonName}' not found in _polygonNames or name not present.");
+    }
+
+    // Remove text marker
+    var textMarkerToRemove = _mapControl.Markers.OfType<GMapMarker>().FirstOrDefault(m => m.Shape is Button tb && tb.Content?.ToString() == _polygonName);
+    if (textMarkerToRemove != null)
+    {
+        Console.WriteLine($"Removing text marker for '{_polygonName}' (Contains: {_mapControl.Markers.Contains(textMarkerToRemove)}).");
+        if (_mapControl.Markers.Contains(textMarkerToRemove))
+        {
+            _mapControl.Markers.Remove(textMarkerToRemove);
+        }
+    }
+    else
+    {
+        Console.WriteLine($"Warning: Text marker for '{_polygonName}' not found on the map during Redo.");
+    }
+
+    // Force map refresh
+    _mapControl.InvalidateVisual();
+}
+
+    public async void Unexecute()
+    {
+        Console.WriteLine($"Unexecuting DeletePolygonCommand for: {_polygonName}");
+        if (_polygonToDelete == null)
+        {
+            // Recreate the EditablePolygon object
+            _polygonToDelete = new EditablePolygon
+            {
+                Name = _polygonName,
+                Coordinates = new List<PointLatLng>(_controlPointCoordinates),
+                Polygon = new GMapPolygon(_controlPointCoordinates)
+                {
+                    Shape = new System.Windows.Shapes.Polygon
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                        StrokeThickness = 2
+                    },
+                    Tag = _polygonName
+                },
+                ControlMarkers = new List<GMapMarker>()
+            };
+
+            using (var client = new HttpClient())
+            {
+                var createRequest = new CreatePolygonRequest
+                {
+                    Name = _polygonToDelete.Name,
+                    UserId = _currentUserId,
+                    Points = _polygonToDelete.Coordinates
+                        .Select((p, index) => new PointRequest
+                        {
+                            Latitude = (decimal)p.Lat,
+                            Longitude = (decimal)p.Lng,
+                            Order = index
+                        }).ToList()
+                };
+
+                var jsonContent = new StringContent(JsonSerializer.Serialize(createRequest), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("https://localhost:7088/api/Polygons", jsonContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Polygon '{_polygonName}' was successfully re-created on the server.");
+                    // Optionally, you might need to fetch the new ID if needed
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to re-create polygon '{_polygonName}' on the server. Status code: {response.StatusCode}");
+                }
+            }
+        }
+
+        // Add polygon back to collections
+        if (_polygonIndexInAllPolygons != -1 && !_allPolygons.Contains(_polygonToDelete))
+        {
+            Console.WriteLine($"Inserting '{_polygonName}' back into _allPolygons at index {_polygonIndexInAllPolygons}.");
+            _allPolygons.Insert(_polygonIndexInAllPolygons, _polygonToDelete);
+        }
+        if (_polygonNameIndex != -1 && !_polygonNames.Contains(_polygonName))
+        {
+            Console.WriteLine($"Inserting '{_polygonName}' back into _polygonNames at index {_polygonNameIndex}.");
+            _polygonNames.Insert(_polygonNameIndex, _polygonName);
+        }
+
+        // Add polygon marker back to map
+        if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
+        {
+            Console.WriteLine($"Adding polygon marker '{_polygonMarker.Tag}' back to map.");
+            _mapControl.Markers.Add(_polygonMarker);
+        }
+        else if (_polygonMarker == null)
+        {
+            Console.WriteLine($"Warning: _polygonMarker is null in Unexecute.");
+            _polygonMarker = _polygonToDelete.Polygon; // Ensure polygon marker is set
+            if (_polygonMarker != null && !_mapControl.Markers.Contains(_polygonMarker))
+            {
+                Console.WriteLine($"Trying to add reconstructed polygon marker '{_polygonMarker.Tag}' back to map.");
+                _mapControl.Markers.Add(_polygonMarker);
+            }
+        }
+
+        // Găsește poligonul vizual pe hartă (poate fi redundant, dar încercăm)
+        var existingPolygonMarker = _mapControl.Markers.OfType<GMapPolygon>().FirstOrDefault(p => p.Tag?.ToString() == _polygonName);
+
+        // Dacă există deja un poligon vizual cu acest nume, înlătură-l (pentru a evita duplicate)
+        if (existingPolygonMarker != null)
+        {
+            Console.WriteLine($"Removing existing polygon marker '{_polygonName}' before re-adding in Unexecute.");
+            _mapControl.Markers.Remove(existingPolygonMarker);
+        }
+
+        // Crează un nou poligon vizual cu coordonatele restaurate
+        var restoredPolygonMarker = new GMapPolygon(_polygonToDelete.Coordinates)
+        {
+            Shape = new System.Windows.Shapes.Polygon
+            {
+                Stroke = Brushes.Red,
+                Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                StrokeThickness = 2
+            },
+            Tag = _polygonToDelete.Name
+        };
+        _polygonToDelete.Polygon = restoredPolygonMarker; // Actualizează referința
+
+        // Adaugă noul poligon vizual pe hartă
+        Console.WriteLine($"Adding restored polygon marker '{_polygonToDelete.Name}' back to map in Unexecute.");
+        _mapControl.Markers.Add(restoredPolygonMarker);
+
+        // Re-add control markers using the provided method
+        Console.WriteLine($"Re-adding control markers for '{_polygonName}' to ensure interactivity.");
+        _addControlMarkersForPolygon(_polygonToDelete);
+
+        // Add text marker back to map
+        if (_textMarker != null && !_mapControl.Markers.Contains(_textMarker))
+        {
+            Console.WriteLine($"Adding text marker for '{_polygonName}' back to map.");
+            _mapControl.Markers.Add(_textMarker);
+        }
+        else if (_textMarker == null)
+        {
+            Console.WriteLine($"Warning: _textMarker is null in Unexecute.");
+            // Potentially try to find and recreate the text marker if needed
+        }
+
+        _mapControl.InvalidateVisual();
+    }
+}
 }
