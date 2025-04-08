@@ -30,6 +30,10 @@
         <DataTemplate DataType="{x:Type viewModel:ParcelViewModel}">
             <view:ParcelView />
         </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:ExpensesViewModel}">
+            <view:ExpensesView />
+        </DataTemplate>
     </Window.Resources>
 
     <Border CornerRadius="10"
@@ -110,12 +114,21 @@
                             <TextBlock Text="Parcele" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
+                    
+                    <RadioButton Style="{StaticResource menuButton}"
+                                 Tag="{StaticResource color9}"
+                                 Command="{Binding ShowExpensesViewCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <fa:IconImage Icon="MoneyBills" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
+                            <TextBlock Text="Cheltuieli" Style="{StaticResource menuButtonText}"></TextBlock>
+                        </StackPanel>
+                    </RadioButton>
 
                     <RadioButton Style="{StaticResource menuButton}"
                                  Tag="{StaticResource color4}">
                         <StackPanel Orientation="Horizontal">
                             <fa:IconImage Icon="Clipboard" Style="{StaticResource menuButtonIcon}"></fa:IconImage>
-                            <TextBlock Text="Tasks" Style="{StaticResource menuButtonText}"></TextBlock>
+                            <TextBlock Text="Sarcini" Style="{StaticResource menuButtonText}"></TextBlock>
                         </StackPanel>
                     </RadioButton>
 

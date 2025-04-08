@@ -124,3 +124,5 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\Clipper
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\ControlzEx.dll
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps.Metro.dll
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\de\MahApps.Metro.resources.dll
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ExpensesView.g.cs
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\ExpensesView.baml

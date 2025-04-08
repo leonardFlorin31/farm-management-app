@@ -45,6 +45,8 @@ public class MainViewModel : ViewModelBase
     public ICommand ShowMapViewCommand { get; }
     
     public ICommand ShowParcelViewCommand { get; } 
+    
+    public ICommand ShowExpensesViewCommand { get; }
         
     private void ExecuteShowHomeViewCommand(object obj)
     {
@@ -109,6 +111,32 @@ public class MainViewModel : ViewModelBase
         Icon = IconChar.LocationCrosshairs;
     }
     
+    private void ExecuteShowExpensesViewCommand(object obj)
+    {
+        Console.WriteLine("Executing ShowParcelViewCommand");
+
+        // Obține instanța de MapViewModel din cache sau creează una nouă
+        if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
+        {
+            Console.WriteLine("Creating new MapViewModel");
+            mapViewModel = new MapViewModel();
+            _viewModelCache[typeof(MapViewModel)] = mapViewModel;
+        }
+
+        // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
+        if (!_viewModelCache.TryGetValue(typeof(ExpensesViewModel), out var expensesViewModel))
+        {
+            Console.WriteLine("Creating new ParcelViewModel");
+            expensesViewModel = new ExpensesViewModel((MapViewModel)mapViewModel);
+            _viewModelCache[typeof(ExpensesViewModel)] = expensesViewModel;
+        }
+
+        CurrentChildView = expensesViewModel;
+        Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
+        Caption = "Cheltuieli";
+        Icon = IconChar.MoneyBills;
+    }
+    
     public IconChar Icon
     {
         get => _icon;
@@ -139,6 +167,7 @@ public class MainViewModel : ViewModelBase
         ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
         ShowMapViewCommand = new ViewModelCommand(ExecuteShowMapViewCommand);
         ShowParcelViewCommand = new ViewModelCommand(ExecuteShowParcelViewCommand);
+        ShowExpensesViewCommand = new ViewModelCommand(ExecuteShowExpensesViewCommand);
         
         //Default view
         ExecuteShowHomeViewCommand(null);
