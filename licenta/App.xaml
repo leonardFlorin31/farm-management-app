@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:licenta"
              Startup="ApplicationStart"
-             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro">
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:wpf="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf">
     
     <Application.Resources>
         <ResourceDictionary>
@@ -22,6 +23,7 @@
                    BasedOn="{StaticResource MahApps.Styles.Button}">
                 <Setter Property="controls:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
             </Style> 
+            
         </ResourceDictionary>
     </Application.Resources>
     

@@ -70,6 +70,10 @@
               "target": "Package",
               "version": "[1.0.0.1, )"
             },
+            "LiveCharts.Wpf": {
+              "target": "Package",
+              "version": "[0.9.7, )"
+            },
             "MahApps.Metro": {
               "target": "Package",
               "version": "[3.0.0-rc0516, )"
