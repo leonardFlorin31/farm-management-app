@@ -26,7 +26,7 @@ public class ExpensesViewModel : ViewModelBase
         // Date Demo - Profit/Pierdere pe Lună
         var monthlyValues = new List<double>
         {
-            15000, -5000, 20000, 3000, -2000, 18000,
+            15000, -10000, 20000, 3000, -2000, 18000,
             9000, -3000, 12000, 7000, -4000, 25000
         };
 
@@ -104,11 +104,5 @@ public class ExpensesViewModel : ViewModelBase
             }
         };
     }
-
-
-    public event PropertyChangedEventHandler PropertyChanged;
-    protected virtual void OnPropertyChanged(string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+    
 }

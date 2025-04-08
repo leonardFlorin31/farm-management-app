@@ -24,9 +24,9 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="20" Background="#FFF8F9FE">
+    <Grid Margin="10" Background="#FFF8F9FE">
         <Grid.RowDefinitions>
-            <RowDefinition Height="2*"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
