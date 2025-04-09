@@ -8,7 +8,6 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <UserControl.Resources>
-        <local:ProfitLossColorConverter x:Key="ProfitLossColorConverter"/>
 
         <Style TargetType="Border" x:Key="ChartContainerStyle">
             <Setter Property="Background" Value="#FFFFFFFF"/>
