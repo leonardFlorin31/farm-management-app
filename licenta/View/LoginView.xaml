@@ -8,7 +8,7 @@
         xmlns:customControls="clr-namespace:licenta.CustomControls"
         xmlns:global="clr-namespace:"
         mc:Ignorable="d"
-        Title="LoginView" Height="450" Width="800"
+        Title="LoginView" Height="500" Width="900"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
@@ -32,14 +32,14 @@
     <Border CornerRadius="50"
             BorderThickness="5">
         <Border.Background>
-            <ImageBrush ImageSource="/Images/background.jpg"
+            <ImageBrush ImageSource="C:\Users\leofl\Documents\GitHub\licenta\licenta\Images\amazing-shot-farmland-with-cows-sunset (1).jpg"
                         Stretch="UniformToFill">
             </ImageBrush>
         </Border.Background>
 
         <Border CornerRadius="50"
                 BorderThickness="1"
-                Opacity="0.90">
+                Opacity="0.70">
             <Border.BorderBrush>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Color="#6BFF84" Offset="0" />
@@ -157,7 +157,7 @@
                            Width="100"
                            Height="100" />
 
-                    <TextBlock Text="Nume"
+                    <TextBlock Text="licenta"
                                Foreground="White"
                                FontSize="25"
                                FontWeight="Medium"

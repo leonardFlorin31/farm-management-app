@@ -9,7 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <None Remove="Images\background.jpg" />
       <Resource Include="Images\background.jpg" />
       <None Remove="Images\logo.png" />
       <Resource Include="Images\logo.png" />
@@ -25,7 +24,9 @@
       <PackageReference Include="GMap.NET.Core" Version="2.1.7" />
       <PackageReference Include="GMap.NET.WinPresentation" Version="2.1.7" />
       <PackageReference Include="GMap.Net.WPF" Version="1.0.0.1" />
+      <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
       <PackageReference Include="MahApps.Metro" Version="3.0.0-rc0516" />
+      <PackageReference Include="MahApps.Metro.IconPacks" Version="5.1.0" />
       <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
