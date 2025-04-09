@@ -66,6 +66,15 @@
         <!--     </Setter> -->
         <!-- </Style> -->
     </UserControl.Resources>
+    
+    <UserControl.InputBindings>
+        <KeyBinding Key="Z"
+                    Modifiers="Control"
+                    Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y"
+                    Modifiers="Control"
+                    Command="{Binding RedoCommand}" />
+    </UserControl.InputBindings>
 
    <Grid>
   <Grid.RowDefinitions>
@@ -103,7 +112,7 @@
                  Background="White"
                  Padding="5"
                  Width="180" Height="30"
-                 BorderThickness="0"
+                 BorderThickness="1"
                  HorizontalContentAlignment="Left"
                  VerticalContentAlignment="Center"
                  mah:TextBoxHelper.Watermark="Introduceti numele parcelei..." />
