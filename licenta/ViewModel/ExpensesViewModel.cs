@@ -7,7 +7,9 @@ using LiveCharts.Wpf;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -27,6 +29,8 @@ public class ExpensesViewModel : ViewModelBase
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
     private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
+    
+    
     
     private ObservableCollection<string> _parcels = new ObservableCollection<string>();
     public ObservableCollection<string> Parcels
@@ -99,7 +103,7 @@ public class ExpensesViewModel : ViewModelBase
     {
         _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         InitializeUserAndData();
-
+        
        
         LoadDemoData();
         AddEntryCommand = new RelayCommand(AddEntry);
@@ -115,13 +119,75 @@ public class ExpensesViewModel : ViewModelBase
         if (_currentUserId != Guid.Empty)
         {
             GetParcelNamesAndIDs(); // Acum _currentUserId este setat
+            GetEntriesFromParcels();
         }
         else
         {
             MessageBox.Show("User ID invalid.");
         }
     }
-    
+
+    private async void GetEntriesFromParcels()
+    {
+        var client = new HttpClient(); 
+
+        Console.WriteLine(_currentUserId);
+        var response = await client
+            .GetAsync($"https://localhost:7088/api/PolygonEntries?userId={_currentUserId.ToString()}")
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"Failed to fetch expenses data. Status code: {response.StatusCode}");
+            return;
+        }
+
+        var entriesJson = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Răspuns server: {entriesJson}"); // Log răspunsul serverului
+
+        // Use case-insensitive options to avoid casing issues
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var entries = JsonSerializer.Deserialize<List<Entry>>(entriesJson, options);
+
+        App.Current.Dispatcher.Invoke(() =>
+        {
+            if (entries != null)
+            {
+                foreach (var entry in entries)
+                {
+                    string polygonName= null;
+
+                    try
+                    {
+                        foreach (var parcel in _parcelNameAndIDs)
+                        {
+                            if (parcel.Id == entry.ParcelId)
+                            {
+                                polygonName = parcel.Name;
+                            }
+                        }
+                        Console.WriteLine($"Polygon Name: {polygonName}");
+
+                        Entry entryModel = new Entry()
+                        {
+                            ParcelName = polygonName,
+                            Category = entry.Category,
+                            Value = entry.Value,
+                            Date = entry.Date
+                        };
+                        Console.WriteLine($"Entry value: {entry.Value}");
+                        
+                        Entries.Add(entryModel);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        });
+    }
+
     private async Task InitializeUser()
     {
         try
@@ -187,12 +253,12 @@ public class ExpensesViewModel : ViewModelBase
                 return;
             }
 
-            var polygonsJson = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"Răspuns server: {polygonsJson}"); // Log răspunsul serverului
+            var entriesJson = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Răspuns server: {entriesJson}"); // Log răspunsul serverului
 
             // Use case-insensitive options to avoid casing issues
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
+            var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(entriesJson, options);
 
             App.Current.Dispatcher.Invoke(() =>
             {
@@ -240,7 +306,7 @@ public class ExpensesViewModel : ViewModelBase
 
     private void RefreshParcels()
     {
-        _allParcels.Clear();
+        _parcels.Clear();
         _savedParcels.Clear();
         GetParcelNamesAndIDs();
         Console.WriteLine("refresh parcels");
@@ -253,7 +319,7 @@ public class ExpensesViewModel : ViewModelBase
             ParcelName = SelectedParcel ?? "Nicio parcelă",
             Category = NewCategory,
             Value = Value,
-            Date = DateTime.Now.ToString("g")
+            Date = DateTime.Now
         });
 
         // Add to existing categories if new
@@ -351,11 +417,24 @@ public class ExpensesViewModel : ViewModelBase
     
     public class Entry
     {
+        [JsonPropertyName("id")]
         public string ParcelName { get; set; }
+        
+        [JsonPropertyName("PolygonID")]
+        public Guid ParcelId { get; set; }
+        
+        [JsonPropertyName("CreatedByUserID")]
+        public Guid CreatedByUserId { get; set; }
+        
+        [JsonPropertyName("Categorie")]
         public string Category { get; set; }
+        
+        [JsonPropertyName("Valoare")]
         public decimal Value { get; set; }
-        public string Date { get; set; }
-        public string ValueString => Value.ToString("+0.##;-0.##");
+        
+        [JsonPropertyName("DataCreare")]
+        public DateTime Date { get; set; }
+
     }
     
     
