@@ -5,20 +5,264 @@ using System.Windows.Media;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Net.Http;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace licenta.ViewModel;
 
 public class ExpensesViewModel : ViewModelBase
 {
     private readonly MapViewModel _mapViewModel;
+    public Guid _currentUserId;
+    public string _currentUsername = LoginViewModel.UsernameForUse.Username;
     public SeriesCollection MonthlyProfitLoss { get; set; }
     public SeriesCollection ExpensePercentages { get; set; }
     public string[] Months { get; } = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
     public Func<double, string> AmountFormatter { get; } = value => value.ToString("N0") + " RON";
+    
+    private List<ParcelData> _allParcels = new List<ParcelData>();
+    private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
+    private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
+    
+    private ObservableCollection<string> _parcels = new ObservableCollection<string>();
+    public ObservableCollection<string> Parcels
+    {
+        get => _parcels;
+        set
+        {
+           _parcels = value;
+           OnPropertyChanged(nameof(Parcels));
+        }
+    }
+
+    private string _selectedParcel;
+    public string SelectedParcel
+    {
+        get => _selectedParcel;
+        set  {
+        _selectedParcel = value;
+        OnPropertyChanged(nameof(SelectedParcel));
+    }
+    }
+
+    private string _newCategory;
+    public string NewCategory
+    {
+        get => _newCategory;
+        set
+        {
+            _newCategory = value;
+            OnPropertyChanged(nameof(NewCategory));
+        }
+    }
+
+    private decimal _value;
+    public decimal Value
+    {
+        get => _value;
+        set
+        {
+            _value = value;
+            OnPropertyChanged(nameof(Value));
+        }
+    }
+
+    private ObservableCollection<string> _existingCategories = new ObservableCollection<string>();
+    public ObservableCollection<string> ExistingCategories
+    {
+        get => _existingCategories;
+        set
+        {
+            _existingCategories = value;
+            OnPropertyChanged(nameof(ExistingCategories));
+        }
+    }
+
+    private ObservableCollection<Entry> _entries = new ObservableCollection<Entry>();
+    public ObservableCollection<Entry> Entries
+    {
+        get => _entries;
+        set
+        {
+            _entries = value;
+            OnPropertyChanged(nameof(Entries));
+        }
+    }
+    
+    public ICommand AddEntryCommand { get; }
+
     public ExpensesViewModel(MapViewModel mapViewModel)
     {
         _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
+        InitializeUserAndData();
+
+       
         LoadDemoData();
+        AddEntryCommand = new RelayCommand(AddEntry);
+        
+        _mapViewModel.PolygonsUpdated += RefreshParcels;
+    
+    }
+    
+    private async void InitializeUserAndData()
+    {
+        await InitializeUser(); // Așteptăm finalizarea inițializării utilizatorului
+
+        if (_currentUserId != Guid.Empty)
+        {
+            GetParcelNamesAndIDs(); // Acum _currentUserId este setat
+        }
+        else
+        {
+            MessageBox.Show("User ID invalid.");
+        }
+    }
+    
+    private async Task InitializeUser()
+    {
+        try
+        {
+            // Folosiți HttpClient cu handler care ignoră erorile SSL (doar pentru mediu de dezvoltare!)
+            // var handler = new HttpClientHandler
+            // {
+            //     ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            // };
+
+            var client = new HttpClient(); //handler)
+            // {
+            //     Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            // };
+
+            var response = await client.GetAsync($"http://localhost:5035/api/auth/{_currentUsername}")
+                .ConfigureAwait(false); // Evită blocarea contextului UI
+
+            response.EnsureSuccessStatusCode(); // Aruncă excepție dacă răspunsul nu e succes
+
+            var userJson = await response.Content.ReadAsStringAsync();
+
+            // Use case-insensitive deserialization for the user DTO
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var userDto = JsonSerializer.Deserialize<MapViewModel.UserDto>(userJson, options);
+            if (userDto == null || userDto.Id == Guid.Empty)
+            {
+                MessageBox.Show("Failed to fetch current user information.");
+                return;
+            }
+
+            _currentUserId = userDto.Id;
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine(e.InnerException.Message);
+        }
+    }
+    
+     private async void GetParcelNamesAndIDs()
+    {
+        //https://localhost:7088/api/Polygons/names?userId=4cff5da4-c2e5-4125-9a63-997e7d040565
+        try
+        {
+            // var handler = new HttpClientHandler
+            // {
+            //     ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            // };
+
+            var client = new HttpClient(); //handler)
+            // {
+            //     Timeout = TimeSpan.FromSeconds(30) // Timeout crescut la 30 secunde
+            // };
+            // Fetch polygons for the current user
+            Console.WriteLine(_currentUserId);
+            var response = await client
+                .GetAsync($"https://localhost:7088/api/Polygons/names?userId={_currentUserId.ToString()}")
+                .ConfigureAwait(false);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Failed to fetch polygons. Status code: {response.StatusCode}");
+                return;
+            }
+
+            var polygonsJson = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Răspuns server: {polygonsJson}"); // Log răspunsul serverului
+
+            // Use case-insensitive options to avoid casing issues
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var polygons = JsonSerializer.Deserialize<List<ParcelNameAndID>>(polygonsJson, options);
+
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                Parcels.Clear();
+                if (polygons != null)
+                {
+                    Parcels.Add("");
+                    foreach (var polygon in polygons)
+                    {
+                        Parcels.Add(polygon.Name);
+                        Console.WriteLine($"Name: {polygon.Name}");
+                    }
+                }
+            });
+
+            foreach (var polygon in polygons)
+            {
+                try
+                {
+                    ParcelNameAndID parcelData = new ParcelNameAndID();
+                    parcelData.Name = polygon.Name;
+                    parcelData.Id = polygon.Id;
+                    _parcelNameAndIDs.Add(parcelData);
+                    
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Eroare la procesarea poligonului (GrainParcel): {ex.Message}");
+                }
+            }
+        }
+        catch
+        {
+            MessageBox.Show("Failed to fetch polygons");
+        }
+    }
+    
+    private void InitializeParcels()
+    {
+        // Add empty option
+        //Parcels.Insert(0, new string { Name = "(Nicio parcelă)" });
+        
+        
+    }
+
+    private void RefreshParcels()
+    {
+        _allParcels.Clear();
+        _savedParcels.Clear();
+        GetParcelNamesAndIDs();
+        Console.WriteLine("refresh parcels");
+    }
+
+    private void AddEntry()
+    {
+        Entries.Add(new Entry
+        {
+            ParcelName = SelectedParcel ?? "Nicio parcelă",
+            Category = NewCategory,
+            Value = Value,
+            Date = DateTime.Now.ToString("g")
+        });
+
+        // Add to existing categories if new
+        if (!string.IsNullOrEmpty(NewCategory) && !ExistingCategories.Contains(NewCategory))
+            ExistingCategories.Add(NewCategory);
+
+        // Clear inputs
+        NewCategory = string.Empty;
+        Value = 0;
     }
 
     private void LoadDemoData()
@@ -104,5 +348,15 @@ public class ExpensesViewModel : ViewModelBase
             }
         };
     }
+    
+    public class Entry
+    {
+        public string ParcelName { get; set; }
+        public string Category { get; set; }
+        public decimal Value { get; set; }
+        public string Date { get; set; }
+        public string ValueString => Value.ToString("+0.##;-0.##");
+    }
+    
     
 }
