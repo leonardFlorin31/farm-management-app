@@ -63,6 +63,17 @@ public class ExpensesViewModel : ViewModelBase
             OnPropertyChanged(nameof(NewCategory));
         }
     }
+    
+    private string _selectedCategory;
+    public string SelectedCategory
+    {
+        get => _selectedCategory;
+        set
+        {
+            _selectedCategory = value;
+            OnPropertyChanged(nameof(SelectedCategory));
+        }
+    }
 
     private decimal _value;
     public decimal Value
@@ -97,7 +108,7 @@ public class ExpensesViewModel : ViewModelBase
         }
     }
     
-    public ICommand AddEntryCommand { get; }
+    public ICommand SaveEntryCommand { get; }
 
     public ExpensesViewModel(MapViewModel mapViewModel)
     {
@@ -106,7 +117,7 @@ public class ExpensesViewModel : ViewModelBase
         
        
         LoadDemoData();
-        AddEntryCommand = new RelayCommand(AddEntry);
+        SaveEntryCommand = new RelayCommand(SaveEntry);
         
         _mapViewModel.PolygonsUpdated += RefreshParcels;
     
@@ -151,6 +162,7 @@ public class ExpensesViewModel : ViewModelBase
 
         App.Current.Dispatcher.Invoke(() =>
         {
+            _existingCategories.Add("");
             if (entries != null)
             {
                 foreach (var entry in entries)
@@ -178,6 +190,22 @@ public class ExpensesViewModel : ViewModelBase
                         Console.WriteLine($"Entry value: {entry.Value}");
                         
                         Entries.Add(entryModel);
+
+                        int cnt = 0;
+                        foreach (var category in _existingCategories)
+                        {
+                            
+                            if (category == entry.Category)
+                            {
+                                cnt++;
+                            }
+                        }
+
+                        if (cnt == 0)
+                        {
+                            _existingCategories.Add(entry.Category);
+                        }
+                        
                     }
                     catch (Exception ex)
                     {
@@ -312,23 +340,105 @@ public class ExpensesViewModel : ViewModelBase
         Console.WriteLine("refresh parcels");
     }
 
-    private void AddEntry()
+    private async void SaveEntry()
     {
-        Entries.Add(new Entry
+        try
         {
-            ParcelName = SelectedParcel ?? "Nicio parcelă",
-            Category = NewCategory,
-            Value = Value,
-            Date = DateTime.Now
-        });
+            Guid polygonId = new Guid();
 
-        // Add to existing categories if new
-        if (!string.IsNullOrEmpty(NewCategory) && !ExistingCategories.Contains(NewCategory))
-            ExistingCategories.Add(NewCategory);
+            if (SelectedParcel != "")
+            {
+                foreach (var parcel in _parcelNameAndIDs)
+                {
+                    if (parcel.Name == SelectedParcel)
+                    {
+                        polygonId = parcel.Id;
+                    }
+                }
+            }
+            else
+            {
+                polygonId = new Guid();
+            }
 
-        // Clear inputs
-        NewCategory = string.Empty;
-        Value = 0;
+            CreateRequestEntry entry = null;
+
+            if (!string.IsNullOrEmpty(NewCategory))
+            {
+                entry = new CreateRequestEntry()
+                {
+                    ParcelId = polygonId,
+                    CreatedByUserId = _currentUserId,
+                    Category = NewCategory,
+                    Value = Value,
+                };
+
+                Entries.Add(new Entry
+                {
+                    ParcelName = SelectedParcel,
+                    Category = NewCategory,
+                    Value = Value,
+                    Date = DateTime.Now
+                });
+            }
+            else
+            {
+
+                entry = new CreateRequestEntry()
+                {
+                    ParcelId = polygonId,
+                    CreatedByUserId = _currentUserId,
+                    Category = SelectedCategory,
+                    Value = Value,
+                };
+
+                Entries.Add(new Entry
+                {
+                    ParcelName = SelectedParcel,
+                    Category = SelectedCategory,
+                    Value = Value,
+                    Date = DateTime.Now
+                });
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                // Serializăm obiectul request în JSON.
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                string json;
+
+                json = JsonSerializer.Serialize(entry, options);
+
+
+                var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response;
+
+                response = await client.PostAsync("https://localhost:7088/api/PolygonEntries", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Datele au fost salvate cu succes.");
+                }
+                else
+                {
+                    MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                }
+            }
+
+            // Add to existing categories if new
+            if (!string.IsNullOrEmpty(NewCategory) && !ExistingCategories.Contains(NewCategory))
+                ExistingCategories.Add(NewCategory);
+
+            // Clear inputs
+            NewCategory = string.Empty;
+            Value = 0;
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private void LoadDemoData()
@@ -434,6 +544,23 @@ public class ExpensesViewModel : ViewModelBase
         
         [JsonPropertyName("DataCreare")]
         public DateTime Date { get; set; }
+
+    }
+    
+    public class CreateRequestEntry
+    {
+        
+        [JsonPropertyName("PolygonID")]
+        public Guid ParcelId { get; set; }
+    
+        [JsonPropertyName("CreatedByUserID")]
+        public Guid CreatedByUserId { get; set; }
+    
+        [JsonPropertyName("Categorie")]
+        public string Category { get; set; }
+    
+        [JsonPropertyName("Valoare")]
+        public decimal Value { get; set; }
 
     }
     
