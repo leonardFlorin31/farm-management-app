@@ -166,10 +166,23 @@
 
         <!-- Existing Categories ComboBox -->
         <ComboBox Grid.Column="1" Grid.Row="1"
-                ItemsSource="{Binding ExistingCategories}"
-                SelectedItem="{Binding SelectedCategory}"
+                ItemsSource="{Binding ExistingCategories, UpdateSourceTrigger=PropertyChanged}"
+                SelectedItem="{Binding SelectedCategory, UpdateSourceTrigger=PropertyChanged}"
                 Margin="0 0 10 10"
                 mah:TextBoxHelper.Watermark="Categorii"/>
+        
+        <Button Grid.Column="3" Grid.Row="1"
+                Content="Delete"
+                Command="{Binding DeleteEntryCommand}"
+                Margin="0 0 0 5"
+                Width="80"
+                Height="25"
+                Padding="5"
+                HorizontalAlignment="Left"
+                Background="{StaticResource color14}"
+                Foreground="White" 
+                BorderBrush="Transparent"
+                FontWeight="Bold"/>
 
         <!-- Entries ListView -->
         <ListView Grid.ColumnSpan="5" Grid.Row="2"
@@ -177,13 +190,13 @@
                 Margin="0 10 0 0"
                 HorizontalAlignment="Left"
                 BorderThickness="1"
-                Width="500">
+                Width="520">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Parcelă" DisplayMemberBinding="{Binding ParcelName}" Width="120"/>
                     <GridViewColumn Header="Categorie" DisplayMemberBinding="{Binding Category}" Width="120"/>
                     <GridViewColumn Header="Valoare" DisplayMemberBinding="{Binding Value}" Width="120"/>
-                    <GridViewColumn Header="Data/Ora" DisplayMemberBinding="{Binding Date}" Width="140"/>
+                    <GridViewColumn Header="Data/Ora" DisplayMemberBinding="{Binding Date}" Width="160"/>
                 </GridView>
             </ListView.View>
         </ListView>

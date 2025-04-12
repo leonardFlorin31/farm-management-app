@@ -109,6 +109,8 @@ public class ExpensesViewModel : ViewModelBase
     }
     
     public ICommand SaveEntryCommand { get; }
+    
+    public ICommand DeleteEntryCommand { get; }
 
     public ExpensesViewModel(MapViewModel mapViewModel)
     {
@@ -118,11 +120,12 @@ public class ExpensesViewModel : ViewModelBase
        
         LoadDemoData();
         SaveEntryCommand = new RelayCommand(SaveEntry);
+        DeleteEntryCommand = new RelayCommand(DeleteEntry);
         
         _mapViewModel.PolygonsUpdated += RefreshParcels;
     
     }
-    
+
     private async void InitializeUserAndData()
     {
         await InitializeUser(); // Așteptăm finalizarea inițializării utilizatorului
@@ -182,6 +185,7 @@ public class ExpensesViewModel : ViewModelBase
 
                         Entry entryModel = new Entry()
                         {
+                            Id = entry.Id,
                             ParcelName = polygonName,
                             Category = entry.Category,
                             Value = entry.Value,
@@ -440,6 +444,55 @@ public class ExpensesViewModel : ViewModelBase
             Console.WriteLine(ex.Message);
         }
     }
+    
+    private async void DeleteEntry()
+    {
+        try
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                Guid _parcelId = Entries
+                    .First(entry => entry.Category == SelectedCategory && entry.Value == Value)
+                    .Id;
+
+                var response = await client.DeleteAsync($"https://localhost:7088/api/PolygonEntries/{_parcelId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Datele au fost sterse cu succes.");
+                }
+                else
+                {
+                    MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
+                }
+                
+                App.Current.Dispatcher.Invoke(() =>
+                {
+                    for (int i = Entries.Count - 1; i >= 0; i--)
+                    {
+                        if (Entries[i].Category == SelectedCategory && Entries[i].Value == Value)
+                        {
+                            Entries.RemoveAt(i);
+
+                            if (Entries.Count(entry => entry.Category == Entries[i].Category) == 1)
+                            {
+                                ExistingCategories.Remove(Entries[i].Category);
+                            }
+                        }
+                    }
+                    
+                });
+
+                // Clear inputs
+                NewCategory = string.Empty;
+                Value = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"A apărut o eroare: {ex.Message}");
+        }
+    }
 
     private void LoadDemoData()
     {
@@ -528,6 +581,8 @@ public class ExpensesViewModel : ViewModelBase
     public class Entry
     {
         [JsonPropertyName("id")]
+        public Guid Id { get; set; }
+        
         public string ParcelName { get; set; }
         
         [JsonPropertyName("PolygonID")]
