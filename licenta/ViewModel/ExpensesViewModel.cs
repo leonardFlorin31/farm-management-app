@@ -374,38 +374,46 @@ public class ExpensesViewModel : ViewModelBase
             {
                 entry = new CreateRequestEntry()
                 {
+                    PolygonEntryId = Guid.NewGuid(),
                     ParcelId = polygonId,
                     CreatedByUserId = _currentUserId,
                     Category = NewCategory,
                     Value = Value,
                 };
 
-                Entries.Add(new Entry
+                Entry entryAdd = new Entry
                 {
+                    Id = entry.PolygonEntryId,
                     ParcelName = SelectedParcel,
                     Category = NewCategory,
                     Value = Value,
                     Date = DateTime.Now
-                });
+                };
+                
+                Entries.Add(entryAdd);
             }
             else
             {
 
                 entry = new CreateRequestEntry()
                 {
+                    PolygonEntryId = Guid.NewGuid(),
                     ParcelId = polygonId,
                     CreatedByUserId = _currentUserId,
                     Category = SelectedCategory,
                     Value = Value,
                 };
 
-                Entries.Add(new Entry
+                Entry entryAdd = new Entry
                 {
+                    Id = entry.PolygonEntryId,
                     ParcelName = SelectedParcel,
                     Category = SelectedCategory,
                     Value = Value,
                     Date = DateTime.Now
-                });
+                };
+                
+                Entries.Add(entryAdd);
             }
 
             using (HttpClient client = new HttpClient())
@@ -607,6 +615,8 @@ public class ExpensesViewModel : ViewModelBase
     
     public class CreateRequestEntry
     {
+        [JsonPropertyName("PolygonEntryID")]
+        public Guid PolygonEntryId { get; set; }
         
         [JsonPropertyName("PolygonID")]
         public Guid ParcelId { get; set; }
