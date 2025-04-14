@@ -196,14 +196,17 @@ public class ExpensesViewModel : ViewModelBase
                         Entries.Add(entryModel);
 
                         int cnt = 0;
-                        foreach (var category in _existingCategories)
-                        {
-                            
-                            if (category == entry.Category)
-                            {
-                                cnt++;
-                            }
-                        }
+                        // foreach (var category in _existingCategories)
+                        // {
+                        //     
+                        //     if (category == entry.Category)
+                        //     {
+                        //         cnt++;
+                        //     }
+                        // }
+
+                       cnt = _existingCategories.Count(category => category == entry.Category);
+                        
 
                         if (cnt == 0)
                         {
@@ -472,12 +475,12 @@ public class ExpensesViewModel : ViewModelBase
                     {
                         if (Entries[i].Category == SelectedCategory && Entries[i].Value == Value)
                         {
-                            Entries.RemoveAt(i);
-
                             if (Entries.Count(entry => entry.Category == Entries[i].Category) == 1)
                             {
                                 ExistingCategories.Remove(Entries[i].Category);
                             }
+                            
+                            Entries.RemoveAt(i);
                         }
                     }
                     
