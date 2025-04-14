@@ -21,9 +21,7 @@ public class ExpensesViewModel : ViewModelBase
     private readonly MapViewModel _mapViewModel;
     public Guid _currentUserId;
     public string _currentUsername = LoginViewModel.UsernameForUse.Username;
-    public SeriesCollection MonthlyProfitLoss { get; set; }
-    public SeriesCollection ExpensePercentages { get; set; }
-    public string[] Months { get; } = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
+    public ObservableCollection<string> Months { get; set; }
     public Func<double, string> AmountFormatter { get; } = value => value.ToString("N0") + " RON";
     
     private List<ParcelData> _allParcels = new List<ParcelData>();
@@ -108,6 +106,28 @@ public class ExpensesViewModel : ViewModelBase
         }
     }
     
+    private SeriesCollection _monthlyProfitLoss;
+    public SeriesCollection MonthlyProfitLoss
+    {
+        get => _monthlyProfitLoss;
+        set
+        {
+            _monthlyProfitLoss = value;
+            OnPropertyChanged(nameof(MonthlyProfitLoss));
+        }
+    }
+    
+    private SeriesCollection _expensePercentages;
+    public SeriesCollection ExpensePercentages
+    {
+        get => _expensePercentages;
+        set
+        {
+            _expensePercentages = value;
+            OnPropertyChanged(nameof(ExpensePercentages));
+        }
+    }
+    
     public ICommand SaveEntryCommand { get; }
     
     public ICommand DeleteEntryCommand { get; }
@@ -118,7 +138,7 @@ public class ExpensesViewModel : ViewModelBase
         InitializeUserAndData();
         
        
-        LoadDemoData();
+        //LoadDemoData();
         SaveEntryCommand = new RelayCommand(SaveEntry);
         DeleteEntryCommand = new RelayCommand(DeleteEntry);
         
@@ -147,8 +167,8 @@ public class ExpensesViewModel : ViewModelBase
 
         Console.WriteLine(_currentUserId);
         var response = await client
-            .GetAsync($"https://localhost:7088/api/PolygonEntries?userId={_currentUserId.ToString()}")
-            .ConfigureAwait(false);
+            .GetAsync($"https://localhost:7088/api/PolygonEntries?userId={_currentUserId.ToString()}");
+            
 
         if (!response.IsSuccessStatusCode)
         {
@@ -221,6 +241,8 @@ public class ExpensesViewModel : ViewModelBase
                 }
             }
         });
+        UpdateMonthlyProfitLossChart();
+        UpdateExpensePercentagesChart();
     }
 
     private async Task InitializeUser()
@@ -449,11 +471,14 @@ public class ExpensesViewModel : ViewModelBase
             NewCategory = string.Empty;
             Value = 0;
 
+            UpdateMonthlyProfitLossChart();
+            UpdateExpensePercentagesChart();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
+        
     }
     
     private async void DeleteEntry()
@@ -497,6 +522,9 @@ public class ExpensesViewModel : ViewModelBase
                 // Clear inputs
                 NewCategory = string.Empty;
                 Value = 0;
+                
+                UpdateMonthlyProfitLossChart();
+                UpdateExpensePercentagesChart();
             }
         }
         catch (Exception ex)
@@ -505,89 +533,254 @@ public class ExpensesViewModel : ViewModelBase
         }
     }
 
-    private void LoadDemoData()
+    // private void LoadDemoData()
+    // {
+    //     // Date Demo - Profit/Pierdere pe Lună
+    //     var monthlyValues = new List<double>
+    //     {
+    //         15000, -10000, 20000, 3000, -2000, 18000,
+    //         9000, -3000, 12000, 7000, -4000, 25000
+    //     };
+    //
+    //     var positiveValues = new ChartValues<double>();
+    //     var negativeValues = new ChartValues<double>();
+    //
+    //     for (int i = 0; i < monthlyValues.Count; i++)
+    //     {
+    //         if (monthlyValues[i] >= 0)
+    //         {
+    //             positiveValues.Add(monthlyValues[i]);
+    //         }
+    //         else
+    //         {
+    //             negativeValues.Add(monthlyValues[i]);
+    //         }
+    //     }
+    //
+    //     MonthlyProfitLoss = new SeriesCollection
+    //     {
+    //         new ColumnSeries
+    //         {
+    //             Title = "Profit",
+    //             Values = positiveValues,
+    //             Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
+    //             StrokeThickness = 2,
+    //             DataLabels = true,
+    //             LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+    //         },
+    //         new ColumnSeries
+    //         {
+    //             Title = "Pierdere",
+    //             Values = negativeValues,
+    //             Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Roșu
+    //             StrokeThickness = 2,
+    //             DataLabels = true,
+    //             LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+    //         }
+    //     };
+    //
+    //     // Date Demo - Procente Cheltuieli (rămâne neschimbat)
+    //     ExpensePercentages = new SeriesCollection
+    //     {
+    //         new PieSeries
+    //         {
+    //             Title = "Semințe",
+    //             Values = new ChartValues<double> { 40 },
+    //             Fill = Brushes.DodgerBlue,
+    //             DataLabels = true,
+    //             LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
+    //         },
+    //         new PieSeries
+    //         {
+    //             Title = "Îngrășăminte",
+    //             Values = new ChartValues<double> { 25 },
+    //             Fill = Brushes.Orange,
+    //             DataLabels = true,
+    //             LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
+    //         },
+    //         new PieSeries
+    //         {
+    //             Title = "Lucrări",
+    //             Values = new ChartValues<double> { 20 },
+    //             Fill = Brushes.LightGreen,
+    //             DataLabels = true,
+    //             LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
+    //         },
+    //         new PieSeries
+    //         {
+    //             Title = "Altele",
+    //             Values = new ChartValues<double> { 15 },
+    //             Fill = Brushes.Violet,
+    //             DataLabels = true,
+    //             LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
+    //         }
+    //     };
+    // }
+    
+private void UpdateMonthlyProfitLossChart()
+{
+    Application.Current.Dispatcher.Invoke(() =>
     {
-        // Date Demo - Profit/Pierdere pe Lună
-        var monthlyValues = new List<double>
+        // Create dictionaries for sums by month
+        Dictionary<string, double> profitByMonth = new Dictionary<string, double>();
+        Dictionary<string, double> lossByMonth = new Dictionary<string, double>();
+    
+        // Initialize with all months (or compute from actual entry dates)
+        var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames
+                         .Where(m => !string.IsNullOrEmpty(m)).ToList();
+        foreach (var month in monthNames)
         {
-            15000, -10000, 20000, 3000, -2000, 18000,
-            9000, -3000, 12000, 7000, -4000, 25000
-        };
-
+            profitByMonth[month] = 0;
+            lossByMonth[month] = 0;
+        }
+    
+        // Aggregate each entry into the corresponding month
+        foreach (var entry in Entries)
+        {
+            var month = entry.Date.ToString("MMM");
+            if (!profitByMonth.ContainsKey(month))
+            {
+                profitByMonth[month] = 0;
+                lossByMonth[month] = 0;
+            }
+            if (entry.Value >= 0)
+                profitByMonth[month] += (double)entry.Value;
+            else
+                lossByMonth[month] += (double)entry.Value;
+        }
+    
+        // Create chart values from the aggregated data
         var positiveValues = new ChartValues<double>();
         var negativeValues = new ChartValues<double>();
-
-        for (int i = 0; i < monthlyValues.Count; i++)
+    
+        foreach (var month in monthNames)
         {
-            if (monthlyValues[i] >= 0)
-            {
-                positiveValues.Add(monthlyValues[i]);
-            }
-            else
-            {
-                negativeValues.Add(monthlyValues[i]);
-            }
+            positiveValues.Add(profitByMonth[month]);
+            negativeValues.Add(lossByMonth[month]);
         }
-
+    
+        // Update the series collection (which is bound to the chart)
         MonthlyProfitLoss = new SeriesCollection
         {
             new ColumnSeries
             {
                 Title = "Profit",
                 Values = positiveValues,
-                Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Verde
+                Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Green
                 StrokeThickness = 2,
                 DataLabels = true,
-                LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+                LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : ""
             },
             new ColumnSeries
             {
                 Title = "Pierdere",
                 Values = negativeValues,
-                Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Roșu
+                Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Red
                 StrokeThickness = 2,
                 DataLabels = true,
-                LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : "" // Am schimbat chartPoint.Value în chartPoint.Y
+                LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : ""
             }
         };
+    
+        // Update the Months collection which is the label for AxisX
+        Months = new ObservableCollection<string>(monthNames); // Make sure Months is an ObservableCollection<string> or notifies changes appropriately
+    });
+}
+    
+    private void UpdateExpensePercentagesChart()
+{
+    // Dicționare separate pentru profit și pentru cheltuieli (folosim valoarea absolută pentru cheltuieli)
+    var profitSums = new Dictionary<string, double>();
+    var expenseSums = new Dictionary<string, double>();
 
-        // Date Demo - Procente Cheltuieli (rămâne neschimbat)
-        ExpensePercentages = new SeriesCollection
+    // Parcurgem fiecare intrare și le adunăm corespunzător
+    foreach (var entry in Entries)
+    {
+        // Valorile pozitive sunt tratate ca profit
+        if (entry.Value >= 0)
         {
-            new PieSeries
-            {
-                Title = "Semințe",
-                Values = new ChartValues<double> { 40 },
-                Fill = Brushes.DodgerBlue,
-                DataLabels = true,
-                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
-            },
-            new PieSeries
-            {
-                Title = "Îngrășăminte",
-                Values = new ChartValues<double> { 25 },
-                Fill = Brushes.Orange,
-                DataLabels = true,
-                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
-            },
-            new PieSeries
-            {
-                Title = "Lucrări",
-                Values = new ChartValues<double> { 20 },
-                Fill = Brushes.LightGreen,
-                DataLabels = true,
-                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
-            },
-            new PieSeries
-            {
-                Title = "Altele",
-                Values = new ChartValues<double> { 15 },
-                Fill = Brushes.Violet,
-                DataLabels = true,
-                LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
-            }
-        };
+            if (!profitSums.ContainsKey(entry.Category))
+                profitSums[entry.Category] = 0;
+            profitSums[entry.Category] += (double)entry.Value;
+        }
+        else // Valorile negative reprezintă cheltuieli
+        {
+            if (!expenseSums.ContainsKey(entry.Category))
+                expenseSums[entry.Category] = 0;
+            expenseSums[entry.Category] += Math.Abs((double)entry.Value);
+        }
     }
+
+    // Calculăm totalul pentru ca procentajele să fie calculate corect
+    double totalProfit = profitSums.Values.Sum();
+    double totalExpense = expenseSums.Values.Sum();
+    double grandTotal = totalProfit + totalExpense;  // totalul tuturor valorilor (profit + cheltuieli)
+
+    // Creăm o nouă colecție pentru Pie Chart
+    ExpensePercentages = new SeriesCollection();
+
+    // Adăugăm segmentele (felii) pentru profit
+    foreach (var kvp in profitSums)
+    {
+        ExpensePercentages.Add(new PieSeries
+        {
+            Title = $"{kvp.Key} (Profit)",
+            Values = new ChartValues<double> { kvp.Value },
+            Fill = GetBrushForCategory(kvp.Key),
+            DataLabels = true,
+            LabelPoint = chartPoint =>
+            {
+                // Calculăm procentul slice-ului din total (grandTotal)
+                double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
+                return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+            }
+        });
+    }
+
+    // Adăugăm segmentele (felii) pentru cheltuieli
+    foreach (var kvp in expenseSums)
+    {
+        ExpensePercentages.Add(new PieSeries
+        {
+            Title = $"{kvp.Key} (Cheltuieli)",
+            Values = new ChartValues<double> { kvp.Value },
+            Fill = GetBrushForCategory(kvp.Key),
+            DataLabels = true,
+            LabelPoint = chartPoint =>
+            {
+                double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
+                return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+            }
+        });
+    }
+}
+
+    private readonly List<Brush> _brushesList = new List<Brush>
+    {
+        Brushes.DodgerBlue,
+        Brushes.Orange,
+        Brushes.LightGreen,
+        Brushes.Violet,
+        Brushes.Magenta,  // You can add more colors if you expect more categories.
+        Brushes.Cyan,
+        Brushes.Gold
+    };
+
+    private Brush GetBrushForCategory(string category)
+    {
+        // Assuming ExistingCategories is an ObservableCollection<string> defined in your ViewModel.
+        int index = ExistingCategories.IndexOf(category);
+        if (index >= 0)
+        {
+            // Use the index modulo the number of brushes available
+            return _brushesList[index % _brushesList.Count];
+        }
+        else
+        {
+            return Brushes.Gray;
+        }
+    }
+
     
     public class Entry
     {
