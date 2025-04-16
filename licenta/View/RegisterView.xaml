@@ -161,8 +161,8 @@
                                FontWeight="Bold"
                                FontFamily="Arial"
                                Margin="0,5,0,0" />
-                    <customControls:BindablePasswordBox2
-                        Password="{Binding PasswordConfirm, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <customControls:BindablePasswordBox
+                        Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Height="28"
                         Margin="0,5,0,20" />
 
