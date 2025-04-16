@@ -8,7 +8,8 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        MouseDown="Windows_MouseDown">
     <Window.DataContext>
         <vm:RegisterViewModel />
     </Window.DataContext>
@@ -71,7 +72,7 @@
                     <!-- Using a Back or Close button -->
                     <Button x:Name="BtnClose"
                             BorderThickness="0"
-                            Content="x"
+                            Content=""
                             HorizontalContentAlignment="Center"
                             VerticalContentAlignment="Center"
                             Foreground="White"

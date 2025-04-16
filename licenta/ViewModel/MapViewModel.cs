@@ -298,6 +298,7 @@ namespace licenta.ViewModel
 
             MapControl.MouseMove += MapControl_MouseMove;
             MapControl.MouseLeftButtonUp += MapControl_MouseLeftButtonUp;
+            
         }
 
         private void OnResizeCorner(DragDeltaEventArgs e)
