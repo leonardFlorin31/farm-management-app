@@ -3,12 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:licenta.ViewModel"
         xmlns:customControls="clr-namespace:licenta.CustomControls"
-        Title="Register" Height="550" Width="1000"
+        Title="Register" Height="650" Width="1100"
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         Background="Transparent"
-        AllowsTransparency="True">
+        AllowsTransparency="True"
+        MouseDown="Windows_MouseDown">
     <Window.DataContext>
         <vm:RegisterViewModel />
     </Window.DataContext>
@@ -68,10 +69,45 @@
                                Grid.Column="0"
                                VerticalAlignment="Top"
                                Margin="20,30,0,0" />
+                    
+                    <Button x:Name="BtnMinimize"
+                            BorderThickness="0"
+                            Content="-"
+                            Foreground="Black"
+                            FontSize="16"
+                            FontFamily="Arial"
+                            Cursor="Hand"
+                            Margin="0,0,5,0"
+                            Grid.Column="1"
+                            Click="BtnMinimize_OnClick">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Aqua" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="White" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+
+                        <Button.Template>
+                            <ControlTemplate>
+                                <Border Width="18" Height="18"
+                                        CornerRadius="9"
+                                        Background="{TemplateBinding Background}">
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center" />
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    
                     <!-- Using a Back or Close button -->
                     <Button x:Name="BtnClose"
                             BorderThickness="0"
-                            Content="x"
+                            Content=""
                             HorizontalContentAlignment="Center"
                             VerticalContentAlignment="Center"
                             Foreground="White"
@@ -80,7 +116,7 @@
                             Cursor="Hand"
                             Margin="0,0,5,0"
                             Grid.Column="2"
-                            Command="{Binding BackCommand}">
+                            Click="BtnClose_OnClick">
                     
 
                         <Button.Style>
@@ -122,12 +158,81 @@
                                HorizontalAlignment="Center"
                                Margin="0,10,0,20" />
 
+                    <TextBlock Text="Nume:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,10"
+                             Padding="20,0,0,0">
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/username.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left" />
+                        </TextBox.Background>
+                    </TextBox>
+                    
+                    <TextBlock Text="Prenume:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,10"
+                             Padding="20,0,0,0">
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/username.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left" />
+                        </TextBox.Background>
+                    </TextBox>
+                    
                     <TextBlock Text="Username:"
                                Foreground="White"
                                FontWeight="Bold"
                                FontFamily="Arial"
                                Margin="0,5,0,0" />
                     <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                             FontSize="13"
+                             Foreground="White"
+                             CaretBrush="White"
+                             BorderThickness="0, 0, 0, 1"
+                             Height="28"
+                             VerticalContentAlignment="Center"
+                             FontWeight="Medium"
+                             FontFamily="Arial"
+                             Margin="0,5,0,10"
+                             Padding="20,0,0,0">
+                        <TextBox.Background>
+                            <ImageBrush ImageSource="/Images/username.png"
+                                        Stretch="Uniform"
+                                        AlignmentX="Left" />
+                        </TextBox.Background>
+                    </TextBox>
+                    
+                    <TextBlock Text="Email:"
+                               Foreground="White"
+                               FontWeight="Bold"
+                               FontFamily="Arial"
+                               Margin="0,5,0,0" />
+                    <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="13"
                              Foreground="White"
                              CaretBrush="White"
@@ -154,16 +259,23 @@
                         Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         Height="28"
                         Margin="0,5,0,10" />
+                    
+                    <CheckBox Content="Cont de administrator"
+                              IsChecked="{Binding IsAdmin, Mode=TwoWay}"
+                              Foreground="White"
+                              FontWeight="Bold"
+                              FontFamily="Arial"
+                              Margin="0,0,0,10" />
 
-                    <TextBlock Text="Confirm Password:"
-                               Foreground="White"
-                               FontWeight="Bold"
-                               FontFamily="Arial"
-                               Margin="0,5,0,0" />
-                    <customControls:BindablePasswordBox
-                        Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                        Height="28"
-                        Margin="0,5,0,20" />
+                    <!-- <TextBlock Text="Confirm Password:" -->
+                    <!--            Foreground="White" -->
+                    <!--            FontWeight="Bold" -->
+                    <!--            FontFamily="Arial" -->
+                    <!--            Margin="0,5,0,0" /> -->
+                    <!-- <customControls:BindablePasswordBox -->
+                    <!--     Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" -->
+                    <!--     Height="28" -->
+                    <!--     Margin="0,5,0,20" /> -->
 
                     <TextBlock Text="{Binding ErrorMessage}"
                                Foreground="Red"
