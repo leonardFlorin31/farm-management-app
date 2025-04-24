@@ -125,7 +125,8 @@ public class RegisterViewModel : ViewModelBase
             LastName = LastName.Trim(),
             Username = Username.Trim(),
             Email = Email.Trim(),
-            Password = passwordPlain
+            Password = passwordPlain,
+            Role = IsAdmin
         };
 
         var json = JsonSerializer.Serialize(registerDto, new JsonSerializerOptions
@@ -143,12 +144,13 @@ public class RegisterViewModel : ViewModelBase
 
                 if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    // Înregistrare OK → te întorci la login
+                    // Înregistrare OK -> te întorci la login
+                    IsAdmin = false;
                     BackAction();
                 }
                 else if (response.StatusCode == HttpStatusCode.Conflict)
                 {
-                    // 409 Conflict → username sau email deja existent
+                    // 409 Conflict -> username sau email deja existent
                     var msg = await response.Content.ReadAsStringAsync();
                     ErrorMessage = $"Eroare: {msg}";
                 }
@@ -207,8 +209,7 @@ public class RegisterViewModel : ViewModelBase
         //     Console.WriteLine("false");
         // }
 
-        IsAdmin = false;
-        // BackAction();
+        
     }
 
     private void BackAction()
