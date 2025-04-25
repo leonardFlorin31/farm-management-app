@@ -35,6 +35,10 @@
         <DataTemplate DataType="{x:Type viewModel:ExpensesViewModel}">
             <view:ExpensesView />
         </DataTemplate>
+        
+        <DataTemplate DataType="{x:Type viewModel:AccesDeniedViewModel}">
+            <view:AccesDeniedView />
+        </DataTemplate>
     </Window.Resources>
 
     <Border CornerRadius="10"

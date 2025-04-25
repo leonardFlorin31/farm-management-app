@@ -166,3 +166,5 @@ C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps.Metro.IconPacks.VaadinIcons.dll
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps.Metro.IconPacks.WeatherIcons.dll
 C:\Users\leofl\Documents\GitHub\licenta\licenta\bin\Debug\net8.0-windows\MahApps.Metro.IconPacks.Zondicons.dll
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\AccesDeniedView.g.cs
+C:\Users\leofl\Documents\GitHub\licenta\licenta\obj\Debug\net8.0-windows\View\AccesDeniedView.baml
