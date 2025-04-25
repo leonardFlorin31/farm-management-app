@@ -94,26 +94,49 @@ public class ResizeAdornerSides : Adorner
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        if (!(AdornedElement is FrameworkElement fe))
-            return finalSize;
+        // Determine the real width/height of the adorned element:
+        //  - If the user explicitly set Width/Height (and they're finite), use them.
+        //  - Otherwise, fall back to the layout system's finalSize.
+        double adornerWidth = (!double.IsNaN(AdornedElement.RenderSize.Width) &&
+                               !double.IsInfinity(AdornedElement.RenderSize.Width))
+            ? AdornedElement.RenderSize.Width
+            : finalSize.Width;
 
-        double adornerWidth = fe.Width;
-        double adornerHeight = fe.Height;
+        double adornerHeight = (!double.IsNaN(AdornedElement.RenderSize.Height) &&
+                                !double.IsInfinity(AdornedElement.RenderSize.Height))
+            ? AdornedElement.RenderSize.Height
+            : finalSize.Height;
 
-        // Arrange pentru thumb‑ul din stânga:
-        // se întinde pe toată înălțimea adorner‑ului
+        // Arrange the four thumbs around the edges
         leftThumb.Arrange(new Rect(-thumbThickness / 2, 0, thumbThickness, adornerHeight));
-
-        // Thumb-ul din dreapta:
         rightThumb.Arrange(new Rect(adornerWidth - thumbThickness / 2, 0, thumbThickness, adornerHeight));
-
-        // Thumb-ul de sus:
         topThumb.Arrange(new Rect(0, -thumbThickness / 2, adornerWidth, thumbThickness));
-
-        // Thumb-ul de jos:
         bottomThumb.Arrange(new Rect(0, adornerHeight - thumbThickness / 2, adornerWidth, thumbThickness));
 
         return finalSize;
+        
+        //versiunea dinainte de crash ul random
+        //
+        // if (!(AdornedElement is FrameworkElement fe))
+        //     return finalSize;
+        //
+        // double adornerWidth = fe.Width;
+        // double adornerHeight = fe.Height;
+        //
+        // // Arrange pentru thumb‑ul din stânga:
+        // // se întinde pe toată înălțimea adorner‑ului
+        // leftThumb.Arrange(new Rect(-thumbThickness / 2, 0, thumbThickness, adornerHeight));
+        //
+        // // Thumb-ul din dreapta:
+        // rightThumb.Arrange(new Rect(adornerWidth - thumbThickness / 2, 0, thumbThickness, adornerHeight));
+        //
+        // // Thumb-ul de sus:
+        // topThumb.Arrange(new Rect(0, -thumbThickness / 2, adornerWidth, thumbThickness));
+        //
+        // // Thumb-ul de jos:
+        // bottomThumb.Arrange(new Rect(0, adornerHeight - thumbThickness / 2, adornerWidth, thumbThickness));
+        //
+        // return finalSize;
     }
 
     protected override int VisualChildrenCount => visualChildren.Count;
