@@ -246,7 +246,7 @@ namespace licenta.ViewModel
 
         public MapViewModel()
         {
-           
+           Console.WriteLine(_currentRole);
             
             if (_currentRole != "Contabil")
             {
