@@ -185,7 +185,7 @@
                 FontWeight="Bold"/>
 
         <!-- Entries ListView -->
-        <ListView Grid.ColumnSpan="5" Grid.Row="2"
+        <ListView Grid.ColumnSpan="4" Grid.Row="2"
                 ItemsSource="{Binding Entries}"
                 Margin="0 10 0 0"
                 HorizontalAlignment="Left"
@@ -200,6 +200,28 @@
                 </GridView>
             </ListView.View>
         </ListView>
+        
+        <Border Grid.Column="4" Grid.Row="2"
+                Style="{StaticResource ChartContainerStyle}"
+                Padding="10"
+                Margin="5,0,430,5"
+                Width="160">
+            <StackPanel Orientation="Vertical" >
+                <TextBlock Text="Filtre:" Margin="0,10,0,10"></TextBlock>
+                <TextBox Width="120"
+                         Margin="0,15,0,15"
+                         mah:TextBoxHelper.Watermark="parcela"
+                         Text="{Binding Filter1, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="120"
+                         Margin="0,0,0,15"
+                         mah:TextBoxHelper.Watermark="categorie"
+                         Text="{Binding Filter2, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBox Width="120"
+                         Margin="0,0,0,10"
+                         mah:TextBoxHelper.Watermark="valoare"
+                         Text="{Binding Filter3, UpdateSourceTrigger=PropertyChanged}" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Border>
     </Grid>

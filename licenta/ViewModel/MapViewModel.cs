@@ -26,6 +26,7 @@ namespace licenta.ViewModel
     {
         private static MapViewModel _instance;
         public static MapViewModel Instance => _instance ??= new MapViewModel();
+        public static string _currentRole = MainViewModel.CurrentRole.RoleName;
 
         private PointLatLng _mapCenter;
         private int _zoomLevel = 13; // Initial zoom level
@@ -245,59 +246,101 @@ namespace licenta.ViewModel
 
         public MapViewModel()
         {
-            MapCenter = new PointLatLng(44.4268, 26.1025); // București
-            MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
-
-            _httpClient = new HttpClient
+           Console.WriteLine(_currentRole);
+            
+            if (_currentRole != "Contabil")
             {
-                BaseAddress = new Uri(_apiBaseUrl) // Set the base address
-            };
+                MapCenter = new PointLatLng(44.4268, 26.1025); // București
+                MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
 
-            // Initialize zoom commands
-            ZoomInCommand = new RelayCommand(ZoomIn);
-            ZoomOutCommand = new RelayCommand(ZoomOut);
+                _httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(_apiBaseUrl) // Set the base address
+                };
+// Initialize zoom commands
+                ZoomInCommand = new RelayCommand(ZoomIn);
+                ZoomOutCommand = new RelayCommand(ZoomOut);
+                
+                MapControl = new GMapControl
+                {
+                    MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
+                    Position = new PointLatLng(44.4268, 26.1025), // București
+                    MinZoom = 2,
+                    MaxZoom = 18,
+                    Zoom = 13,
+                    MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter,
+                    CanDragMap = true,
+                    DragButton = MouseButton.Left
+                };
+            
+            
 
-            // Command to create a polygon
-            CreatePolygonCommand = new RelayCommand(CreatePolygon);
-            DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
-            DeletePolygonCommand = new RelayCommand(DeletePolygon);
+                // Fetch the current user's ID and load polygons
+                InitializeUserAndPolygons();
 
-            ChangeMapTypeCommand = new RelayCommand(ChangeMapType);
+                // Subscribe to the OnPositionChanged event
+                MapControl.OnPositionChanged += MapControl_OnPositionChanged;
+                
+                // Command to create a polygon
+                CreatePolygonCommand = new RelayCommand(CreatePolygon);
+                DeleteLastMarkerCommand = new RelayCommand(DeleteLastMarker);
+                DeletePolygonCommand = new RelayCommand(DeletePolygon);
 
-            SelectionChangedCommand = new RelayCommand(SelectionChanged);
+                ChangeMapTypeCommand = new RelayCommand(ChangeMapType);
 
-            ToggleParcelDetailsCommand = new RelayCommand(ToggleParcelDetails);
+                SelectionChangedCommand = new RelayCommand(SelectionChanged);
 
-            ResizeHorizontalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeHorizontal);
-            ResizeVerticalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeVertical);
-            ResizeCornerCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeCorner);
+                ToggleParcelDetailsCommand = new RelayCommand(ToggleParcelDetails);
 
-            RedoCommand = new RelayCommand(Redo);
-            UndoCommand = new RelayCommand(Undo);
+                ResizeHorizontalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeHorizontal);
+                ResizeVerticalCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeVertical);
+                ResizeCornerCommand = new RelayCommand<DragDeltaEventArgs>(OnResizeCorner);
 
-            MapControl = new GMapControl
+                RedoCommand = new RelayCommand(Redo);
+                UndoCommand = new RelayCommand(Undo);
+                MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
+
+                MapControl.MouseMove += MapControl_MouseMove;
+                MapControl.MouseLeftButtonUp += MapControl_MouseLeftButtonUp;
+            }
+            else
             {
-                MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
-                Position = new PointLatLng(44.4268, 26.1025), // București
-                MinZoom = 2,
-                MaxZoom = 18,
-                Zoom = 13,
-                MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter,
-                CanDragMap = true,
-                DragButton = MouseButton.Left
-            };
+                MapCenter = new PointLatLng(44.4268, 26.1025); // București
+                MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
 
-            // Fetch the current user's ID and load polygons
-            InitializeUserAndPolygons();
+                _httpClient = new HttpClient
+                {
+                    BaseAddress = new Uri(_apiBaseUrl) // Set the base address
+                };
+// Initialize zoom commands
+                ZoomInCommand = new RelayCommand(ZoomIn);
+                ZoomOutCommand = new RelayCommand(ZoomOut);
+                
+                MapControl = new GMapControl
+                {
+                    MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
+                    Position = new PointLatLng(44.4268, 26.1025), // București
+                    MinZoom = 2,
+                    MaxZoom = 18,
+                    Zoom = 13,
+                    MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter,
+                    CanDragMap = true,
+                    DragButton = MouseButton.Left
+                };
+            
+            
 
-            // Subscribe to the OnPositionChanged event
-            MapControl.OnPositionChanged += MapControl_OnPositionChanged;
+                // Fetch the current user's ID and load polygons
+                InitializeUserAndPolygons();
 
-            // Handle right-click events
-            MapControl.MouseRightButtonDown += MapControl_MouseRightButtonDown;
+                // Subscribe to the OnPositionChanged event
+                MapControl.OnPositionChanged += MapControl_OnPositionChanged;
+            }
 
-            MapControl.MouseMove += MapControl_MouseMove;
-            MapControl.MouseLeftButtonUp += MapControl_MouseLeftButtonUp;
+           
+
+            
+            
             
         }
 

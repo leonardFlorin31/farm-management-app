@@ -23,35 +23,76 @@ public class ExpensesViewModel : ViewModelBase
     public string _currentUsername = LoginViewModel.UsernameForUse.Username;
     public ObservableCollection<string> Months { get; set; }
     public Func<double, string> AmountFormatter { get; } = value => value.ToString("N0") + " RON";
-    
+
     private List<ParcelData> _allParcels = new List<ParcelData>();
     private ObservableCollection<ParcelData> _savedParcels = new ObservableCollection<ParcelData>();
     private List<ParcelNameAndID> _parcelNameAndIDs = new List<ParcelNameAndID>();
-    
-    
-    
+
+    private List<Entry> _allEntries = new List<Entry>();
+    private string _filter1;
+    private string _filter2;
+    private string _filter3;
+
+
     private ObservableCollection<string> _parcels = new ObservableCollection<string>();
+
     public ObservableCollection<string> Parcels
     {
         get => _parcels;
         set
         {
-           _parcels = value;
-           OnPropertyChanged(nameof(Parcels));
+            _parcels = value;
+            OnPropertyChanged(nameof(Parcels));
         }
     }
 
     private string _selectedParcel;
+
     public string SelectedParcel
     {
         get => _selectedParcel;
-        set  {
-        _selectedParcel = value;
-        OnPropertyChanged(nameof(SelectedParcel));
+        set
+        {
+            _selectedParcel = value;
+            OnPropertyChanged(nameof(SelectedParcel));
+        }
     }
+
+    public string Filter1
+    {
+        get => _filter1;
+        set
+        {
+            _filter1 = value;
+            OnPropertyChanged(nameof(Filter1));
+            FilterParcels();
+        }
+    }
+
+    public string Filter2
+    {
+        get => _filter2;
+        set
+        {
+            _filter2 = value;
+            OnPropertyChanged(nameof(Filter2));
+            FilterParcels();
+        }
+    }
+
+    public string Filter3
+    {
+        get => _filter3;
+        set
+        {
+            _filter3 = value;
+            OnPropertyChanged(nameof(Filter3));
+            FilterParcels();
+        }
     }
 
     private string _newCategory;
+
     public string NewCategory
     {
         get => _newCategory;
@@ -61,8 +102,9 @@ public class ExpensesViewModel : ViewModelBase
             OnPropertyChanged(nameof(NewCategory));
         }
     }
-    
+
     private string _selectedCategory;
+
     public string SelectedCategory
     {
         get => _selectedCategory;
@@ -74,6 +116,7 @@ public class ExpensesViewModel : ViewModelBase
     }
 
     private decimal _value;
+
     public decimal Value
     {
         get => _value;
@@ -85,6 +128,7 @@ public class ExpensesViewModel : ViewModelBase
     }
 
     private ObservableCollection<string> _existingCategories = new ObservableCollection<string>();
+
     public ObservableCollection<string> ExistingCategories
     {
         get => _existingCategories;
@@ -96,6 +140,7 @@ public class ExpensesViewModel : ViewModelBase
     }
 
     private ObservableCollection<Entry> _entries = new ObservableCollection<Entry>();
+
     public ObservableCollection<Entry> Entries
     {
         get => _entries;
@@ -105,8 +150,9 @@ public class ExpensesViewModel : ViewModelBase
             OnPropertyChanged(nameof(Entries));
         }
     }
-    
+
     private SeriesCollection _monthlyProfitLoss;
+
     public SeriesCollection MonthlyProfitLoss
     {
         get => _monthlyProfitLoss;
@@ -116,8 +162,9 @@ public class ExpensesViewModel : ViewModelBase
             OnPropertyChanged(nameof(MonthlyProfitLoss));
         }
     }
-    
+
     private SeriesCollection _expensePercentages;
+
     public SeriesCollection ExpensePercentages
     {
         get => _expensePercentages;
@@ -127,23 +174,22 @@ public class ExpensesViewModel : ViewModelBase
             OnPropertyChanged(nameof(ExpensePercentages));
         }
     }
-    
+
     public ICommand SaveEntryCommand { get; }
-    
+
     public ICommand DeleteEntryCommand { get; }
 
     public ExpensesViewModel(MapViewModel mapViewModel)
     {
         _mapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
         InitializeUserAndData();
-        
-       
+
+
         //LoadDemoData();
         SaveEntryCommand = new RelayCommand(SaveEntry);
         DeleteEntryCommand = new RelayCommand(DeleteEntry);
-        
+
         _mapViewModel.PolygonsUpdated += RefreshParcels;
-    
     }
 
     private async void InitializeUserAndData()
@@ -163,12 +209,12 @@ public class ExpensesViewModel : ViewModelBase
 
     private async void GetEntriesFromParcels()
     {
-        var client = new HttpClient(); 
+        var client = new HttpClient();
 
         Console.WriteLine(_currentUserId);
         var response = await client
             .GetAsync($"https://localhost:7088/api/PolygonEntries?userId={_currentUserId.ToString()}");
-            
+
 
         if (!response.IsSuccessStatusCode)
         {
@@ -190,7 +236,7 @@ public class ExpensesViewModel : ViewModelBase
             {
                 foreach (var entry in entries)
                 {
-                    string polygonName= null;
+                    string polygonName = null;
 
                     try
                     {
@@ -201,6 +247,7 @@ public class ExpensesViewModel : ViewModelBase
                                 polygonName = parcel.Name;
                             }
                         }
+
                         Console.WriteLine($"Polygon Name: {polygonName}");
 
                         Entry entryModel = new Entry()
@@ -212,8 +259,9 @@ public class ExpensesViewModel : ViewModelBase
                             Date = entry.Date
                         };
                         Console.WriteLine($"Entry value: {entry.Value}");
-                        
+
                         Entries.Add(entryModel);
+                        _allEntries.Add(entryModel);
 
                         int cnt = 0;
                         // foreach (var category in _existingCategories)
@@ -225,14 +273,13 @@ public class ExpensesViewModel : ViewModelBase
                         //     }
                         // }
 
-                       cnt = _existingCategories.Count(category => category == entry.Category);
-                        
+                        cnt = _existingCategories.Count(category => category == entry.Category);
+
 
                         if (cnt == 0)
                         {
                             _existingCategories.Add(entry.Category);
                         }
-                        
                     }
                     catch (Exception ex)
                     {
@@ -283,8 +330,8 @@ public class ExpensesViewModel : ViewModelBase
             Console.WriteLine(e.InnerException.Message);
         }
     }
-    
-     private async void GetParcelNamesAndIDs()
+
+    private async void GetParcelNamesAndIDs()
     {
         //https://localhost:7088/api/Polygons/names?userId=4cff5da4-c2e5-4125-9a63-997e7d040565
         try
@@ -339,7 +386,6 @@ public class ExpensesViewModel : ViewModelBase
                     parcelData.Name = polygon.Name;
                     parcelData.Id = polygon.Id;
                     _parcelNameAndIDs.Add(parcelData);
-                    
                 }
                 catch (Exception ex)
                 {
@@ -352,13 +398,11 @@ public class ExpensesViewModel : ViewModelBase
             MessageBox.Show("Failed to fetch polygons");
         }
     }
-    
+
     private void InitializeParcels()
     {
         // Add empty option
         //Parcels.Insert(0, new string { Name = "(Nicio parcelă)" });
-        
-        
     }
 
     private void RefreshParcels()
@@ -411,12 +455,12 @@ public class ExpensesViewModel : ViewModelBase
                     Value = Value,
                     Date = DateTime.Now
                 };
-                
+
                 Entries.Add(entryAdd);
+                _allEntries.Add(entryAdd);
             }
             else
             {
-
                 entry = new CreateRequestEntry()
                 {
                     PolygonEntryId = Guid.NewGuid(),
@@ -434,8 +478,9 @@ public class ExpensesViewModel : ViewModelBase
                     Value = Value,
                     Date = DateTime.Now
                 };
-                
+
                 Entries.Add(entryAdd);
+                _allEntries.Add(entryAdd);
             }
 
             using (HttpClient client = new HttpClient())
@@ -478,51 +523,54 @@ public class ExpensesViewModel : ViewModelBase
         {
             Console.WriteLine(ex.Message);
         }
-        
     }
-    
+
     private async void DeleteEntry()
     {
         try
         {
             using (HttpClient client = new HttpClient())
             {
-                Guid _parcelId = Entries
-                    .First(entry => entry.Category == SelectedCategory && entry.Value == Value)
-                    .Id;
+                // 1. Găsim *ultima* intrare cu categoria și valoarea date
+                var lastEntry = Entries
+                    .LastOrDefault(e => e.Category == SelectedCategory && e.Value == Value);
 
+                if (lastEntry == null)
+                {
+                    MessageBox.Show("Nu există nicio intrare de șters pentru categoria și valoarea specificate.");
+                    return;
+                }
+
+                Guid _parcelId = lastEntry.Id;
+
+                // 2. Apelăm API-ul
                 var response = await client.DeleteAsync($"https://localhost:7088/api/PolygonEntries/{_parcelId}");
 
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Datele au fost sterse cu succes.");
+                    MessageBox.Show($"Eroare la ștergerea datelor: {response.StatusCode}");
+                    return;
                 }
-                else
-                {
-                    MessageBox.Show($"Eroare la salvarea datelor: {response.StatusCode}");
-                }
-                
+
+                // 3. Ștergem doar intrarea cu acel Id din UI
                 App.Current.Dispatcher.Invoke(() =>
                 {
-                    for (int i = Entries.Count - 1; i >= 0; i--)
+                    // Verificăm dacă mai există alte elemente cu aceeași categorie
+                    bool wasLastOfCategory = Entries.Count(e => e.Category == lastEntry.Category) == 1;
+                    if (wasLastOfCategory)
                     {
-                        if (Entries[i].Category == SelectedCategory && Entries[i].Value == Value)
-                        {
-                            if (Entries.Count(entry => entry.Category == Entries[i].Category) == 1)
-                            {
-                                ExistingCategories.Remove(Entries[i].Category);
-                            }
-                            
-                            Entries.RemoveAt(i);
-                        }
+                        ExistingCategories.Remove(lastEntry.Category);
                     }
-                    
+
+                    Entries.Remove(lastEntry);
                 });
 
-                // Clear inputs
+                MessageBox.Show("Datele au fost șterse cu succes.");
+
+                // 4. Resetează câmpurile de input și reîmprospătează graficele
                 NewCategory = string.Empty;
                 Value = 0;
-                
+
                 UpdateMonthlyProfitLossChart();
                 UpdateExpensePercentagesChart();
             }
@@ -532,6 +580,34 @@ public class ExpensesViewModel : ViewModelBase
             MessageBox.Show($"A apărut o eroare: {ex.Message}");
         }
     }
+
+    private void FilterParcels()
+    {
+        var filteredEntries = _allEntries.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(Filter1))
+        {
+            filteredEntries =
+                filteredEntries.Where(p => p.ParcelName.Contains(Filter1, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(Filter2))
+        {
+            filteredEntries =
+                filteredEntries.Where(p => p.Category.Contains(Filter2, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(Filter3))
+        {
+            filteredEntries = filteredEntries
+                .Where(p => p.Value
+                    .ToString(CultureInfo.InvariantCulture)
+                    .Contains(Filter3));
+        }
+
+        Entries = new ObservableCollection<Entry>(filteredEntries);
+    }
+
 
     // private void LoadDemoData()
     // {
@@ -616,154 +692,156 @@ public class ExpensesViewModel : ViewModelBase
     //         }
     //     };
     // }
-    
-private void UpdateMonthlyProfitLossChart()
-{
-    Application.Current.Dispatcher.Invoke(() =>
+
+    private void UpdateMonthlyProfitLossChart()
     {
-        // Create dictionaries for sums by month
-        Dictionary<string, double> profitByMonth = new Dictionary<string, double>();
-        Dictionary<string, double> lossByMonth = new Dictionary<string, double>();
-    
-        // Initialize with all months (or compute from actual entry dates)
-        var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames
-                         .Where(m => !string.IsNullOrEmpty(m)).ToList();
-        foreach (var month in monthNames)
+        Application.Current.Dispatcher.Invoke(() =>
         {
-            profitByMonth[month] = 0;
-            lossByMonth[month] = 0;
-        }
-    
-        // Aggregate each entry into the corresponding month
-        foreach (var entry in Entries)
-        {
-            var month = entry.Date.ToString("MMM");
-            if (!profitByMonth.ContainsKey(month))
+            // Create dictionaries for sums by month
+            Dictionary<string, double> profitByMonth = new Dictionary<string, double>();
+            Dictionary<string, double> lossByMonth = new Dictionary<string, double>();
+
+            // Initialize with all months (or compute from actual entry dates)
+            var monthNames = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames
+                .Where(m => !string.IsNullOrEmpty(m)).ToList();
+            foreach (var month in monthNames)
             {
                 profitByMonth[month] = 0;
                 lossByMonth[month] = 0;
             }
-            if (entry.Value >= 0)
-                profitByMonth[month] += (double)entry.Value;
-            else
-                lossByMonth[month] += (double)entry.Value;
-        }
-    
-        // Create chart values from the aggregated data
-        var positiveValues = new ChartValues<double>();
-        var negativeValues = new ChartValues<double>();
-    
-        foreach (var month in monthNames)
-        {
-            positiveValues.Add(profitByMonth[month]);
-            negativeValues.Add(lossByMonth[month]);
-        }
-    
-        // Update the series collection (which is bound to the chart)
-        MonthlyProfitLoss = new SeriesCollection
-        {
-            new ColumnSeries
+
+            // Aggregate each entry into the corresponding month
+            foreach (var entry in Entries)
             {
-                Title = "Profit",
-                Values = positiveValues,
-                Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Green
-                StrokeThickness = 2,
-                DataLabels = true,
-                LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : ""
-            },
-            new ColumnSeries
-            {
-                Title = "Pierdere",
-                Values = negativeValues,
-                Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Red
-                StrokeThickness = 2,
-                DataLabels = true,
-                LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : ""
+                var month = entry.Date.ToString("MMM");
+                if (!profitByMonth.ContainsKey(month))
+                {
+                    profitByMonth[month] = 0;
+                    lossByMonth[month] = 0;
+                }
+
+                if (entry.Value >= 0)
+                    profitByMonth[month] += (double)entry.Value;
+                else
+                    lossByMonth[month] += (double)entry.Value;
             }
-        };
-    
-        // Update the Months collection which is the label for AxisX
-        Months = new ObservableCollection<string>(monthNames); // Make sure Months is an ObservableCollection<string> or notifies changes appropriately
-    });
-}
-    
+
+            // Create chart values from the aggregated data
+            var positiveValues = new ChartValues<double>();
+            var negativeValues = new ChartValues<double>();
+
+            foreach (var month in monthNames)
+            {
+                positiveValues.Add(profitByMonth[month]);
+                negativeValues.Add(lossByMonth[month]);
+            }
+
+            // Update the series collection (which is bound to the chart)
+            MonthlyProfitLoss = new SeriesCollection
+            {
+                new ColumnSeries
+                {
+                    Title = "Profit",
+                    Values = positiveValues,
+                    Fill = new SolidColorBrush(Color.FromRgb(76, 175, 80)), // Green
+                    StrokeThickness = 2,
+                    DataLabels = true,
+                    LabelPoint = (chartPoint) => chartPoint.Y > 0 ? AmountFormatter(chartPoint.Y) : ""
+                },
+                new ColumnSeries
+                {
+                    Title = "Pierdere",
+                    Values = negativeValues,
+                    Fill = new SolidColorBrush(Color.FromRgb(244, 67, 54)), // Red
+                    StrokeThickness = 2,
+                    DataLabels = true,
+                    LabelPoint = (chartPoint) => chartPoint.Y < 0 ? AmountFormatter(chartPoint.Y) : ""
+                }
+            };
+
+            // Update the Months collection which is the label for AxisX
+            Months = new ObservableCollection<string>(
+                monthNames); // Make sure Months is an ObservableCollection<string> or notifies changes appropriately
+        });
+    }
+
     private void UpdateExpensePercentagesChart()
-{
-    // Dicționare separate pentru profit și pentru cheltuieli (folosim valoarea absolută pentru cheltuieli)
-    var profitSums = new Dictionary<string, double>();
-    var expenseSums = new Dictionary<string, double>();
-
-    // Parcurgem fiecare intrare și le adunăm corespunzător
-    foreach (var entry in Entries)
     {
-        // Valorile pozitive sunt tratate ca profit
-        if (entry.Value >= 0)
-        {
-            if (!profitSums.ContainsKey(entry.Category))
-                profitSums[entry.Category] = 0;
-            profitSums[entry.Category] += (double)entry.Value;
-        }
-        else // Valorile negative reprezintă cheltuieli
-        {
-            if (!expenseSums.ContainsKey(entry.Category))
-                expenseSums[entry.Category] = 0;
-            expenseSums[entry.Category] += Math.Abs((double)entry.Value);
-        }
-    }
+        // Dicționare separate pentru profit și pentru cheltuieli (folosim valoarea absolută pentru cheltuieli)
+        var profitSums = new Dictionary<string, double>();
+        var expenseSums = new Dictionary<string, double>();
 
-    // Calculăm totalul pentru ca procentajele să fie calculate corect
-    double totalProfit = profitSums.Values.Sum();
-    double totalExpense = expenseSums.Values.Sum();
-    double grandTotal = totalProfit + totalExpense;  // totalul tuturor valorilor (profit + cheltuieli)
-
-    // Creăm o nouă colecție pentru Pie Chart
-    ExpensePercentages = new SeriesCollection();
-
-    // Adăugăm segmentele (felii) pentru profit
-    foreach (var kvp in profitSums)
-    {
-        ExpensePercentages.Add(new PieSeries
+        // Parcurgem fiecare intrare și le adunăm corespunzător
+        foreach (var entry in Entries)
         {
-            Title = $"{kvp.Key} (Profit)",
-            Values = new ChartValues<double> { kvp.Value },
-            Fill = GetBrushForCategory(kvp.Key),
-            DataLabels = true,
-            LabelPoint = chartPoint =>
+            // Valorile pozitive sunt tratate ca profit
+            if (entry.Value >= 0)
             {
-                // Calculăm procentul slice-ului din total (grandTotal)
-                double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
-                return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+                if (!profitSums.ContainsKey(entry.Category))
+                    profitSums[entry.Category] = 0;
+                profitSums[entry.Category] += (double)entry.Value;
             }
-        });
-    }
-
-    // Adăugăm segmentele (felii) pentru cheltuieli
-    foreach (var kvp in expenseSums)
-    {
-        ExpensePercentages.Add(new PieSeries
-        {
-            Title = $"{kvp.Key} (Cheltuieli)",
-            Values = new ChartValues<double> { kvp.Value },
-            Fill = GetBrushForCategory(kvp.Key),
-            DataLabels = true,
-            LabelPoint = chartPoint =>
+            else // Valorile negative reprezintă cheltuieli
             {
-                double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
-                return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+                if (!expenseSums.ContainsKey(entry.Category))
+                    expenseSums[entry.Category] = 0;
+                expenseSums[entry.Category] += Math.Abs((double)entry.Value);
             }
-        });
+        }
+
+        // Calculăm totalul pentru ca procentajele să fie calculate corect
+        double totalProfit = profitSums.Values.Sum();
+        double totalExpense = expenseSums.Values.Sum();
+        double grandTotal = totalProfit + totalExpense; // totalul tuturor valorilor (profit + cheltuieli)
+
+        // Creăm o nouă colecție pentru Pie Chart
+        ExpensePercentages = new SeriesCollection();
+
+        // Adăugăm segmentele (felii) pentru profit
+        foreach (var kvp in profitSums)
+        {
+            ExpensePercentages.Add(new PieSeries
+            {
+                Title = $"{kvp.Key}",
+                Values = new ChartValues<double> { kvp.Value },
+                Fill = GetBrushForCategory(kvp.Key),
+                DataLabels = true,
+                LabelPoint = chartPoint =>
+                {
+                    // Calculăm procentul slice-ului din total (grandTotal)
+                    double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
+                    return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+                }
+            });
+        }
+
+        // Adăugăm segmentele (felii) pentru cheltuieli
+        foreach (var kvp in expenseSums)
+        {
+            ExpensePercentages.Add(new PieSeries
+            {
+                Title = $"{kvp.Key}",
+                Values = new ChartValues<double> { kvp.Value },
+                Fill = new SolidColorBrush(Color.FromArgb(255, 244, 67, 54)),
+                DataLabels = true,
+                LabelPoint = chartPoint =>
+                {
+                    double perc = grandTotal == 0 ? 0 : kvp.Value / grandTotal;
+                    return string.Format("{0} - {1:N0} RON - {2:P}", chartPoint.SeriesView.Title, kvp.Value, perc);
+                }
+            });
+        }
     }
-}
 
     private readonly List<Brush> _brushesList = new List<Brush>
     {
-        Brushes.DodgerBlue,
-        Brushes.Orange,
+        Brushes.DarkGreen,
+        Brushes.GreenYellow,
         Brushes.LightGreen,
-        Brushes.Violet,
-        Brushes.Magenta,  // You can add more colors if you expect more categories.
-        Brushes.Cyan,
-        Brushes.Gold
+        Brushes.DarkOliveGreen,
+        Brushes.ForestGreen, // You can add more colors if you expect more categories.
+        Brushes.DarkSeaGreen,
+        Brushes.LimeGreen
     };
 
     private Brush GetBrushForCategory(string category)
@@ -781,49 +859,34 @@ private void UpdateMonthlyProfitLossChart()
         }
     }
 
-    
+
     public class Entry
     {
-        [JsonPropertyName("id")]
-        public Guid Id { get; set; }
-        
-        public string ParcelName { get; set; }
-        
-        [JsonPropertyName("PolygonID")]
-        public Guid ParcelId { get; set; }
-        
-        [JsonPropertyName("CreatedByUserID")]
-        public Guid CreatedByUserId { get; set; }
-        
-        [JsonPropertyName("Categorie")]
-        public string Category { get; set; }
-        
-        [JsonPropertyName("Valoare")]
-        public decimal Value { get; set; }
-        
-        [JsonPropertyName("DataCreare")]
-        public DateTime Date { get; set; }
+        [JsonPropertyName("id")] public Guid Id { get; set; }
 
+        public string ParcelName { get; set; }
+
+        [JsonPropertyName("PolygonID")] public Guid ParcelId { get; set; }
+
+        [JsonPropertyName("CreatedByUserID")] public Guid CreatedByUserId { get; set; }
+
+        [JsonPropertyName("Categorie")] public string Category { get; set; }
+
+        [JsonPropertyName("Valoare")] public decimal Value { get; set; }
+
+        [JsonPropertyName("DataCreare")] public DateTime Date { get; set; }
     }
-    
+
     public class CreateRequestEntry
     {
-        [JsonPropertyName("PolygonEntryID")]
-        public Guid PolygonEntryId { get; set; }
-        
-        [JsonPropertyName("PolygonID")]
-        public Guid ParcelId { get; set; }
-    
-        [JsonPropertyName("CreatedByUserID")]
-        public Guid CreatedByUserId { get; set; }
-    
-        [JsonPropertyName("Categorie")]
-        public string Category { get; set; }
-    
-        [JsonPropertyName("Valoare")]
-        public decimal Value { get; set; }
+        [JsonPropertyName("PolygonEntryID")] public Guid PolygonEntryId { get; set; }
 
+        [JsonPropertyName("PolygonID")] public Guid ParcelId { get; set; }
+
+        [JsonPropertyName("CreatedByUserID")] public Guid CreatedByUserId { get; set; }
+
+        [JsonPropertyName("Categorie")] public string Category { get; set; }
+
+        [JsonPropertyName("Valoare")] public decimal Value { get; set; }
     }
-    
-    
 }
