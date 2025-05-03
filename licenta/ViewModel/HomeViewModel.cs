@@ -11,6 +11,7 @@ public class HomeViewModel:ViewModelBase
 {
     private string _name;
     private string _email;
+    private string _userName;
 
     private List<string> _roles = new List<string> {"Manager", "Angajat", "Contabil"};
     private string _selectedRole;
@@ -31,6 +32,17 @@ public class HomeViewModel:ViewModelBase
         {
             _roles = value;
             OnPropertyChanged(nameof(Roles));
+        }
+    }
+    
+    public string UserName
+    {
+        get => _userName;
+        set
+        {
+            _userName = value;
+            Console.WriteLine($"Name set to: {_userName}");
+            OnPropertyChanged(nameof(UserName));
         }
     }
 
@@ -90,6 +102,7 @@ public class HomeViewModel:ViewModelBase
             return;
         }
 
+        UserName = userDto.Name;
         _currentUserId = userDto.Id;
     }
 

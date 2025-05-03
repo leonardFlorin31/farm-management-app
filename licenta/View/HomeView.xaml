@@ -5,22 +5,45 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:licenta.View"
              xmlns:viewModel="clr-namespace:licenta.ViewModel"
+             xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     
     
-    <Grid>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <fa:IconImage Icon="House"
+                      Style="{StaticResource menuButtonIcon}"
+                      Foreground="{DynamicResource AccentColorBrush}"
+                      Margin="0,0,10,0"
+                      Grid.Row="0" Grid.Column="0"/>
+
+        <!-- Greeting -->
+        <TextBlock Grid.Row="0" Grid.Column="1"
+                   Text="Hello, " FontSize="18" VerticalAlignment="Center"
+                   FontWeight="Bold">
+            <Run Text="{Binding UserName}" FontWeight="Bold"/>
+            <Run Text="!"/>
+        </TextBlock>
         <!-- Form Title -->
-        <TextBlock Text="Enter Your Details"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Top"
-                   FontSize="24"
-                   Margin="0,20,0,0"/>
+        
+        
+        
 
         <!-- Input Fields -->
-        <StackPanel VerticalAlignment="Center"
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2"
+                    Orientation="Vertical"
+                    Margin="0,20,0,0"
                     HorizontalAlignment="Center"
-                    Width="300">
+                    Width="400">
 
             <!-- Name Input -->
             <TextBlock Text="username:"
