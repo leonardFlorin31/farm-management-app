@@ -51,6 +51,8 @@ public class MainViewModel : ViewModelBase
     public ICommand ShowParcelViewCommand { get; } 
     
     public ICommand ShowExpensesViewCommand { get; }
+    
+    public ICommand ShowTaskViewCommand { get; }
         
     private void ExecuteShowHomeViewCommand(object obj)
     {
@@ -156,6 +158,22 @@ public class MainViewModel : ViewModelBase
         Icon = IconChar.MoneyBills;
     }
     
+    private void ExecuteShowTaskViewCommand(object obj)
+    {
+        Console.WriteLine("Executing ShowTaskViewCommand");
+
+        // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
+        if (!_viewModelCache.TryGetValue(typeof(TaskViewModel), out var taskViewModel))
+        {
+            Console.WriteLine("Creating new ParcelViewModel");
+            taskViewModel = new TaskViewModel();
+            _viewModelCache[typeof(TaskViewModel)] = taskViewModel;
+        }
+
+        CurrentChildView = taskViewModel;
+        Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
+    }
+    
     public IconChar Icon
     {
         get => _icon;
@@ -187,6 +205,7 @@ public class MainViewModel : ViewModelBase
         ShowMapViewCommand = new ViewModelCommand(ExecuteShowMapViewCommand);
         ShowParcelViewCommand = new ViewModelCommand(ExecuteShowParcelViewCommand);
         ShowExpensesViewCommand = new ViewModelCommand(ExecuteShowExpensesViewCommand);
+        ShowTaskViewCommand = new ViewModelCommand(ExecuteShowTaskViewCommand);
         
         //Default view
         ExecuteShowHomeViewCommand(null);
