@@ -116,14 +116,16 @@ public class ExpensesViewModel : ViewModelBase
     }
 
     private decimal _value;
-
     public decimal Value
     {
         get => _value;
         set
         {
-            _value = value;
-            OnPropertyChanged(nameof(Value));
+            if (_value != value)
+            {
+                _value = value;
+                OnPropertyChanged(nameof(Value));
+            }
         }
     }
 
@@ -587,22 +589,23 @@ public class ExpensesViewModel : ViewModelBase
 
         if (!string.IsNullOrWhiteSpace(Filter1))
         {
-            filteredEntries =
-                filteredEntries.Where(p => p.ParcelName.Contains(Filter1, StringComparison.OrdinalIgnoreCase));
+            filteredEntries = filteredEntries
+                .Where(p => p.ParcelName != null && 
+                            p.ParcelName.Contains(Filter1, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(Filter2))
         {
-            filteredEntries =
-                filteredEntries.Where(p => p.Category.Contains(Filter2, StringComparison.OrdinalIgnoreCase));
+            filteredEntries = filteredEntries
+                .Where(p => p.Category != null && 
+                            p.Category.Contains(Filter2, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(Filter3))
         {
             filteredEntries = filteredEntries
-                .Where(p => p.Value
-                    .ToString(CultureInfo.InvariantCulture)
-                    .Contains(Filter3));
+                .Where(p => p.Value.ToString(CultureInfo.InvariantCulture)
+                    .Contains(Filter3, StringComparison.OrdinalIgnoreCase));
         }
 
         Entries = new ObservableCollection<Entry>(filteredEntries);

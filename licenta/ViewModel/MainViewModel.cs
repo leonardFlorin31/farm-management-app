@@ -24,6 +24,7 @@ public class MainViewModel : ViewModelBase
     private string _currentUsername = LoginViewModel.UsernameForUse.Username;
     public string _currentRole = "test";
 
+
     public ViewModelBase CurrentChildView
     {
         get => _currentChildView;
