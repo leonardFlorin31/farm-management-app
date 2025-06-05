@@ -44,7 +44,7 @@ namespace licenta.ViewModel
         private EditablePolygon _currentEditablePolygon; // Poligonul editat în momentul curent
         private List<PointLatLng> _initialPolygonCoordinates;
 
-// Poligonul selectat în momentul curent
+        // Poligonul selectat în momentul curent
         private EditablePolygon _selectedPolygon;
 
 
@@ -248,7 +248,7 @@ namespace licenta.ViewModel
         {
            Console.WriteLine(_currentRole);
             
-            if (_currentRole != "Contabil")
+            if (_currentRole != "Angajat")
             {
                 MapCenter = new PointLatLng(44.4268, 26.1025); // București
                 MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);

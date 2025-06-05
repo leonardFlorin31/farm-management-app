@@ -126,7 +126,7 @@ public class MainViewModel : ViewModelBase
                 _viewModelCache[typeof(AccesDeniedViewModel)] = deniedVm;
             }
 
-            // 2) Swap current view to the AccessDeniedView
+            // Swap of current view to the AccessDeniedView
             CurrentChildView = deniedVm;
             Caption = "Acces Refuzat";
             Icon    = IconChar.Lock; 

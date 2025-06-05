@@ -36,12 +36,14 @@
                       Style="{StaticResource menuButtonIcon}"
                       Foreground="{StaticResource color4}"
                       Margin="0,0,10,0"
+                      HorizontalAlignment="Left"
                       Grid.Row="0" Grid.Column="0"/>
-        <TextBlock Grid.Row="0" Grid.Column="1"
+        <TextBlock 
                    Text="Sarcini"
+                   Margin="30,5,0,0"
+                   HorizontalAlignment="Left"
                    FontSize="18"
                    FontWeight="Bold"
-                   VerticalAlignment="Center"
                    Foreground="{StaticResource color4}"/>
 
         <!-- Zona de creare task: vizibilă doar pentru manager/admin -->

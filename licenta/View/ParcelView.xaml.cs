@@ -12,7 +12,7 @@ public partial class ParcelView : UserControl
         Console.WriteLine("ParcelView initialized");
         var currentTheme = ThemeManager.Current.DetectTheme(Application.Current);
 
-        // Schimbă tema aplicației la Light.Blue
+        // tema aplicatiei la Light.Green
         ThemeManager.Current.ChangeTheme(Application.Current, "Light.Green");
     }
 }
