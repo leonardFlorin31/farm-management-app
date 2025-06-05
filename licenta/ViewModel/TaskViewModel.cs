@@ -10,10 +10,17 @@ namespace licenta.ViewModel
         private string _newTaskTitle;
         private string _newTaskDescription;
         private string _newTaskStatus;
+        private string _employee;
         private bool _canCreateTasks = true;  // Set based on user role
 
         public ObservableCollection<TaskItem> Tasks { get; } = new ObservableCollection<TaskItem>();
-        public ObservableCollection<string> StatusValues { get; } = new ObservableCollection<string>
+
+        public Collection<string> Employees { get; } = new Collection<string>
+        {
+            "gica",
+            "relu"
+        };
+        public Collection<string> StatusValues { get; } = new Collection<string>
         {
             "Asignat",
             "In Progres",
@@ -39,6 +46,12 @@ namespace licenta.ViewModel
             get => _newTaskStatus;
             set { _newTaskStatus = value; OnPropertyChanged(nameof(NewTaskStatus)); }
         }
+        
+        public string Employee
+        {
+            get => _employee;
+            set { _employee = value; OnPropertyChanged(nameof(Employee)); }
+        }
 
         public bool CanCreateTasks
         {
@@ -50,25 +63,29 @@ namespace licenta.ViewModel
         {
             if (!string.IsNullOrWhiteSpace(NewTaskTitle))
             {
+                App.Current.Dispatcher.Invoke(() =>
+                {
                 Tasks.Add(new TaskItem
                 {
                     Title = NewTaskTitle,
                     Description = NewTaskDescription,
                     Status = NewTaskStatus ?? "Not Started",
-                    AssignedToUsername = "Unassigned", // You'll need to implement user assignment
+                    AssignedToUsername = Employee, // You'll need to implement user assignment
                     CanChangeStatus = true
+                });
                 });
 
                 // Clear input fields
                 NewTaskTitle = string.Empty;
                 NewTaskDescription = string.Empty;
                 NewTaskStatus = null;
+                
             }
         }
         
     }
 
-    public class TaskItem : INotifyPropertyChanged
+    public class TaskItem : ViewModelBase
     {
         private string _status;
         
@@ -79,38 +96,12 @@ namespace licenta.ViewModel
         public string Status
         {
             get => _status;
-            set { _status = value; OnPropertyChanged(); }
+            set { _status = value; OnPropertyChanged(nameof(Status)); }
         }
 
         public bool CanChangeStatus { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        
     }
-
-    // Basic RelayCommand implementation
-    public class RelayCommand : ICommand
-    {
-        private readonly Action _execute;
-        private readonly Func<bool> _canExecute;
-
-        public RelayCommand(Action execute, Func<bool> canExecute = null)
-        {
-            _execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            _canExecute = canExecute;
-        }
-
-        public bool CanExecute(object parameter) => _canExecute?.Invoke() ?? true;
-
-        public void Execute(object parameter) => _execute();
-
-        public event EventHandler CanExecuteChanged
-        {
-            add => CommandManager.RequerySuggested += value;
-            remove => CommandManager.RequerySuggested -= value;
-        }
-    }
+    
+  
 }
