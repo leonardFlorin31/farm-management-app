@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -29,8 +30,8 @@ namespace licenta.ViewModel
             "In Progres",
             "Completat"
         };
-
-        public ICommand CreateTaskCmd => new RelayCommand(AddNewTask);
+        
+        public ICommand CreateTaskCmd { get; }
 
         public string NewTaskTitle
         {
@@ -64,6 +65,7 @@ namespace licenta.ViewModel
 
         public TaskViewModel()
         {
+            CreateTaskCmd = new RelayCommand(AddNewTask);
             InitializeAsync();
            
         }
@@ -76,7 +78,6 @@ namespace licenta.ViewModel
         public async Task InitiateUsersNames()
         {
             HttpClient client = new HttpClient();
-            List<UsersNamesDTO> usersList = null; // Variabilă locală
 
             try
             {
@@ -87,7 +88,7 @@ namespace licenta.ViewModel
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                    usersList = JsonSerializer.Deserialize<List<UsersNamesDTO>>(json, options);
+                    _usersList = JsonSerializer.Deserialize<List<UsersNamesDTO>>(json, options);
                 }
                 else
                 {
@@ -106,9 +107,9 @@ namespace licenta.ViewModel
                 Employees.Clear();
 
                 // Pas 2: Dacă s-au primit date, populează colecția
-                if (usersList != null)
+                if (_usersList != null)
                 {
-                    foreach (var user in usersList)
+                    foreach (var user in _usersList)
                     {
                         string fullName = $"{user.Name} {user.LastName}";
                         Employees.Add(fullName);
@@ -118,30 +119,98 @@ namespace licenta.ViewModel
         }
 
 
-        private void AddNewTask()
+        private async void AddNewTask()
         {
-            if (!string.IsNullOrWhiteSpace(NewTaskTitle))
+            // Validare de bază în UI
+            if (string.IsNullOrWhiteSpace(NewTaskTitle) || string.IsNullOrWhiteSpace(Employee))
             {
-                App.Current.Dispatcher.Invoke(() =>
-                {
-                Tasks.Add(new TaskItem
-                {
-                    Title = NewTaskTitle,
-                    Description = NewTaskDescription,
-                    Status = NewTaskStatus ?? "Not Started",
-                    AssignedToUsername = Employee, // You'll need to implement user assignment
-                    CanChangeStatus = true
-                });
-                });
+                // Afișează un mesaj de eroare utilizatorului, ex: folosind un MessageBox
+                Console.WriteLine("Titlul și angajatul sunt obligatorii.");
+                return;
+            }
 
-                // Clear input fields
-                NewTaskTitle = string.Empty;
-                NewTaskDescription = string.Empty;
-                NewTaskStatus = null;
-                
+            Console.WriteLine($"[DEBUG] Căutare utilizator pentru Employee: '{Employee}'");
+
+            // Afișează lista de nume complete așa cum sunt ele în _usersList
+            Console.WriteLine("[DEBUG] Lista de utilizatori disponibili în _usersList:");
+            foreach(var u in _usersList)
+            {
+                Console.WriteLine($" -> '{u.Name} {u.LastName}'");
+            }
+            // --- END DEBUGGING ---
+
+            // Folosim o comparație robustă, care ignoră majusculele/minusculele și spațiile extra.
+            var foundUser = _usersList.FirstOrDefault(user => 
+                string.Equals($"{user.Name} {user.LastName}".Trim(), Employee.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (foundUser == null)
+            {
+                Console.WriteLine($"Eroare: Utilizatorul '{Employee}' nu a fost găsit în lista internă. Verifică log-urile de debug de mai sus.");
+                return;
+            }
+        
+            // Extrage username-ul utilizatorului găsit
+            string assignedUsername = foundUser.Username;
+            
+            // 1. Creează obiectul DTO pentru a-l trimite la server
+            var taskRequest = new TaskCreateRequest
+            {
+                Title = NewTaskTitle,
+                Description = NewTaskDescription,
+                Status = NewTaskStatus ?? "Asignat", // Default status
+                CreatedByUsername = _currentUsername, // Username-ul utilizatorului logat
+                AssignedToUsername = assignedUsername // Numele selectat din ComboBox
+            };
+
+            // 2. Trimite request-ul HTTP POST
+            HttpClient client = new HttpClient();
+            try
+            {
+                // PostAsJsonAsync serializează automat obiectul taskRequest în JSON
+                // și setează header-ul Content-Type: application/json
+                var response = await client.PostAsJsonAsync("https://localhost:7088/api/Task/create", taskRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    // Dacă a avut succes, poți actualiza lista de task-uri local
+                    // Fie adaugi manual (cum făceai înainte), fie reîncarci lista de la server.
+
+                    // Momentan, adăugăm local pentru un răspuns rapid al UI-ului.
+                    App.Current.Dispatcher.Invoke(() =>
+                    {
+                        Tasks.Add(new TaskItem
+                        {
+                            Title = NewTaskTitle,
+                            Description = NewTaskDescription,
+                            Status = NewTaskStatus ?? "Asignat",
+                            AssignedToUsername = Employee,
+                            CanChangeStatus = true
+                        });
+
+                        // Golește câmpurile de input după succes
+                        NewTaskTitle = string.Empty;
+                        NewTaskDescription = string.Empty;
+                        NewTaskStatus = null;
+                        Employee = null;
+                    });
+
+                    Console.WriteLine("Task creat cu succes pe server!");
+                }
+                else
+                {
+                    // Gestionează eroarea venită de la server
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Eroare de la server: {response.StatusCode} - {errorContent}");
+                    // Aici ai putea afișa un mesaj de eroare mai prietenos utilizatorului
+                }
+            }
+            catch (Exception ex)
+            {
+                // Gestionează erori de rețea etc.
+                Console.WriteLine($"A apărut o excepție: {ex.Message}");
             }
         }
-        
+
     }
 
     public class TaskItem : ViewModelBase
@@ -172,6 +241,15 @@ namespace licenta.ViewModel
 
         [JsonPropertyName("lastName")]
         public string LastName { get; set; }
+    }
+    
+    public class TaskCreateRequest
+    {
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Status { get; set; }
+        public string CreatedByUsername { get; set; }
+        public string AssignedToUsername { get; set; }
     }
     
   
