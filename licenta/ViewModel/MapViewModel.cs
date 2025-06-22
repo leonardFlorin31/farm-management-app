@@ -1075,110 +1075,58 @@ namespace licenta.ViewModel
                     }
                 }
 
-                // Nu a fost detectată nicio suprapunere, deci continuăm cu trimiterea către server
-                var client = new HttpClient();
-                var request = new CreatePolygonRequest
-                {
-                    UserId = _currentUserId,
-                    Name = PolygonName,
-                    Points = _markerCoordinates.ConvertAll(p => new PointRequest
-                    {
-                        Latitude = (decimal)p.Lat,
-                        Longitude = (decimal)p.Lng
-                    })
-                };
+                try
+    {
+        // ====================================================================
+        // PASUL 2: Creează obiectul local, fără a-l adăuga încă în liste
+        // ====================================================================
+        var newPolygon = new EditablePolygon
+        {
+            Name = PolygonName,
+            Coordinates = new List<PointLatLng>(_markerCoordinates) 
+        };
 
-                _polygonNames.Add(request.Name);
+        newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
+        {
+            Shape = new System.Windows.Shapes.Polygon
+            {
+                Stroke = Brushes.Red,
+                Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
+                StrokeThickness = 2
+            },
+            Tag = PolygonName
+        };
 
-                var jsonContent =
-                    new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}",
-                    jsonContent);
+        // Generează markerii de control, dar NU îi adăuga pe hartă încă
+        AddControlMarkersForPolygon(newPolygon);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"Crearea poligonului a eșuat. Status code: {response.StatusCode}");
-                    return;
-                }
+        // comanda  creaza si sterge singura (local si pe server)
+        var command = new UndoRedoPolygonCommand(
+            newPolygon, 
+            _allPolygons, 
+            MapControl, 
+            _polygonNames, 
+            _currentUserId, 
+            AddTextToPolygon
+        );
+        
+        // Execută comanda. ACUM se adaugă local, pe hartă și se trimite la server.
+        command.Execute();
+        
+        // Adaugă comanda în stiva de undo
+        _undoStack.Push(command);
+        _redoStack.Clear();
+        
+        ClearMarkers();
+        PolygonName = string.Empty;
+        _polygonMarkerCounter = 0;
 
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var createdPolygon = JsonSerializer.Deserialize<PolygonDto>(responseContent, options);
-
-                if (createdPolygon == null || createdPolygon.Id == Guid.Empty)
-                {
-                    Console.WriteLine("Crearea poligonului pe server a eșuat.");
-                    return;
-                }
-
-                // Dacă dorești să afișezi poligonul la coordonate reale, poți scala invers (opțional)
-                // Aici folosim newPolygonPathD, dar fără scalare inversă arată coordonatele scalate
-                // Pentru afișare, este recomandat să refaci conversia la coordonate reale:
-                var newPolygonPathDForDisplay = new PathD();
-                foreach (var pt in newPolygonPathD)
-                {
-                    newPolygonPathDForDisplay.Add(new PointD(pt.x / scale, pt.y / scale));
-                }
-
-                // Adăugăm poligonul nou pe hartă și îl reținem ca poligon editabil
-                // Crează un nou obiect EditablePolygon
-                var newPolygon = new EditablePolygon
-                {
-                    Name = PolygonName,
-                    Coordinates = new List<PointLatLng>(_markerCoordinates) // Copiază coordonatele
-                };
-
-                // if (CheckPolygonIntersection(newPolygon))
-                // {
-                //   
-                //     MessageBox.Show($"Poligonul '{newPolygon.Name}' se intersectează cu alt poligon.");
-                //     return;
-                // }
-
-                _allPolygons.Add(newPolygon);
-                //_polygons.Add(newPolygon);
-
-
-                // Adaugă poligonul pe hartă
-                newPolygon.Polygon = new GMapPolygon(newPolygon.Coordinates)
-                {
-                    Shape = new System.Windows.Shapes.Polygon
-                    {
-                        Stroke = Brushes.Red,
-                        Fill = new SolidColorBrush(Color.FromArgb(50, 255, 0, 0)),
-                        StrokeThickness = 2
-                    },
-                    Tag = PolygonName
-                };
-                //MapControl.Markers.Add(newPolygon.Polygon);
-
-                // CREAREA PUNCTELOR DE CONTROL: pentru fiecare colț al poligonului, adăugăm un marker transparent
-                // Salvează în lista globală
-
-                _currentEditablePolygon = newPolygon; // Setează-l ca poligon curent
-
-                // Adăugăm poligonul nou pe hartă
-                //AddClipperPolygonToMap(newPolygonPathDForDisplay, createdPolygon.Name);
-
-                _editingPolygonCoordinates = new List<PointLatLng>(_markerCoordinates);
-
-                AddControlMarkersForPolygon(newPolygon);
-                AddTextToPolygon(newPolygon.Polygon, newPolygon.Name);
-
-                // Creăm comanda pentru adăugarea poligonului
-                var command = new UndoRedoPolygonCommand(newPolygon, _allPolygons, MapControl, _polygonNames, _currentUserId);
-                // Executăm comanda
-                command.Execute();
-                // Adăugăm comanda în stiva de undo
-                _undoStack.Push(command);
-                // Ștergem redoStack-ul deoarece s-a efectuat o acțiune nouă
-                _redoStack.Clear();
-
-                ClearMarkers();
-                PolygonName = string.Empty;
-                _polygonMarkerCounter = 0;
-
-                PolygonsUpdated?.Invoke();
+        PolygonsUpdated?.Invoke();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Eroare la crearea poligonului: {ex.Message}");
+    }
             }
             catch (Exception ex)
             {
@@ -1825,83 +1773,107 @@ namespace licenta.ViewModel
         public string Name { get; set; }
     }
 
-    public class UndoRedoPolygonCommand : IUndoableCommand
+   public class UndoRedoPolygonCommand : IUndoableCommand
 {
     private readonly EditablePolygon _polygon;
     private readonly List<EditablePolygon> _allPolygons;
     private readonly GMapControl _mapControl;
     private readonly List<string> _polygonNames;
     private readonly Guid _currentUserId;
+    private readonly Action<GMapPolygon, string> _addTextToPolygon; // Adaugă acțiunea de adăugare text
 
+    // Constructor actualizat
     public UndoRedoPolygonCommand(
         EditablePolygon polygon,
         List<EditablePolygon> allPolygons,
         GMapControl mapControl,
         List<string> polygonNames,
-        Guid currentUserId)
+        Guid currentUserId,
+        Action<GMapPolygon, string> addTextToPolygon) // Adaugă parametrul
     {
         _polygon = polygon;
         _allPolygons = allPolygons;
         _mapControl = mapControl;
         _polygonNames = polygonNames;
         _currentUserId = currentUserId;
+        _addTextToPolygon = addTextToPolygon; // Salvează acțiunea
     }
 
-    // Adaugă poligonul în colecție și pe hartă
-    public void Execute()
+    // Execute va crea poligonul pe server și local
+    public async void Execute()
     {
+        // 1. Logica de adăugare locală
         _allPolygons.Add(_polygon);
         _polygonNames.Add(_polygon.Name);
         _mapControl.Markers.Add(_polygon.Polygon);
+        _addTextToPolygon(_polygon.Polygon, _polygon.Name); // Adaugă eticheta
         foreach (var marker in _polygon.ControlMarkers)
         {
             _mapControl.Markers.Add(marker);
         }
+
+        // 2. Logica de creare pe server
+        using (var client = new HttpClient())
+        {
+            var request = new CreatePolygonRequest
+            {
+                UserId = _currentUserId,
+                Name = _polygon.Name,
+                Points = _polygon.Coordinates.ConvertAll(p => new PointRequest
+                {
+                    Latitude = (decimal)p.Lat,
+                    Longitude = (decimal)p.Lng
+                })
+            };
+
+            var jsonContent = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"https://localhost:7088/api/Polygons?userId={_currentUserId}", jsonContent);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Poligonul '{_polygon.Name}' a fost creat/re-creat pe server.");
+                 // Optional: Poți prelua și stoca ID-ul poligonului returnat de server dacă ai nevoie de el
+            }
+            else
+            {
+                Console.WriteLine($"Crearea poligonului '{_polygon.Name}' pe server a eșuat în Execute. Status: {response.StatusCode}");
+            }
+        }
     }
 
-    // Șterge poligonul din colecție și de pe hartă, și îl șterge de pe server
+    // Unexecute va șterge poligonul de pe server și local
     public async void Unexecute()
     {
+        // 1. Logica de ștergere locală
         _allPolygons.Remove(_polygon);
         _polygonNames.Remove(_polygon.Name);
         _mapControl.Markers.Remove(_polygon.Polygon);
+        
+        // Șterge eticheta text
+        var textMarkerToRemove = _mapControl.Markers.FirstOrDefault(m => m.Shape is Button tb && tb.Content?.ToString() == _polygon.Name);
+        if (textMarkerToRemove != null)
+        {
+            _mapControl.Markers.Remove(textMarkerToRemove);
+        }
+
         foreach (var marker in _polygon.ControlMarkers)
         {
             _mapControl.Markers.Remove(marker);
         }
 
-        // Șterge poligonul de pe server (deoarece a fost creat în CreatePolygon)
+        // 2. Logica de ștergere de pe server
         using (var client = new HttpClient())
         {
-            var getUrl =
-                $"https://localhost:7088/api/Polygons/id-by-name?polygonName={_polygon.Name}&userId={_currentUserId}";
-            var getResponse = await client.GetAsync(getUrl);
-            if (getResponse.IsSuccessStatusCode)
+            // Acum ștergem folosind numele, așa cum este implementat în DeletePolygon()
+            var deleteUrl = $"https://localhost:7088/api/Polygons/{_polygon.Name}?userId={_currentUserId}";
+            var deleteResponse = await client.DeleteAsync(deleteUrl);
+            if (deleteResponse.IsSuccessStatusCode)
             {
-                var jsonResponse = await getResponse.Content.ReadAsStringAsync();
-                var polygonIdResponse = JsonSerializer.Deserialize<PolygonIdResponse>(jsonResponse);
-                if (polygonIdResponse != null)
-                {
-                    Guid polygonId = polygonIdResponse.Id;
-                    var deleteUrl = $"https://localhost:7088/api/Polygons/{polygonId}?userId={_currentUserId}";
-                    var deleteResponse = await client.DeleteAsync(deleteUrl);
-                    if (deleteResponse.IsSuccessStatusCode)
-                    {
-                        Console.WriteLine($"Poligonul '{_polygon.Name}' a fost șters de pe server în Unexecute.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Ștergerea poligonului '{_polygon.Name}' de pe server a eșuat în Unexecute. Status code: {deleteResponse.StatusCode}");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Deserializarea răspunsului cu ID-ul poligonului a eșuat în Unexecute.");
-                }
+                Console.WriteLine($"Poligonul '{_polygon.Name}' a fost șters de pe server în Unexecute.");
             }
             else
             {
-                Console.WriteLine($"Obținerea ID-ului poligonului '{_polygon.Name}' de pe server a eșuat în Unexecute.");
+                 Console.WriteLine($"Ștergerea poligonului '{_polygon.Name}' de pe server a eșuat în Unexecute. Status: {deleteResponse.StatusCode}");
             }
         }
     }
