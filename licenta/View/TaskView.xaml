@@ -22,10 +22,7 @@
 
     <Grid Margin="10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/><!-- Header -->
-            <RowDefinition Height="Auto"/><!-- Zona creare task -->
-            <RowDefinition Height="*"/> <!-- Lista task-uri -->
-        </Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="Auto"/> <RowDefinition Height="*"/>    </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
@@ -74,14 +71,49 @@
                          Text="{Binding NewTaskDescription, UpdateSourceTrigger=PropertyChanged}"/>
                 <Button Content="Adaugă task"
                         Margin="10,0,0,0"
+                        Background="{StaticResource color13}"
                         Command="{Binding CreateTaskCmd}"
                         IsEnabled="{Binding CanCreateTasks}"/>
+                        
+                <Button Content="Șterge task"
+                        Margin="5,0,0,0"
+                        Command="{Binding DeleteTaskCmd}"
+                        IsEnabled="{Binding CanCreateTasks}"
+                        Background="{StaticResource color14}" 
+                        Foreground="White"/>
+                
+            </StackPanel>
+        </Border>
+        
+        <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,10" Padding="8" Background="#F9F9F9" CornerRadius="4">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Filtrează:" FontWeight="Bold" Margin="0,0,10,0" VerticalAlignment="Center"/>
+
+                <TextBox Width="200"
+                         Margin="0,0,10,0"
+                         mah:TextBoxHelper.Watermark="După titlu..."
+                         Text="{Binding FilterTitle, UpdateSourceTrigger=PropertyChanged}"/>
+
+                <ComboBox Width="150"
+                          Margin="0,0,10,0"
+                          mah:TextBoxHelper.Watermark="După angajat..."
+                          ItemsSource="{Binding Employees}"
+                          SelectedItem="{Binding FilterEmployee, Mode=TwoWay}"/>
+
+                <ComboBox Width="150"
+                          mah:TextBoxHelper.Watermark="După status..."
+                          ItemsSource="{Binding StatusValues}"
+                          SelectedItem="{Binding FilterStatus, Mode=TwoWay}"/>
+                <Button Content="Resetează"
+                        Margin="10,0,0,0"
+                        Background="{StaticResource color13}"
+                        Command="{Binding ResetFiltersCmd}"/>
             </StackPanel>
         </Border>
 
         <!-- Lista de task-uri -->
         <Border Margin="10,10,20,10"
-                Grid.Row="2"
+                Grid.Row="3"
                 Padding="10"
                 CornerRadius="8"
                 BorderThickness="2"
@@ -93,20 +125,20 @@
                                   ShadowDepth="2"
                                   Opacity="0.5"/>
             </Border.Effect>
-        <ListView Grid.Row="2"
+        <ListView Grid.Row="3"
                   Grid.ColumnSpan="2"
                   ItemsSource="{Binding Tasks}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Titlu"
                                     DisplayMemberBinding="{Binding Title}"
-                                    Width="200"/>
+                                    Width="250"/>
                     <GridViewColumn Header="Asignat lui"
                                     DisplayMemberBinding="{Binding AssignedToUsername}"
-                                    Width="150"/>
+                                    Width="250"/>
                     <GridViewColumn Header="Descriere sarcina"
                                     DisplayMemberBinding="{Binding Description}"
-                                    Width="150"/>
+                                    Width="550"/>
                     <GridViewColumn Header="Status"
                                     Width="150">
                         <GridViewColumn.CellTemplate>
