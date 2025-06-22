@@ -200,6 +200,8 @@ public class MainViewModel : ViewModelBase
     {
         _userRepository = new UserRepository();
         CurrentUserAccount = new UserAccountModel();
+
+        
         
         //Initialize Commands
         ShowHomeViewCommand = new ViewModelCommand(ExecuteShowHomeViewCommand);
@@ -208,14 +210,21 @@ public class MainViewModel : ViewModelBase
         ShowExpensesViewCommand = new ViewModelCommand(ExecuteShowExpensesViewCommand);
         ShowTaskViewCommand = new ViewModelCommand(ExecuteShowTaskViewCommand);
         
-        //Default view
-        ExecuteShowHomeViewCommand(null);
         
+        _ = InitializeApplicationAsync();
        
-        LoadUserRoleData();
     }
 
-    private async void LoadUserRoleData()
+    private async Task InitializeApplicationAsync()
+    {
+        // 1. Încarcă datele
+        await LoadUserRoleData();
+
+        // 2. Acum, afișează view-ul default cu datele corecte
+        ExecuteShowHomeViewCommand(null);
+    }
+
+    private async Task LoadUserRoleData()
     {
         await LoadCurrentUserData();
         
