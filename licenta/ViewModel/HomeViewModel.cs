@@ -93,7 +93,7 @@ namespace licenta.ViewModel;
 
         public HomeViewModel()
         {
-            CurrentUserRole = _currentUserRole;
+            CurrentUserRole = _currentUserRole ?? "Neinitializat";
 
             InitializeAsync();
             
