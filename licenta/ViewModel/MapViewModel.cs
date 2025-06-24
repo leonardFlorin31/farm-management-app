@@ -248,7 +248,7 @@ namespace licenta.ViewModel
         {
            Console.WriteLine(_currentRole);
             
-            if (_currentRole != "Angajat")
+            if (_currentRole == "admin" || _currentRole == "Manager" )
             {
                 MapCenter = new PointLatLng(44.4268, 26.1025); // București
                 MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);

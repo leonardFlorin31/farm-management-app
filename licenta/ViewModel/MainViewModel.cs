@@ -95,7 +95,8 @@ public class MainViewModel : ViewModelBase
     private void ExecuteShowParcelViewCommand(object obj)
     {
         Console.WriteLine("Executing ShowParcelViewCommand");
-        if (_currentRole != "Contabil")
+        Console.WriteLine(_currentRole);
+        if (_currentRole != "Angajat")
         {
             // Obține instanța de MapViewModel din cache sau creează una nouă
             if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
@@ -137,42 +138,75 @@ public class MainViewModel : ViewModelBase
     {
         Console.WriteLine("Executing ShowParcelViewCommand");
 
-        // Obține instanța de MapViewModel din cache sau creează una nouă
-        if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
+        if (_currentRole != "Angajat")
         {
-            Console.WriteLine("Creating new MapViewModel");
-            mapViewModel = new MapViewModel();
-            _viewModelCache[typeof(MapViewModel)] = mapViewModel;
-        }
+            // Obține instanța de MapViewModel din cache sau creează una nouă
+            if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
+            {
+                Console.WriteLine("Creating new MapViewModel");
+                mapViewModel = new MapViewModel();
+                _viewModelCache[typeof(MapViewModel)] = mapViewModel;
+            }
 
-        // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
-        if (!_viewModelCache.TryGetValue(typeof(ExpensesViewModel), out var expensesViewModel))
+            // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
+            if (!_viewModelCache.TryGetValue(typeof(ExpensesViewModel), out var expensesViewModel))
+            {
+                Console.WriteLine("Creating new ParcelViewModel");
+                expensesViewModel = new ExpensesViewModel((MapViewModel)mapViewModel);
+                _viewModelCache[typeof(ExpensesViewModel)] = expensesViewModel;
+            }
+
+            CurrentChildView = expensesViewModel;
+            Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
+            Caption = "Cheltuieli";
+            Icon = IconChar.MoneyBills;
+        }
+        else
         {
-            Console.WriteLine("Creating new ParcelViewModel");
-            expensesViewModel = new ExpensesViewModel((MapViewModel)mapViewModel);
-            _viewModelCache[typeof(ExpensesViewModel)] = expensesViewModel;
-        }
+            if (!_viewModelCache.TryGetValue(typeof(AccesDeniedViewModel), out var deniedVm))
+            {
+                deniedVm = new AccesDeniedViewModel();
+                _viewModelCache[typeof(AccesDeniedViewModel)] = deniedVm;
+            }
 
-        CurrentChildView = expensesViewModel;
-        Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
-        Caption = "Cheltuieli";
-        Icon = IconChar.MoneyBills;
+            // Swap of current view to the AccessDeniedView
+            CurrentChildView = deniedVm;
+            Caption = "Acces Refuzat";
+            Icon    = IconChar.Lock; 
+        }
     }
     
     private void ExecuteShowTaskViewCommand(object obj)
     {
         Console.WriteLine("Executing ShowTaskViewCommand");
 
-        // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
-        if (!_viewModelCache.TryGetValue(typeof(TaskViewModel), out var taskViewModel))
+        if (_currentRole != "Contabil")
         {
-            Console.WriteLine("Creating new ParcelViewModel");
-            taskViewModel = new TaskViewModel();
-            _viewModelCache[typeof(TaskViewModel)] = taskViewModel;
-        }
+            // Verifică dacă ExpensesViewModel este în cache, altfel creează-l cu MapViewModel-ul existent
+            if (!_viewModelCache.TryGetValue(typeof(TaskViewModel), out var taskViewModel))
+            {
+                Console.WriteLine("Creating new ParcelViewModel");
+                taskViewModel = new TaskViewModel();
+                _viewModelCache[typeof(TaskViewModel)] = taskViewModel;
+            }
 
-        CurrentChildView = taskViewModel;
-        Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
+            CurrentChildView = taskViewModel;
+            Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
+
+        }
+        else
+        {
+            if (!_viewModelCache.TryGetValue(typeof(AccesDeniedViewModel), out var deniedVm))
+            {
+                deniedVm = new AccesDeniedViewModel();
+                _viewModelCache[typeof(AccesDeniedViewModel)] = deniedVm;
+            }
+
+            // Swap of current view to the AccessDeniedView
+            CurrentChildView = deniedVm;
+            Caption = "Acces Refuzat";
+            Icon    = IconChar.Lock; 
+        }
     }
     
     public IconChar Icon
