@@ -250,7 +250,7 @@ namespace licenta.ViewModel
             
             if (_currentRole == "admin" || _currentRole == "Manager" )
             {
-                MapCenter = new PointLatLng(44.4268, 26.1025); // București
+                MapCenter = new PointLatLng(45.6579, 25.6011); // București
                 MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
 
                 _httpClient = new HttpClient
@@ -264,7 +264,7 @@ namespace licenta.ViewModel
                 MapControl = new GMapControl
                 {
                     MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
-                    Position = new PointLatLng(44.4268, 26.1025), // București
+                    Position = new PointLatLng(45.6579, 25.6011), // București
                     MinZoom = 2,
                     MaxZoom = 18,
                     Zoom = 13,
@@ -305,7 +305,7 @@ namespace licenta.ViewModel
             }
             else
             {
-                MapCenter = new PointLatLng(44.4268, 26.1025); // București
+                MapCenter = new PointLatLng(45.6579, 25.6011); // București
                 MapClickedCommand = new RelayCommand<PointLatLng>(OnMapClicked);
 
                 _httpClient = new HttpClient
@@ -319,7 +319,7 @@ namespace licenta.ViewModel
                 MapControl = new GMapControl
                 {
                     MapProvider = GMap.NET.MapProviders.GoogleSatelliteMapProvider.Instance,
-                    Position = new PointLatLng(44.4268, 26.1025), // București
+                    Position = new PointLatLng(45.6579, 25.6011), // București
                     MinZoom = 2,
                     MaxZoom = 18,
                     Zoom = 13,
