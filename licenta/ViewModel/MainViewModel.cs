@@ -138,8 +138,7 @@ public class MainViewModel : ViewModelBase
     {
         Console.WriteLine("Executing ShowParcelViewCommand");
 
-        if (_currentRole != "Angajat")
-        {
+       
             // Obține instanța de MapViewModel din cache sau creează una nouă
             if (!_viewModelCache.TryGetValue(typeof(MapViewModel), out var mapViewModel))
             {
@@ -160,20 +159,7 @@ public class MainViewModel : ViewModelBase
             Console.WriteLine($"CurrentChildView set to: {CurrentChildView.GetType().Name}");
             Caption = "Cheltuieli";
             Icon = IconChar.MoneyBills;
-        }
-        else
-        {
-            if (!_viewModelCache.TryGetValue(typeof(AccesDeniedViewModel), out var deniedVm))
-            {
-                deniedVm = new AccesDeniedViewModel();
-                _viewModelCache[typeof(AccesDeniedViewModel)] = deniedVm;
-            }
-
-            // Swap of current view to the AccessDeniedView
-            CurrentChildView = deniedVm;
-            Caption = "Acces Refuzat";
-            Icon    = IconChar.Lock; 
-        }
+      
     }
     
     private void ExecuteShowTaskViewCommand(object obj)

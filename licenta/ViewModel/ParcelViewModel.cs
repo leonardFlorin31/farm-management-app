@@ -364,7 +364,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         set
         {
             _field5 = value;
-            OnPropertyChanged(nameof(Field1));
+            OnPropertyChanged(nameof(Field5));
         }
     }
 
@@ -374,7 +374,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         set
         {
             _field6 = value;
-            OnPropertyChanged(nameof(Field2));
+            OnPropertyChanged(nameof(Field6));
         }
     }
 
@@ -384,7 +384,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         set
         {
             _field7 = value;
-            OnPropertyChanged(nameof(Field3));
+            OnPropertyChanged(nameof(Field7));
         }
     }
 
@@ -394,7 +394,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         set
         {
             _field8 = value;
-            OnPropertyChanged(nameof(Field4));
+            OnPropertyChanged(nameof(Field8));
         }
     }
 
@@ -404,7 +404,7 @@ public class ParcelViewModel : ViewModelBase, IDisposable
         set
         {
             _field9 = value;
-            OnPropertyChanged(nameof(Field4));
+            OnPropertyChanged(nameof(Field9));
         }
     }
 
@@ -747,12 +747,12 @@ public class ParcelViewModel : ViewModelBase, IDisposable
                 {
                     Id = Guid.NewGuid(),
                     PolygonId = _parcelId,
-                    AnimalType = Field2, // Example value
-                    NumberOfAnimale = int.Parse(Field3), // Example value
-                    FeedType = Field4, // Example value
-                    WaterConsumption = decimal.Parse(Field5), // Example value
-                    VeterinaryVisits = int.Parse(Field6), // Example value
-                    WasteManagement = Field7, // Example value
+                    AnimalType = Field2, 
+                    NumberOfAnimale = int.Parse(Field3), 
+                    FeedType = Field4, 
+                    WaterConsumption = decimal.Parse(Field5), 
+                    VeterinaryVisits = int.Parse(Field6), 
+                    WasteManagement = Field7, 
                     CreatedDate = DateTime.UtcNow
                 };
             }
@@ -815,11 +815,26 @@ public class ParcelViewModel : ViewModelBase, IDisposable
 
             _savedParcels.Add(newParcel);
             _allParcels.Add(newParcel);
+            
+            SelectedOption = null; 
+        
+            SelectedParcel = null; 
+        
+            Field2 = string.Empty;
+            Field3 = string.Empty;
+            Field4 = string.Empty;
+            Field5 = string.Empty;
+            Field6 = string.Empty;
+            Field7 = string.Empty;
+            Field8 = string.Empty;
+            Field9 = string.Empty;
         }
         catch (Exception ex)
         {
             MessageBox.Show($"A apărut o eroare: {ex.Message}");
         }
+        
+        
     }
 
     private async void DeleteData()

@@ -1838,6 +1838,7 @@ namespace licenta.ViewModel
             {
                 Console.WriteLine($"Crearea poligonului '{_polygon.Name}' pe server a eșuat în Execute. Status: {response.StatusCode}");
             }
+            
         }
     }
 
