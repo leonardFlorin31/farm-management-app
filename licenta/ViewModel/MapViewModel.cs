@@ -509,6 +509,7 @@ namespace licenta.ViewModel
                     return;
                 }
 
+                EditablePolygon lastPolygon = null;
                 // Parcurgem fiecare polygon primit și îl transformăm într-un poligon editabil
                 foreach (var dto in polygonDtos)
                 {
@@ -546,6 +547,25 @@ namespace licenta.ViewModel
                     _allPolygons.Add(editablePolygon);
 
                     _polygonNames.Add(editablePolygon.Name);
+                    lastPolygon = editablePolygon;
+                }
+                if (lastPolygon != null && lastPolygon.Coordinates.Count > 0)
+                {
+                    // Calculate the center point of the last polygon
+                    var centerLat = lastPolygon.Coordinates.Average(c => c.Lat);
+                    var centerLng = lastPolygon.Coordinates.Average(c => c.Lng);
+                    var centerPoint = new PointLatLng(centerLat, centerLng);
+
+                    // Update map position and center
+                    MapControl.Position = centerPoint;
+                    MapCenter = centerPoint;
+                    
+                    MapControl.SetZoomToFitRect(RectLatLng.FromLTRB(
+                        lastPolygon.Coordinates.Min(c => c.Lng),
+                        lastPolygon.Coordinates.Max(c => c.Lat),
+                        lastPolygon.Coordinates.Max(c => c.Lng),
+                        lastPolygon.Coordinates.Min(c => c.Lat)
+                    ));
                 }
             }
             catch (Exception ex)
