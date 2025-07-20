@@ -83,10 +83,10 @@
 
             <Border Grid.Column="1"
                     Margin="0 0 0 -10" Style="{StaticResource ChartContainerStyle}"
-                    Padding="15">
+                    Padding="15" Background="LightGray">
                 <wpf:PieChart Series="{Binding ExpensePercentages}"
                             LegendLocation="Right"
-                            InnerRadius="30"
+                            InnerRadius="25"
                             Hoverable="True"
                             AnimationsSpeed="0:0:0.5">
 
