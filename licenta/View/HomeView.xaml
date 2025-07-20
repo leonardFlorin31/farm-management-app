@@ -149,21 +149,28 @@
                                 <Border Background="#E3F2FD" Padding="15" CornerRadius="8" Margin="0,0,0,10">
                                     <StackPanel Orientation="Horizontal">
                                         <fa:IconImage Icon="Shield" Foreground="#1976D2" Width="16" Height="16" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Rolurile determină permisiunile utilizatorilor în sistem" FontSize="13" Foreground="#1976D2" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Rolurile determină permisiunile utilizatorilor în sistem." FontSize="13" Foreground="#1976D2" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                                 
                                 <Border Background="#E8F5E8" Padding="15" CornerRadius="8" Margin="0,0,0,10">
                                     <StackPanel Orientation="Horizontal">
                                         <fa:IconImage Icon="Check" Foreground="#388E3C" Width="16" Height="16" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Verificați de două ori înainte de a atribui un rol" FontSize="13" Foreground="#388E3C" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Rolurile pot fi atribuite si actualizate de către administrator de câte ori este nevoie." FontSize="13" Foreground="#388E3C" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
 
-                                <Border Background="#FFF3E0" Padding="15" CornerRadius="8">
+                                <Border Background="#FFF3E0" Padding="15" CornerRadius="8" Margin="0,0,0,10">
                                     <StackPanel Orientation="Horizontal">
                                         <fa:IconImage Icon="ExclamationTriangle" Foreground="#F57C00" Width="16" Height="16" Margin="0,0,10,0"/>
-                                        <TextBlock Text="Schimbările vor fi aplicate imediat după confirmare" FontSize="13" Foreground="#F57C00" TextWrapping="Wrap"/>
+                                        <TextBlock Text="Sarcinile pot fi vizualizate doar de Managerul/Administratorul care le atribuie și angajatul care are atribuită sarcina." FontSize="13" Foreground="#F57C00" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                </Border>
+                                
+                                <Border Background="#FFF3E0" Padding="15" CornerRadius="8">
+                                    <StackPanel Orientation="Horizontal">
+                                        <fa:IconImage Icon="ExclamationTriangle" Foreground="DarkRed" Width="16" Height="16" Margin="0,0,10,0"/>
+                                        <TextBlock Text="Ștergerea unei parcele nu este permanenta, însa informațiile atribuite sunt!" FontSize="13" Foreground="DarkRed" TextWrapping="Wrap"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
